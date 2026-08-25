@@ -1,0 +1,24 @@
+[project]
+name = "procurement-backend"
+version = "1.0.0"
+description = "FastAPI Backend for AI Procurement System"
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.30.0",
+    "pydantic>=2.8.0",
+    "pydantic-settings>=2.4.0",
+    "pyjwt>=2.9.0",
+    "passlib[bcrypt]>=1.7.4",
+    "python-multipart>=0.0.9",
+    "prisma>=0.14.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.0",
+    "httpx>=0.27.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

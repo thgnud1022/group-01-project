@@ -1,0 +1,152 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  EMPLOYEE
+  MANAGER
+  PROCUREMENT
+  FINANCE
+  ADMIN
+}
+
+enum PRStatus {
+  DRAFT
+  PENDING_MANAGER_APPROVAL
+  PENDING_FINANCE_APPROVAL
+  APPROVED
+  COLLECTING_QUOTATIONS
+  PO_CREATED
+  PARTIALLY_RECEIVED
+  RECEIVED
+  CLOSED
+  REJECTED
+}
+
+model User {
+  id           String        @id @default(uuid())
+  email        String        @unique
+  passwordHash String
+  name         String
+  role         Role          @default(EMPLOYEE)
+  departmentId String
+  department   Department    @relation(fields: [departmentId], references: [id])
+  requests     PurchaseRequest[]
+  approvals    Approval[]
+  createdPOs   PurchaseOrder[]
+  created_at   DateTime      @default(now())
+}
+
+model Department {
+  id         String        @id @default(uuid())
+  name       String        @unique
+  users      User[]
+  budgets    Budget[]
+  requests   PurchaseRequest[]
+}
+
+model Budget {
+  id                 String     @id @default(uuid())
+  departmentId       String
+  department         Department @relation(fields: [departmentId], references: [id])
+  fiscalYear         Int
+  quarter            Int
+  allocatedAmount    Decimal    @db.Decimal(18, 2)
+  spentAmount        Decimal    @db.Decimal(18, 2) @default(0.00)
+  tempReservedAmount Decimal    @db.Decimal(18, 2) @default(0.00)
+  updated_at         DateTime   @updatedAt
+
+  @@unique([departmentId, fiscalYear, quarter])
+}
+
+model PurchaseRequest {
+  id               String          @id @default(uuid())
+  title            String
+  description      String?
+  status           PRStatus        @default(DRAFT)
+  creatorId        String
+  creator          User            @relation(fields: [creatorId], references: [id])
+  departmentId     String
+  department       Department      @relation(fields: [departmentId], references: [id])
+  estimatedValue   Decimal         @db.Decimal(18, 2)
+  items            PRItem[]
+  quotations       Quotation[]
+  purchaseOrders   PurchaseOrder[]
+  approvals        Approval[]
+  created_at       DateTime        @default(now())
+  updated_at       DateTime        @updatedAt
+}
+
+model PRItem {
+  id                 String          @id @default(uuid())
+  purchaseRequestId  String
+  purchaseRequest    PurchaseRequest @relation(fields: [purchaseRequestId], references: [id], onDelete: Cascade)
+  itemName           String
+  quantity           Int
+  estimatedUnitPrice Decimal         @db.Decimal(18, 2)
+}
+
+model Supplier {
+  id         String      @id @default(uuid())
+  name       String      @unique
+  taxCode    String?
+  contact    String?
+  quotations Quotation[]
+}
+
+model Quotation {
+  id                String          @id @default(uuid())
+  purchaseRequestId String
+  purchaseRequest   PurchaseRequest @relation(fields: [purchaseRequestId], references: [id])
+  supplierId        String
+  supplier          Supplier        @relation(fields: [supplierId], references: [id])
+  totalAmount       Decimal         @db.Decimal(18, 2)
+  deliveryDays      Int
+  warrantyTerms     String?
+  fileUrl           String
+  isAnomaly         Boolean         @default(false)
+  anomalyReason     String?
+  purchaseOrders    PurchaseOrder[]
+  created_at        DateTime        @default(now())
+}
+
+model PurchaseOrder {
+  id                String          @id @default(uuid())
+  purchaseRequestId String
+  purchaseRequest   PurchaseRequest @relation(fields: [purchaseRequestId], references: [id])
+  quotationId       String
+  quotation         Quotation       @relation(fields: [quotationId], references: [id])
+  poNumber          String          @unique
+  creatorId         String
+  creator           User            @relation(fields: [creatorId], references: [id])
+  totalAmount       Decimal         @db.Decimal(18, 2)
+  status            String          @default("SENT")
+  receivingDocs     Receiving[]
+  created_at        DateTime        @default(now())
+}
+
+model Receiving {
+  id              String        @id @default(uuid())
+  purchaseOrderId String
+  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
+  receivedQty     Int
+  receivedItems   String
+  receivedDate    DateTime      @default(now())
+  fileUrl         String
+}
+
+model Approval {
+  id                String          @id @default(uuid())
+  purchaseRequestId String
+  purchaseRequest   PurchaseRequest @relation(fields: [purchaseRequestId], references: [id])
+  approverId        String
+  approver          User            @relation(fields: [approverId], references: [id])
+  decision          String
+  comments          String?
+  created_at        DateTime        @default(now())
+}
