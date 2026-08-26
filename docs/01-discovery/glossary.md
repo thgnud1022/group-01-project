@@ -1,14 +1,18 @@
 # GLOSSARY: Từ Điển Thuật Ngữ Mua Sắm Doanh Nghiệp
-
-| Thuật ngữ | Thuật ngữ gốc | Định nghĩa chuyên ngành trong hệ thống |
-| :--- | :--- | :--- |
-| **Yêu cầu mua sắm (PR)** | Purchase Request | Phiếu đề xuất mua sắm nội bộ do Employee tạo, mô tả nhu cầu vật tư thiết bị. |
-| **Đơn đặt hàng (PO)** | Purchase Order | Đơn hàng chính thức có giá trị pháp lý do công ty phát hành gửi tới Supplier để cam kết mua hàng. |
-| **Bản báo giá (Quotation)** | Quotation | Tài liệu báo giá, thông số và điều khoản do Supplier cung cấp cho một mã PR cụ thể. |
-| **Biên bản giao nhận** | Goods Receipt / Receiving | Chứng từ ghi nhận số lượng hàng hóa thực tế đã bàn giao từ Supplier để đối chiếu với PO. |
-| **Ngân sách khả dụng** | Available Budget | Số tiền còn lại có thể chi tiêu của một phòng ban sau khi đã trừ đi khoản đã chi và khoản tạm tính. |
-| **Luồng phê duyệt** | Approval Workflow | Trình tự phê duyệt PR/PO theo các cấp bậc thẩm quyền được cấu hình sẵn. |
-| **Chuẩn hóa PR** | PR Standardization | Tính năng AI bóc tách ngôn ngữ thô của PR thành danh mục và thông số kỹ thuật chuẩn. |
-| **Trích xuất báo giá** | Quotation Extraction | Quy trình AI đọc các file PDF/ảnh báo giá để chuyển thành bảng dữ liệu có cấu trúc. |
-| **Cảnh báo bất thường** | Anomaly Alert | Cảnh báo đỏ do AI phát hiện khi đơn giá vượt mức lịch sử $\geq 20\%$ hoặc có dấu hiệu gian lận giá. |
-| **Lệnh cấu trúc** | Assistant Command | Đầu ra có cấu trúc JSON do AI sinh ra để gọi các hàm nghiệp vụ ở hệ thống backend. |
+| **Thuật ngữ**                        | **Định nghĩa**                                                                                                                       |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| **Purchase Request (PR)**            | Yêu cầu mua hàng hóa hoặc dịch vụ do Employee tạo và gửi vào hệ thống để được xem xét, phê duyệt.                                    |
+| **Approval**                         | Quy trình người có thẩm quyền kiểm tra và quyết định **Approve, Reject hoặc Request Revision** đối với Purchase Request.             |
+| **Approval Workflow**                | Chuỗi các bước và người xử lý mà Purchase Request phải đi qua để được phê duyệt.                                                     |
+| **Quotation**                        | Báo giá do Supplier cung cấp, chứa thông tin về sản phẩm/dịch vụ, đơn giá, số lượng, thời gian giao hàng và các điều kiện liên quan. |
+| **RFQ (Request for Quotation)**      | Yêu cầu do Procurement gửi đến Supplier để thu thập báo giá cho Purchase Request.                                                    |
+| **Supplier**                         | Nhà cung cấp hàng hóa hoặc dịch vụ cho doanh nghiệp.                                                                                 |
+| **Budget Check**                     | Việc kiểm tra giá trị Purchase Request với ngân sách khả dụng để xác định request có nằm trong giới hạn cho phép hay không.          |
+| **Purchase Order (PO)**              | Đơn đặt hàng được Procurement tạo sau khi Purchase Request được phê duyệt và Supplier/Quotation được lựa chọn.                       |
+| **AI Recommendation**                | Đề xuất do AI tạo ra dựa trên dữ liệu request, quotation và các tiêu chí được cấu hình; chỉ mang tính hỗ trợ quyết định.             |
+| **Quotation Comparison**             | Chức năng tổng hợp và so sánh các quotation của nhiều Supplier theo các tiêu chí như giá, thời gian giao hàng và bảo hành.           |
+| **Procurement**                      | Hoạt động thu thập báo giá, so sánh và lựa chọn Supplier, sau đó thực hiện các bước mua sắm tiếp theo.                               |
+| **Role-Based Access Control (RBAC)** | Cơ chế phân quyền người dùng dựa trên vai trò như Employee, Manager, Finance và Procurement.                                         |
+| **Approval History**                 | Lịch sử ghi nhận các hành động approval, bao gồm người thực hiện, thời gian và trạng thái.                                           |
+| **Audit Trail**                      | Nhật ký các hành động quan trọng được thực hiện trên hệ thống nhằm phục vụ kiểm tra và truy vết.                                     |
+| **Request Status**                   | Trạng thái hiện tại của Purchase Request, ví dụ **Draft, Submitted, Pending Approval, Approved, Rejected, Completed, Closed**.       |
