@@ -8,6 +8,7 @@ Thư mục này chứa toàn bộ dữ liệu tri thức nền tảng (Single So
 * 📄 [`vault-qa-benchmark.md`](https://github.com/thgnud1022/group-01-project/blob/main/docs/02-vault/vault-qa-benchmark.md) - Bộ 20 câu hỏi kiểm định chất lượng phản hồi của AI.
 * 📄 [`requirements.md`](https://github.com/thgnud1022/group-01-project/blob/main/docs/01-discovery/requirements.md) - Danh mục Yêu cầu và Quy tắc nghiệp vụ.
 * 📄 [`glossary.md`](https://github.com/thgnud1022/group-01-project/blob/main/docs/01-discovery/glossary.md) - Từ điển thuật ngữ nghiệp vụ.
+* 📄 [`user-research.md`](https://github.com/thgnud1022/group-01-project/blob/main/docs/01-discovery/user-research.md) - Khám phá chân dung người dùng
 
 ## Danh Mục Tài Liệu Lỗi Thời (Superseded Sources)
 *(Hiện chưa có - Mọi thay đổi quy chế sẽ được ghi vết tại đây)*
