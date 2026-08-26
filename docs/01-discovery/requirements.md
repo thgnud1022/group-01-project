@@ -1,45 +1,112 @@
-# REQUIREMENTS INVENTORY: AI Procurement & Purchase Approval System
 
-## A. Yêu Cầu Chức Năng (Functional Requirements - FR)
+# REQUIREMENTS INVENTORY
 
-* **REQ-FR-01 (Must):** Hệ thống cho phép Employee khởi tạo PR bằng văn bản thô/giọng nói, AI hỗ trợ bóc tách, chuẩn hóa thành các trường thông tin: Tên hàng, Số lượng, Đơn giá dự kiến, Ngày mong muốn nhận hàng.
-* **REQ-FR-02 (Must):** Hệ thống tự động kiểm tra ngân sách (Budget Check) phòng ban khả dụng ngay khi Employee bấm nút tạo PR và đưa ra cảnh báo trực quan nếu số tiền vượt hạn mức.
-* **REQ-FR-03 (Must):** Manager có quyền duyệt hoặc từ chối PR kèm theo lý do cụ thể.
-* **REQ-FR-04 (Must):** Luồng duyệt đa cấp tự động kích hoạt: PR có giá trị $> 50$ triệu VND sau khi Manager duyệt xong bắt buộc phải chuyển tiếp đến Finance để ký duyệt bước hai.
-* **REQ-FR-05 (Must):** Procurement tải lên tối đa 3 file báo giá (PDF/ảnh) từ các nhà cung cấp khác nhau cho một mã PR.
-* **REQ-FR-06 (Must):** AI thực hiện trích xuất dữ liệu từ các file báo giá và tự động lập bảng so sánh chi tiết: Tổng chi phí, Đơn giá, Chi phí vận chuyển, Thời gian giao hàng, Điều khoản bảo hành.
-* **REQ-FR-07 (Must):** AI phân tích giá trị báo giá so với lịch sử thu mua và đưa ra cảnh báo bất thường (Anomaly Alert) nếu đơn giá cao vượt $\geq 20\%$ so với đơn giá trung bình lịch sử của sản phẩm cùng loại.
-* **REQ-FR-08 (Must):** Procurement chọn báo giá tối ưu và bấm nút khởi tạo PO. Hệ thống tự động sao chép chính xác thông tin đơn giá, số lượng từ báo giá được chọn sang PO, trạng thái PR chuyển sang `PO_Created`.
-* **REQ-FR-09 (Must):** Hệ thống ghi nhận biên bản nhận hàng thực tế (Goods Receipt), hỗ trợ nhận hàng một phần (Partially Received).
-* **REQ-FR-10 (Must):** Finance thực hiện bấm nút đóng hồ sơ mua sắm (Close PR), hệ thống chính thức hạch toán trừ tiền thực tế vào ngân sách phòng ban và chuyển trạng thái PR sang `Closed`.
-* **REQ-FR-11 (Must):** Quản lý ngân sách phòng ban cho phép Finance cấu hình hạn mức ngân sách theo năm/quý cho từng phòng ban.
-* **REQ-FR-12 (Should):** Quản lý danh bạ nhà cung cấp (Supplier CRUD) và lịch sử giao dịch.
-* **REQ-FR-13 (Must):** Phân quyền người dùng nghiêm ngặt dựa trên vai trò (Role-Based Access Control - RBAC) cho 5 vai trò: `EMPLOYEE`, `MANAGER`, `PROCUREMENT`, `FINANCE`, `ADMIN`.
+## AI Procurement & Purchase Approval System
 
-## B. Yêu Cầu Phi Chức Năng (Non-Functional Requirements - NFR)
+### A. Functional Requirements (FR)
 
-* **REQ-NFR-01 (Should):** Latency xử lý trích xuất và chuẩn hóa báo giá của AI phải $\leq 3.5$ giây trong môi trường demo.
-* **REQ-NFR-02 (Must):** Bảo mật dữ liệu tài chính: Toàn bộ API cập nhật ngân sách hoặc trạng thái phê duyệt phải được xác thực bằng JWT và kiểm tra quyền ở backend.
-* **REQ-NFR-03 (Must):** Audit Logging: Ghi nhật ký hệ thống chi tiết cho mọi hành động phê duyệt, từ chối, cập nhật ngân sách và các cảnh báo bất thường từ AI.
-* **REQ-NFR-04 (Should):** Responsive Web hiển thị tối ưu trên Desktop và di động.
-* **REQ-NFR-05 (Must):** Mật khẩu người dùng được băm bảo mật bằng thuật toán mạnh (bcrypt) trước khi ghi vào cơ sở dữ liệu.
+| **ID**        | **Loại** | **Yêu cầu**                                                                                         | **P**  |
+| ------------- | -------- | --------------------------------------------------------------------------------------------------- | ------ |
+| **REQ-FR-01** | FR       | Employee có thể tạo và quản lý Purchase Request.                                                    | Must   |
+| **REQ-FR-02** | FR       | Hệ thống phải kiểm tra các thông tin cần thiết của Purchase Request trước khi Submit.               | Must   |
+| **REQ-FR-03** | FR       | AI hỗ trợ chuẩn hóa Purchase Request và gợi ý các thông tin còn thiếu trước khi Submit.             | Should |
+| **REQ-FR-04** | FR       | Employee có thể theo dõi trạng thái của Purchase Request trong quy trình.                           | Must   |
+| **REQ-FR-05** | FR       | Manager có thể xem thông tin Purchase Request trước khi phê duyệt.                                  | Must   |
+| **REQ-FR-06** | FR       | Manager có thể Approve, Reject hoặc yêu cầu chỉnh sửa Purchase Request.                             | Must   |
+| **REQ-FR-07** | FR       | Hệ thống hỗ trợ Approval Workflow cho Purchase Request.                                             | Must   |
+| **REQ-FR-08** | FR       | Finance có thể kiểm tra Purchase Request với Budget trước khi phê duyệt.                            | Must   |
+| **REQ-FR-09** | FR       | Hệ thống cảnh báo khi Purchase Request có giá trị vượt Budget được phép.                            | Must   |
+| **REQ-FR-10** | FR       | Procurement có thể quản lý Supplier và thu thập nhiều Quotation cho Purchase Request.               | Must   |
+| **REQ-FR-11** | FR       | Hệ thống chuẩn hóa thông tin từ các Quotation để phục vụ việc đối chiếu.                            | Should |
+| **REQ-FR-12** | FR       | Hệ thống cho phép so sánh các Quotation giữa nhiều Supplier.                                        | Must   |
+| **REQ-FR-13** | FR       | AI hỗ trợ phân tích và hiển thị kết quả so sánh Quotation.                                          | Must   |
+| **REQ-FR-14** | FR       | AI đưa ra Recommendation dựa trên thông tin và tiêu chí của các Quotation.                          | Should |
+| **REQ-FR-15** | FR       | Procurement có thể lựa chọn Supplier và tạo Purchase Order sau khi Purchase Request được phê duyệt. | Must   |
+| **REQ-FR-16** | FR       | Người dùng có quyền có thể ghi nhận Receiving đối với hàng hóa/dịch vụ.                             | Must   |
+| **REQ-FR-17** | FR       | Hệ thống cho phép Close Purchase Request sau khi các bước mua sắm hoàn tất.                         | Must   |
 
-## C. Quy Tắc Nghiệp Vụ (Business Rules - BR)
+---
 
-* **REQ-BR-01:** Ràng buộc ngân sách: Một PR chỉ được gửi đi khi ngân sách phòng ban khả dụng lớn hơn hoặc bằng giá trị ước tính của PR.
-* **REQ-BR-02:** Quy tắc phân cấp duyệt: PR có giá trị $\leq 50$ triệu VND do Manager duyệt trực tiếp. PR $> 50$ triệu VND cần đồng thuận của cả Manager và Finance.
-* **REQ-BR-03:** Tính nhất quán dữ liệu PO: Đơn giá và số lượng trên PO được khởi tạo tự động phải khớp $100\%$ với báo giá (Quotation) gốc đã được lưu trong DB. AI hoàn toàn không có quyền tự ý sửa đổi đơn giá PO để chống ảo giác giá cả.
-* **REQ-BR-04:** Giới hạn nhận hàng: Tổng số lượng hàng ghi nhận trên tất cả các biên bản nhận hàng (Receiving) không được phép vượt quá số lượng đặt trên PO.
-* **REQ-BR-05:** Quyền hạn ngân sách: Chỉ có người dùng có vai trò Finance hoặc Admin mới được phép thao tác các API điều chỉnh hạn mức ngân sách phòng ban.
+# B. Non-Functional Requirements (NFR)
 
-## D. Ràng Buộc & Giả Định (Constraints & Assumptions)
+| **ID**         | **Loại** | **Yêu cầu**                                                                                                                   | **P** |
+| -------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- | ----- |
+| **REQ-NFR-01** | NFR      | Hệ thống phải đảm bảo dữ liệu Purchase Request, Approval, Quotation và Budget được quản lý nhất quán trong toàn bộ quy trình. | Must  |
+| **REQ-NFR-02** | NFR      | Hệ thống phải phân quyền chức năng phù hợp với vai trò Employee, Manager, Procurement và Finance.                             | Must  |
+| **REQ-NFR-03** | NFR      | Hệ thống phải ghi nhận thông tin cần thiết để theo dõi quá trình xử lý và Approval của Purchase Request.                      | Must  |
 
-* **CON-01:** Phải bàn giao phiên bản MVP chạy được trong vòng 14 tuần của môn học.
-* **CON-02:** Quá trình Receiving thực hiện nhập liệu qua giao diện web kèm tải file PDF biên bản đối soát.
-* **ASM-01:** Dữ liệu nhà cung cấp ban đầu được cung cấp thông qua dữ liệu mẫu (Seed Data) trong DB.
-* **ASM-02:** Hệ thống giả định việc gửi email PO cho Supplier được mock qua dịch vụ giả lập SMTP.
 
-## E. Câu Hỏi Mở (Open Questions)
+# C. Business Rules (BR)
 
-* **Q-01:** Có cần cổng thông tin (Supplier Portal) riêng cho Supplier tự upload báo giá? -> *Xác nhận:* Không, Procurement Specialist sẽ trực tiếp nhận file báo giá và tải lên hệ thống.
-* **Q-02:** Hệ thống có tự động quy đổi ngoại tệ khi so sánh báo giá bằng ngoại tệ không? -> *Xác nhận:* Không, phiên bản MVP chỉ xử lý duy nhất đơn vị tiền tệ là VND.
+| **ID**        | **Rule**                                                                                                      |
+| ------------- | ------------------------------------------------------------------------------------------------------------- |
+| **REQ-BR-01** | Purchase Request phải được tạo đầy đủ thông tin cần thiết trước khi được Submit.                              |
+| **REQ-BR-02** | Purchase Request phải được Approve trước khi chuyển sang bước Collect Quotations.                             |
+| **REQ-BR-03** | Manager là người xem xét và đưa ra quyết định Approval đối với Purchase Request thuộc phạm vi của mình.       |
+| **REQ-BR-04** | Finance kiểm tra Purchase Request với Budget trước khi hoàn tất bước phê duyệt có yêu cầu kiểm tra ngân sách. |
+| **REQ-BR-05** | Purchase Request vượt giới hạn Budget phải được cảnh báo.                                                     |
+| **REQ-BR-06** | Procurement thực hiện thu thập và đối chiếu Quotation sau khi Purchase Request được Approve.                  |
+| **REQ-BR-07** | Các Quotation được thu thập phải được liên kết với Purchase Request tương ứng để phục vụ so sánh.             |
+| **REQ-BR-08** | AI chỉ đưa ra Recommendation, không tự quyết định Supplier thay cho Procurement.                              |
+| **REQ-BR-09** | AI Recommendation dựa trên thông tin và tiêu chí được sử dụng để so sánh Quotation.                           |
+| **REQ-BR-10** | Purchase Order chỉ được tạo sau khi Purchase Request được Approve và Supplier được lựa chọn.                  |
+| **REQ-BR-11** | Purchase Request chỉ được Close sau khi bước Receiving và các bước mua sắm liên quan hoàn tất.                |
+
+---
+
+# D. Constraints (CON)
+
+| **ID**     | **Constraint**                                                                                                                                                           |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **CON-01** | Quy trình nghiệp vụ phải tuân theo thứ tự: **Purchase Request → Approve → Collect Quotations → Compare → PO → Receive → Close**.                                         |
+| **CON-02** | MVP tập trung vào các vai trò **Employee, Manager, Procurement và Finance**.                                                                                             |
+| **CON-03** | AI chỉ đóng vai trò **hỗ trợ**, không thay thế quyết định Approval hoặc quyết định lựa chọn Supplier của người dùng.                                                     |
+| **CON-04** | MVP được triển khai trên **nền tảng web**.                                                                                                                               |
+| **CON-05** | MVP không tích hợp trực tiếp với hệ thống **ERP hoặc kế toán**.                                                                                                          |
+| **CON-06** | Các chức năng **Inventory, Supplier Payment, Contract Management, ERP/Accounting Integration, Mobile App, Supplier Portal và Demand Forecasting** nằm ngoài phạm vi MVP. |
+
+---
+
+# E. Assumptions (ASM)
+
+
+| **ID**     | **Assumption**                                                                                                                                         |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **ASM-01** | Kết quả nghiên cứu hiện tại sử dụng **Stakeholder Proxy và business-process assumptions** do nhóm có giới hạn tiếp cận người dùng Procurement thực tế. |
+| **ASM-02** | Các pain point và nhu cầu được xác định cần được validation bằng phỏng vấn hoặc quan sát người dùng thực tế.                                           |
+| **ASM-03** | Approval Workflow và cách kiểm tra Budget trong MVP cần được xác nhận lại với quy trình thực tế của doanh nghiệp.                                      |
+| **ASM-04** | AI Recommendation được sử dụng như công cụ hỗ trợ quyết định và người dùng vẫn chịu trách nhiệm cho quyết định cuối cùng.                              |
+
+
+# F. Open Questions (Q)
+
+| **ID**   | **Open Question**                                                                                |
+| -------- | ------------------------------------------------------------------------------------------------ |
+| **Q-01** | Approval Workflow thực tế gồm những cấp phê duyệt nào?                                           |
+| **Q-02** | Những thông tin nào là bắt buộc khi Employee tạo Purchase Request?                               |
+| **Q-03** | Budget được kiểm tra theo tiêu chí và giới hạn nào trong quy trình thực tế?                      |
+| **Q-04** | Những tiêu chí nào được sử dụng để AI Recommendation Supplier từ các Quotation?                  |
+| **Q-05** | Procurement cần những thông tin nào từ Supplier/Quotation để thực hiện việc so sánh và lựa chọn? |
+
+
+## Mapping với Project Charter
+
+| **Project Charter**                    | **Requirements tương ứng** |
+| -------------------------------------- | -------------------------- |
+| Employee tạo PR                        | FR-01 → FR-04              |
+| Manager Approval                       | FR-05 → FR-07              |
+| Finance kiểm tra Budget                | FR-08 → FR-09              |
+| Procurement quản lý Supplier/Quotation | FR-10 → FR-12              |
+| AI chuẩn hóa PR                        | FR-03                      |
+| AI so sánh Quotation                   | FR-13                      |
+| AI Recommendation                      | FR-14                      |
+| Purchase Order                         | FR-15                      |
+| Receiving                              | FR-16                      |
+| Close                                  | FR-17                      |
+| Workflow bắt buộc                      | CON-01 / BR-02 → BR-11     |
+| AI chỉ hỗ trợ                          | CON-03 / BR-08             |
+| Web MVP                                | CON-04                     |
+| Không ERP/Accounting                   | CON-05                     |
+| Out of Scope                           | CON-06                     |
+| Stakeholder Proxy                      | ASM-01 → ASM-02            |
+
