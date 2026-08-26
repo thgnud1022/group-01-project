@@ -30,6 +30,5 @@ Tự động hóa thông minh quy trình thu mua từ khâu khởi tạo PR đ�
 4. Thời gian trích xuất & so sánh báo giá của AI < 3.5 giây trong môi trường demo.
 
 ## 6. Ràng Buộc (Constraints)
-* Bàn giao MVP trong 14 tuần học.
 * Chỉ xử lý đơn vị tiền tệ VND.
 * Không tích hợp cổng thanh toán ngân hàng thật.
