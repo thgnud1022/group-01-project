@@ -1,3 +1,6 @@
+# VAULT Q&A BENCHMARK: Bộ 20 Câu Hỏi Kiểm Định AI 
+Bộ câu hỏi benchmark dưới đây dùng để chạy kiểm thử đánh giá năng lực phản hồi chính xác của AI dựa trên dữ liệu tri thức Vault, đảm bảo AI trả lời đúng nguồn và phản hồi "KHÔNG ĐỦ DỮ LIỆU" khi thông tin không có trong Vault.
+
 | **ID**   | **Dạng** | **Câu hỏi kiểm thử (Query)**                                                | **Phản hồi chuẩn (Expected Grounded Answer)**                                                                                                                                | **Source ID**                    | **Trạng thái** |
 | -------- | -------- | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- | -------------- |
 | **Q-01** | Fact     | AI có quyền tự ý thay đổi đơn giá trên PO không?                            | Không. AI chỉ đóng vai trò hỗ trợ và không được tự ý thay đổi thông tin nghiệp vụ trên PO.                                                                                   | `CON-03` / `ASM-04`              | PASS           |
