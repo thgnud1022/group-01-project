@@ -14,7 +14,6 @@
 | **EPIC-05** | **Receiving & Close**    | **US-09:** Ghi nhận Receiving                      | `REQ-FR-16`                           |
 |             |                          | **US-10:** Close Purchase Request                  | `REQ-FR-17`                           |
 
-Cách này mapping **1-1 với Functional Requirements FR-01 → FR-17**, không bỏ requirement nào. 
 
 ### 5 Epic theo workflow
 
