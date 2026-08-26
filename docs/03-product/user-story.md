@@ -11,9 +11,9 @@
 |             |                          | **US-06:** So sánh Quotation                       | `REQ-FR-12`                           |
 |             |                          | **US-07:** AI phân tích và Recommendation          | `REQ-FR-13`, `REQ-FR-14`              |
 |             |                          | **US-08:** AI cảnh báo bất thường                  | `REQ-FR-15`,            |
-| **EPIC-04** | **Purchase Order**       | **US-08:** Lựa chọn Supplier và tạo Purchase Order | `REQ-FR-16`                           |
-| **EPIC-05** | **Receiving & Close**    | **US-09:** Ghi nhận Receiving                      | `REQ-FR-17`                           |
-|             |                          | **US-10:** Close Purchase Request                  | `REQ-FR-18`                           |
+| **EPIC-04** | **Purchase Order**       | **US-09:** Lựa chọn Supplier và tạo Purchase Order | `REQ-FR-16`                           |
+| **EPIC-05** | **Receiving & Close**    | **US-10:** Ghi nhận Receiving                      | `REQ-FR-17`                           |
+|             |                          | **US-11:** Close Purchase Request                  | `REQ-FR-18`                           |
 
 
 ### 5 Epic theo workflow
