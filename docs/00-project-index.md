@@ -10,7 +10,7 @@
 * 📄 [Project Charter](https://github.com/thgnud1022/group-01-project/blob/main/docs/01-discovery/project-charter.md) - Tuyên bố vấn đề, mục tiêu, giá trị và tiêu chí thành công.
 * 📄 [Requirements Inventory](https://github.com/thgnud1022/group-01-project/blob/main/docs/01-discovery/requirements.md) - Danh mục FR, NFR, BR, Constraints, Assumptions, Open Questions.
 * 📄 [Glossary](https://github.com/thgnud1022/group-01-project/blob/main/docs/01-discovery/glossary.md) - Từ điển thuật ngữ mua sắm doanh nghiệp.
-* 📂 [Project Vault Index](file:///d:/THUDDN/group-01-project/docs/02-vault/00-index.md) - Danh mục tài liệu tri thức làm nguồn cho AI.
+* 📂 [Project Vault Index](https://github.com/thgnud1022/group-01-project/blob/main/docs/02-vault/00-index.md) - Danh mục tài liệu tri thức làm nguồn cho AI.
 * 📄 [Source Priority Rules](file:///d:/THUDDN/group-01-project/docs/02-vault/source-priority.md) - Quy tắc 6 cấp độ phân xử mâu thuẫn nguồn.
 * 📄 [Company Procurement Policies](file:///d:/THUDDN/group-01-project/docs/02-vault/company-policies.md) - Quy chế thu mua và hạn mức duyệt.
 * 📄 [Vault Q&A Benchmark](file:///d:/THUDDN/group-01-project/docs/02-vault/vault-qa-benchmark.md) - Bộ 20 câu hỏi kiểm định chất lượng AI.
