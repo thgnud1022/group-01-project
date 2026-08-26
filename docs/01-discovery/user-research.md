@@ -42,9 +42,8 @@
 
 | Persona | Job To Be Done (JTBD) | Pain Point | Success Criteria |
 | --- | --- | --- | --- |
-| **Employee**<br>
-
-<br>*(Requester)* | Khi cần mua sản phẩm/dịch vụ phục vụ công việc, tôi muốn tạo Purchase Request đầy đủ và nhanh để yêu cầu không bị trả lại do thiếu thông tin. | Không biết cần cung cấp những thông tin nào; request có thể bị trả về để bổ sung hoặc sửa. | Tạo được request đầy đủ ngay lần đầu; giảm số request bị trả về do thiếu thông tin. |
+| **Employee**
+*(Requester)* | Khi cần mua sản phẩm/dịch vụ phục vụ công việc, tôi muốn tạo Purchase Request đầy đủ và nhanh để yêu cầu không bị trả lại do thiếu thông tin. | Không biết cần cung cấp những thông tin nào; request có thể bị trả về để bổ sung hoặc sửa. | Tạo được request đầy đủ ngay lần đầu; giảm số request bị trả về do thiếu thông tin. |
 | **Manager**<br>
 
 <br>*(Approver)* | Khi nhận Purchase Request, tôi muốn nhanh chóng xem thông tin yêu cầu, ngân sách và trạng thái để đưa ra quyết định Approve/Reject. | Phải xem nhiều request; khó xác định request nào cần ưu tiên và khó biết request có vượt ngân sách hay không. | Có thể xem đầy đủ thông tin và đưa ra quyết định approval nhanh, không cần trao đổi nhiều lần. |
