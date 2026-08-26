@@ -21,7 +21,7 @@
 | **REQ-FR-12** | FR       | Hệ thống cho phép so sánh các Quotation giữa nhiều Supplier.                                        | Must   |
 | **REQ-FR-13** | FR       | AI hỗ trợ phân tích và hiển thị kết quả so sánh Quotation.                                          | Must   |
 | **REQ-FR-14** | FR       | AI đưa ra Recommendation dựa trên thông tin và tiêu chí của các Quotation.                          | Should |
-| **REQ-FR-15** | Trong MVP, AI cảnh báo giá bất thường khi đơn giá cao hơn hoặc bằng 20% so với mức trung bình lịch sử của sản phẩm cùng loại. | Should |
+| **REQ-FR-15** | FR       | AI cảnh báo giá bất thường khi đơn giá cao hơn hoặc bằng 20% so với mức trung bình lịch sử của sản phẩm cùng loại. | Should |
 | **REQ-FR-16** | FR       | Procurement có thể lựa chọn Supplier và tạo Purchase Order sau khi Purchase Request được phê duyệt. | Must   |
 | **REQ-FR-17** | FR       | Người dùng có quyền có thể ghi nhận Receiving đối với hàng hóa/dịch vụ.                             | Must   |
 | **REQ-FR-18** | FR       | Hệ thống cho phép Close Purchase Request sau khi các bước mua sắm hoàn tất.                         | Must   |
