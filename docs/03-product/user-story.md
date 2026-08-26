@@ -55,7 +55,7 @@ Và thứ tự Epic cũng khớp hoàn toàn với workflow bắt buộc:
 
 ---
 
-## US-PR-01 — Create and standardize Purchase Request
+## US-01 — Create and standardize Purchase Request
 
 **As an Employee, I want to create and complete a Purchase Request with AI assistance, so that I can submit a request without missing necessary information.**
 
@@ -89,7 +89,7 @@ Purchase Request data structure; AI standardization.
 
 ---
 
-## US-PR-02 — Track Purchase Request status
+## US-02 — Track Purchase Request status
 
 **As an Employee, I want to track the status of my Purchase Request, so that I can know its progress in the procurement process.**
 
@@ -120,7 +120,7 @@ Purchase Request workflow.
 
 # EPIC-02 — Approval & Budget
 
-## US-AP-01 — Review and process Purchase Request Approval
+## US-03 — Review and process Purchase Request Approval
 
 **As a Manager, I want to review and process Purchase Requests, so that I can make an Approval decision for requests within my scope.**
 
@@ -159,7 +159,7 @@ Approval Workflow; Manager role.
 
 ---
 
-## US-BG-01 — Check Purchase Request against Budget
+## US-04 — Check Purchase Request against Budget
 
 **As a Finance user, I want to check a Purchase Request against the Budget, so that I can identify requests that exceed the permitted Budget.**
 
@@ -190,7 +190,7 @@ Budget data; Finance role.
 
 # EPIC-03 — Supplier & Quotation
 
-## US-QT-01 — Manage Supplier and collect Quotations
+## US-05 — Manage Supplier and collect Quotations
 
 **As a Procurement user, I want to manage Supplier information and collect multiple Quotations for a Purchase Request, so that I can gather the information needed for comparison.**
 
@@ -219,7 +219,7 @@ Approved Purchase Request; Supplier and Quotation data.
 
 ---
 
-## US-QT-02 — Compare Quotations
+## US-06 — Compare Quotations
 
 **As a Procurement user, I want to compare Quotations from multiple Suppliers, so that I can evaluate the available Supplier options.**
 
@@ -248,7 +248,7 @@ AI Recommendation; automatic Supplier selection.
 
 ---
 
-## US-QT-03 — AI analysis and Supplier Recommendation
+## US-07 — AI analysis and Supplier Recommendation
 
 **As a Procurement user, I want AI to analyze Quotation comparisons and provide a Recommendation, so that I can use the available Quotation information to support my Supplier selection.**
 
@@ -284,7 +284,7 @@ AI automatically selecting the Supplier.
 
 # EPIC-04 — Purchase Order
 
-## US-PO-01 — Select Supplier and create Purchase Order
+## US-08 — Select Supplier and create Purchase Order
 
 **As a Procurement user, I want to select a Supplier and create a Purchase Order after Purchase Request approval, so that I can proceed to the ordering step.**
 
@@ -320,7 +320,7 @@ Approved Purchase Request; selected Supplier and Quotation.
 
 # EPIC-05 — Receiving & Close
 
-## US-RC-01 — Record Receiving
+## US-09 — Record Receiving
 
 **As an authorized user, I want to record Receiving for goods or services, so that the procurement process can record the receipt.**
 
@@ -349,7 +349,7 @@ Purchase Order; user permission.
 
 ---
 
-## US-CL-01 — Close Purchase Request
+## US-10 — Close Purchase Request
 
 **As an authorized user, I want to close a Purchase Request after the procurement steps are completed, so that the Purchase Request reaches the end of the workflow.**
 
@@ -378,13 +378,4 @@ Receiving completion.
 
 ---
 
-## Tổng cấu trúc sau khi chốt
-
-| **Epic**                           | **User Stories**             | **FR được cover** |
-| ---------------------------------- | ---------------------------- | ----------------- |
-| **EPIC-01 — Purchase Request**     | US-PR-01, US-PR-02           | FR-01 → FR-04     |
-| **EPIC-02 — Approval & Budget**    | US-AP-01, US-BG-01           | FR-05 → FR-09     |
-| **EPIC-03 — Supplier & Quotation** | US-QT-01, US-QT-02, US-QT-03 | FR-10 → FR-14     |
-| **EPIC-04 — Purchase Order**       | US-PO-01                     | FR-15             |
-| **EPIC-05 — Receiving & Close**    | US-RC-01, US-CL-01           | FR-16 → FR-17     |
 
