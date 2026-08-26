@@ -1,34 +1,20 @@
-# PROJECT CHARTER: AI Procurement & Purchase Approval System
 
-## 1. Thông Tin Tổng Quan
-* **Tên dự án:** AI Procurement & Purchase Approval System
-* **Nhóm thực hiện:** Nhóm 1 (5 thành viên)
-* **Khóa học:** Thực hành Lập trình Ứng dụng Doanh nghiệp (MIS3032_1 - 2026)
-* **Thời gian thực hiện:** 14 tuần
+# Project Charter
 
-## 2. Bối Cảnh & Tuyên Bố Vấn Đề (Problem Statement)
-Quy trình mua sắm nội bộ doanh nghiệp hiện tại bị phân mảnh, phụ thuộc vào xử lý thủ công qua email/giấy tờ, thiếu kiểm soát ngân sách theo thời gian thực và tiêu tốn nhiều giờ làm việc cho việc đọc hiểu, so sánh các bản báo giá phi cấu trúc.
+| **Trường**            | **Nội dung**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Project**           | **AI Procurement & Purchase Approval System**                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| **Problem**           | Trong quy trình mua sắm nội bộ, **Employee** có thể gặp khó khăn khi tạo Purchase Request do thiếu thông tin cần thiết và phải bổ sung hoặc chỉnh sửa. **Manager** cần xem xét các thông tin của Purchase Request trước khi đưa ra quyết định Approval. **Procurement** phải thu thập và đối chiếu thông tin từ nhiều Quotation trước khi lựa chọn Supplier. **Finance** cần kiểm tra giá trị Purchase Request và Budget trước khi phê duyệt.                                               |
+| **Primary users**     | **Employee:** tạo Purchase Request.<br>**Manager:** xem xét và phê duyệt Purchase Request.<br>**Procurement:** thu thập, đối chiếu Quotation và lựa chọn Supplier.<br>**Finance:** kiểm tra Purchase Request với Budget trước khi phê duyệt.                                                                                                                                                                                                                                                |
+| **Value proposition** | Chuẩn hóa quy trình mua sắm nội bộ và hỗ trợ người dùng tại các bước **Purchase Request, Approval, Quotation Comparison và Budget Review**. AI hỗ trợ Employee chuẩn hóa Purchase Request, hỗ trợ Procurement so sánh Quotation và cung cấp khuyến nghị dựa trên thông tin báo giá.                                                                                                                                                                                                         |
+| **MVP**               | - Tạo và quản lý Purchase Request.<br>- Xem xét và phê duyệt Purchase Request.<br>- Quản lý Supplier và Quotation.<br>- AI hỗ trợ chuẩn hóa Purchase Request.<br>- AI hỗ trợ so sánh Quotation và đưa ra khuyến nghị.<br>- Finance kiểm tra Purchase Request với Budget.<br>- Tạo Purchase Order.<br>- Quản lý Receiving và Close.                                                                                                                                                          |
+| **Out of scope**      |Không phát triển các chức năng: Quản lý kho (Inventory), Thanh toán nhà cung cấp, Quản lý hợp đồng, Tích hợp ERP/Kế toán, Ứng dụng Mobile, Supplier Portal và Demand Forecasting. Các chức năng này được xem là hướng mở rộng sau MVP.                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| **Success signals**   | - ≥80% Purchase Request được AI chuẩn hóa chính xác.
+<br>- Giảm ít nhất 40% thời gian phê duyệt so với quy trình thủ công.
+<br>- Giảm ít nhất 60% thời gian so sánh báo giá.
+<br>- AI phát hiện ≥80% trường hợp giá bất thường hoặc vượt ngân sách trong bộ dữ liệu kiểm thử.
+<br>- Người dùng đánh giá mức hài lòng ≥4/5.
 
-1. **Đối với Nhân viên (Employee):** Khó khăn khi mô tả thông số kỹ thuật thiết bị chuẩn hóa và theo dõi trạng thái phê duyệt PR.
-2. **Đối với Chuyên viên Thu mua (Procurement Specialist):** Mất nhiều thời gian đọc hiểu file PDF/ảnh báo giá từ nhiều nhà cung cấp và lập bảng đối chiếu thủ công, dễ bỏ sót nâng giá/gian lận.
-3. **Đối với Quản lý & Finance (Manager & Finance Specialist):** Rủi ro phê duyệt dồn dập vượt hạn mức ngân sách phòng ban do thiếu công cụ kiểm tra tự động theo thời gian thực.
+                                                                                                                                                                                                                          |
+| **Constraints**       | Quy trình nghiệp vụ được xác định theo thứ tự: **Purchase Request → Approve → Collect Quotations → Compare → PO → Receive → Close**. AI đóng vai trò **hỗ trợ** trong việc chuẩn hóa Purchase Request và so sánh Quotation; các quyết định nghiệp vụ như Approval và lựa chọn Supplier vẫn cần được người dùng thực hiện. Hệ thống chỉ hoạt động trên nền tảng web trong phạm vi MVP và không tích hợp trực tiếp với hệ thống ERP hoặc kế toán. Kết quả nghiên cứu hiện sử dụng **Stakeholder Proxy và business-process assumptions**, do đó cần được validation bằng phỏng vấn hoặc quan sát người dùng thực tế. |
 
-## 3. Định Vị Giá Trị (Value Proposition)
-Tự động hóa thông minh quy trình thu mua từ khâu khởi tạo PR đến thanh quyết toán; tích hợp AI hỗ trợ chuẩn hóa PR từ văn bản thô, tự động trích xuất so sánh báo giá PDF, phát hiện bất thường đơn giá >= 20% , bảo vệ 100% ngân sách phòng ban theo thời gian thực.
-
-## 4. Các Bên Liên Quan & Phân Quyền (Stakeholders)
-* `EMPLOYEE`: Khởi tạo PR bằng voice/text, theo dõi trạng thái PR.
-* `MANAGER`: Phê duyệt PR bước 1 <= 50 triệu VND).
-* `PROCUREMENT`: Upload báo giá PDF, xem bảng so sánh AI, phát hành PO.
-* `FINANCE`: Phê duyệt PR bước 2 (> 50 triệu VND), quản lý ngân sách phòng ban, đóng hồ sơ mua sắm.
-* `ADMIN`: Quản trị người dùng, phòng ban, danh mục.
-
-## 5. Tiêu Chí Thành Công (Success Signals)
-1. 100% PR được kiểm tra ngân sách phòng ban tự động trước khi gửi duyệt.
-2. Độ chính xác của AI khi bóc tách báo giá PDF đạt 90% trên tập câu hỏi benchmark.
-3. 100% luồng duyệt giá trị lớn (> 50 triệu VND) bắt buộc qua bước duyệt thứ hai của Finance.
-4. Thời gian trích xuất & so sánh báo giá của AI < 3.5 giây trong môi trường demo.
-
-## 6. Ràng Buộc (Constraints)
-* Chỉ xử lý đơn vị tiền tệ VND.
-* Không tích hợp cổng thanh toán ngân hàng thật.
