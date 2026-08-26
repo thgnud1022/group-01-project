@@ -10,6 +10,7 @@
 | **EPIC-03** | **Supplier & Quotation** | **US-05:** Quản lý Supplier và thu thập Quotation  | `REQ-FR-10`, `REQ-FR-11`              |
 |             |                          | **US-06:** So sánh Quotation                       | `REQ-FR-12`                           |
 |             |                          | **US-07:** AI phân tích và Recommendation          | `REQ-FR-13`, `REQ-FR-14`              |
+|             |                          | **US-08:** AI cảnh báo bất thường                  | `REQ-FR-13`, `REQ-FR-14`              |
 | **EPIC-04** | **Purchase Order**       | **US-08:** Lựa chọn Supplier và tạo Purchase Order | `REQ-FR-15`                           |
 | **EPIC-05** | **Receiving & Close**    | **US-09:** Ghi nhận Receiving                      | `REQ-FR-16`                           |
 |             |                          | **US-10:** Close Purchase Request                  | `REQ-FR-17`                           |
