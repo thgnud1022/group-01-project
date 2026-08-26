@@ -70,12 +70,17 @@
 # E. Assumptions (ASM)
 
 
-| **ID**     | **Assumption**                                                                                                                                         |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **ASM-01** | Kết quả nghiên cứu hiện tại sử dụng **Stakeholder Proxy và business-process assumptions** do nhóm có giới hạn tiếp cận người dùng Procurement thực tế. |
-| **ASM-02** | Các pain point và nhu cầu được xác định cần được validation bằng phỏng vấn hoặc quan sát người dùng thực tế.                                           |
-| **ASM-03** | Approval Workflow và cách kiểm tra Budget trong MVP cần được xác nhận lại với quy trình thực tế của doanh nghiệp.                                      |
-| **ASM-04** | AI Recommendation được sử dụng như công cụ hỗ trợ quyết định và người dùng vẫn chịu trách nhiệm cho quyết định cuối cùng.                              |
+| **ID**     | **Assumption**                                                                                                                    |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| **ASM-01** | MVP sử dụng dữ liệu Supplier, Quotation và Budget ở dạng mock/sample nếu chưa có dữ liệu doanh nghiệp thực tế.                    |
+| **ASM-02** | Approval hierarchy và Budget threshold trong MVP là giả định và cần được validation với doanh nghiệp thực tế.                     |
+| **ASM-03** | AI trong MVP chỉ đóng vai trò decision support, không thay thế quyết định của Manager, Finance hoặc Procurement.                  |
+| **ASM-04** | AI không được tự ý thay đổi thông tin Quotation đã được lựa chọn khi tạo PO.                                                      |
+| **ASM-05** | Đối với MVP, PR có giá trị trên 50 triệu VND được giả định cần Manager và Finance approval.                                 |
+| **ASM-06** | Trong MVP, tổng số lượng Receiving không được vượt quá số lượng trên PO.                                                      |
+| **ASM-07** | Trong MVP, AI có thể trích xuất thông tin từ file Quotation do Procurement cung cấp.                                  |
+| **ASM-08** | Trong MVP, AI cảnh báo giá bất thường khi đơn giá cao hơn hoặc bằng 20% so với mức trung bình lịch sử của sản phẩm cùng loại. |
+
 
 
 # F. Open Questions (Q)
