@@ -1,4 +1,5 @@
 
+
 # USER RESEARCH & SYNTHESIS
 
 ## 1. Research Question & Observations
