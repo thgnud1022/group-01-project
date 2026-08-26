@@ -38,59 +38,47 @@
 
 > FR-16 → FR-17
 
-Và thứ tự Epic cũng khớp hoàn toàn với workflow bắt buộc:
+Được. Dưới đây là bản **User Story tiếng Việt**, giữ đúng **cấu trúc mẫu trước đó**, đồng thời **bám sát bảng Epic → User Story → Requirement IDs bạn vừa chốt**. Không bổ sung requirement ngoài danh sách.
 
-**Purchase Request → Approve → Collect Quotations → Compare → PO → Receive → Close** (`CON-01`). 
-
-### Các requirement không nên biến thành User Story riêng
-
-* **NFR-01 → NFR-03**: yêu cầu phi chức năng, nên áp dụng xuyên suốt các Epic.
-* **BR-01 → BR-11**: Business Rules, dùng làm điều kiện/Acceptance Criteria cho các Story tương ứng.
-* **CON-01 → CON-06**: Constraints, áp dụng cho toàn project.
-* **ASM-01 → ASM-08**: Assumptions, dùng làm cơ sở triển khai MVP.  
-* **Q-01 → Q-05**: Open Questions, chưa nên biến thành Story cho đến khi được validation.
-
-
+---
 
 # EPIC-01 — Purchase Request
 
 ## US-01 — Tạo và chuẩn hóa Purchase Request
 
-**Là một Employee, tôi muốn tạo và hoàn thiện Purchase Request với sự hỗ trợ của AI, để tôi có thể gửi yêu cầu mà không bị thiếu thông tin cần thiết.**
+**Là một Employee, tôi muốn tạo và hoàn thiện Purchase Request với sự hỗ trợ của AI, để có thể gửi yêu cầu mà không thiếu thông tin cần thiết.**
 
 **Context:**
-Bao gồm `REQ-FR-01`, `REQ-FR-02`, `REQ-FR-03` và `REQ-BR-01`. Employee có thể gặp khó khăn trong việc xác định những thông tin cần thiết khi tạo Purchase Request. AI hỗ trợ chuẩn hóa và gợi ý thông tin còn thiếu trước khi Submit.
+Bao gồm `REQ-FR-01`, `REQ-FR-02`, `REQ-FR-03`. Employee có thể gặp khó khăn khi xác định thông tin cần cung cấp khi tạo Purchase Request. AI hỗ trợ chuẩn hóa và gợi ý thông tin còn thiếu trước khi Submit.
 
 **Acceptance Criteria:**
 
 **AC1**
-**Given** Employee đang tạo một Purchase Request
-**When** có thông tin bắt buộc bị thiếu
-**Then** hệ thống xác định thông tin còn thiếu trước khi Submit.
+Given Employee đang tạo Purchase Request
+When có trường thông tin bắt buộc chưa được điền
+Then hệ thống xác định và hiển thị thông tin còn thiếu trước khi Submit.
 
 **AC2**
-**Given** Purchase Request có thông tin bị thiếu
-**When** Employee sử dụng chức năng hỗ trợ của AI
-**Then** AI gợi ý những thông tin cần được bổ sung.
+Given Purchase Request còn thiếu thông tin
+When Employee sử dụng AI hỗ trợ
+Then AI gợi ý thông tin cần được bổ sung.
 
 **AC3**
-**Given** Purchase Request đã có đầy đủ thông tin cần thiết
-**When** Employee Submit request
-**Then** hệ thống cho phép Purchase Request được gửi đi.
+Given Purchase Request đã có đầy đủ thông tin cần thiết
+When Employee Submit
+Then hệ thống cho phép gửi Purchase Request.
 
-**Out of Scope:**
-Approval; thu thập Quotation; cấu hình Budget.
+**Out of Scope:** Approval; Quotation; cấu hình Budget.
 
-**Dependencies:**
-Cấu trúc dữ liệu Purchase Request; AI Standardization.
+**Dependencies:** Purchase Request data structure; AI hỗ trợ chuẩn hóa.
 
 **Estimate:** 3 pts
 
 ---
 
-## US-02 — Theo dõi trạng thái Purchase Request
+## US-02 — Theo dõi Purchase Request
 
-**Là một Employee, tôi muốn theo dõi trạng thái Purchase Request của mình, để tôi biết tiến độ của yêu cầu trong quy trình mua sắm.**
+**Là một Employee, tôi muốn theo dõi trạng thái Purchase Request, để biết yêu cầu của mình đang ở bước nào trong quy trình mua sắm.**
 
 **Context:**
 Bao gồm `REQ-FR-04`. Employee cần theo dõi trạng thái hiện tại của Purchase Request trong quá trình xử lý.
@@ -98,20 +86,18 @@ Bao gồm `REQ-FR-04`. Employee cần theo dõi trạng thái hiện tại của
 **Acceptance Criteria:**
 
 **AC1**
-**Given** Employee có một Purchase Request
-**When** Employee xem request
-**Then** hệ thống hiển thị trạng thái hiện tại của request.
+Given Employee có một Purchase Request
+When Employee xem Purchase Request
+Then hệ thống hiển thị trạng thái hiện tại.
 
 **AC2**
-**Given** Purchase Request tiến triển qua các bước của workflow
-**When** Employee xem request
-**Then** hệ thống hiển thị trạng thái hiện tại của quy trình.
+Given Purchase Request thay đổi trạng thái trong quy trình
+When Employee xem lại Purchase Request
+Then hệ thống hiển thị trạng thái mới nhất.
 
-**Out of Scope:**
-Thay đổi trạng thái Purchase Request thủ công.
+**Out of Scope:** Employee tự thay đổi trạng thái Purchase Request.
 
-**Dependencies:**
-Purchase Request Workflow.
+**Dependencies:** Purchase Request workflow.
 
 **Estimate:** 2 pts
 
@@ -119,69 +105,65 @@ Purchase Request Workflow.
 
 # EPIC-02 — Approval & Budget
 
-## US-03 — Xem xét và xử lý Approval của Purchase Request
+## US-03 — Xem và xử lý Approval
 
-**Là một Manager, tôi muốn xem xét và xử lý Purchase Request, để tôi có thể đưa ra quyết định Approval đối với các request thuộc phạm vi của mình.**
+**Là một Manager, tôi muốn xem và xử lý Purchase Request, để đưa ra quyết định Approval đối với các yêu cầu thuộc phạm vi của mình.**
 
 **Context:**
-Bao gồm `REQ-FR-05`, `REQ-FR-06`, `REQ-FR-07` và `REQ-BR-03`. Manager xem xét thông tin Purchase Request và có thể Approve, Reject hoặc yêu cầu chỉnh sửa.
+Bao gồm `REQ-FR-05`, `REQ-FR-06`, `REQ-FR-07`. Manager xem thông tin Purchase Request và có thể Approve, Reject hoặc Request Revision.
 
 **Acceptance Criteria:**
 
 **AC1**
-**Given** một Purchase Request đang chờ Approval
-**When** Manager mở request
-**Then** hệ thống hiển thị thông tin của Purchase Request.
+Given Purchase Request đang chờ Approval
+When Manager mở Purchase Request
+Then hệ thống hiển thị thông tin của Purchase Request.
 
 **AC2**
-**Given** Manager đang xem xét một Purchase Request thuộc phạm vi của mình
-**When** Manager chọn Approve
-**Then** hệ thống ghi nhận quyết định Approval và tiếp tục Approval Workflow.
+Given Manager đang xem Purchase Request thuộc phạm vi xử lý
+When Manager chọn Approve
+Then hệ thống ghi nhận quyết định Approval và tiếp tục Approval Workflow.
 
 **AC3**
-**Given** Manager đang xem xét một Purchase Request
-**When** Manager chọn Reject hoặc yêu cầu chỉnh sửa
-**Then** hệ thống ghi nhận quyết định tương ứng.
+Given Manager đang xem Purchase Request
+When Manager chọn Reject hoặc Request Revision
+Then hệ thống ghi nhận quyết định tương ứng.
 
 **AC4**
-**Given** Purchase Request đang trong Approval Workflow
-**When** cần thực hiện bước Approval tiếp theo
-**Then** hệ thống thực hiện theo Approval Workflow đã được cấu hình.
+Given Purchase Request đang trong Approval Workflow
+When cần thực hiện bước Approval tiếp theo
+Then hệ thống chuyển Purchase Request theo workflow được cấu hình.
 
-**Out of Scope:**
-Xác định Approval hierarchy thực tế.
+**Out of Scope:** Thiết lập Approval hierarchy.
 
-**Dependencies:**
-Approval Workflow; vai trò Manager.
+**Dependencies:** Approval Workflow; Manager role.
 
 **Estimate:** 3 pts
 
 ---
 
-## US-04 — Kiểm tra Purchase Request với Budget
+## US-04 — Kiểm tra Budget
 
-**Là một Finance, tôi muốn kiểm tra Purchase Request với Budget, để tôi có thể xác định những request vượt quá Budget được cho phép.**
+**Là một Finance user, tôi muốn kiểm tra Purchase Request với Budget, để xác định yêu cầu có vượt ngân sách hay không.**
 
 **Context:**
-Bao gồm `REQ-FR-08`, `REQ-FR-09`, `REQ-BR-04`, `REQ-BR-05`. Finance kiểm tra Purchase Request với Budget trước khi hoàn thành bước Approval yêu cầu kiểm tra Budget.
+Bao gồm `REQ-FR-08`, `REQ-FR-09`. Finance kiểm tra giá trị Purchase Request với thông tin Budget khi cần thực hiện Budget Review.
 
 **Acceptance Criteria:**
 
 **AC1**
-**Given** Purchase Request yêu cầu kiểm tra Budget
-**When** Finance thực hiện kiểm tra request
-**Then** hệ thống kiểm tra request với thông tin Budget khả dụng.
+Given Purchase Request cần được kiểm tra Budget
+When Finance thực hiện Budget Check
+Then hệ thống kiểm tra Purchase Request với thông tin Budget khả dụng.
 
 **AC2**
-**Given** giá trị Purchase Request vượt quá Budget được cho phép
-**When** thực hiện Budget Check
-**Then** hệ thống hiển thị cảnh báo về Budget.
+Given Purchase Request vượt Budget
+When Budget Check được thực hiện
+Then hệ thống hiển thị cảnh báo Budget.
 
-**Out of Scope:**
-Xác định tiêu chí hoặc threshold cụ thể của Budget.
+**Out of Scope:** Cấu hình tiêu chí hoặc hạn mức Budget.
 
-**Dependencies:**
-Dữ liệu Budget; vai trò Finance.
+**Dependencies:** Budget data; Finance role.
 
 **Estimate:** 2 pts
 
@@ -191,28 +173,26 @@ Dữ liệu Budget; vai trò Finance.
 
 ## US-05 — Quản lý Supplier và thu thập Quotation
 
-**Là một Procurement, tôi muốn quản lý thông tin Supplier và thu thập nhiều Quotation cho một Purchase Request, để tôi có đủ thông tin phục vụ việc so sánh.**
+**Là một Procurement user, tôi muốn quản lý thông tin Supplier và thu thập nhiều Quotation cho Purchase Request, để có đủ thông tin phục vụ việc so sánh.**
 
 **Context:**
-Bao gồm `REQ-FR-10`, `REQ-FR-11` và `REQ-BR-06`, `REQ-BR-07`. Procurement thu thập và so sánh Quotation sau khi Purchase Request được Approval. Thông tin Quotation được chuẩn hóa để phục vụ so sánh.
+Bao gồm `REQ-FR-10`, `REQ-FR-11`. Procurement thu thập Quotation sau khi Purchase Request được Approval và thông tin Quotation được chuẩn hóa để phục vụ so sánh.
 
 **Acceptance Criteria:**
 
 **AC1**
-**Given** Purchase Request đã được Approved
-**When** Procurement thu thập Quotation
-**Then** các Quotation có thể được liên kết với Purchase Request tương ứng.
+Given Purchase Request đã được Approved
+When Procurement thu thập Quotation
+Then Quotation được liên kết với Purchase Request tương ứng.
 
 **AC2**
-**Given** có nhiều Quotation được thu thập cho một Purchase Request
-**When** hệ thống xử lý các Quotation
-**Then** thông tin của chúng được chuẩn hóa để phục vụ so sánh.
+Given có nhiều Quotation cho một Purchase Request
+When hệ thống xử lý các Quotation
+Then thông tin Quotation được chuẩn hóa theo cấu trúc thống nhất.
 
-**Out of Scope:**
-Supplier Portal.
+**Out of Scope:** Supplier Portal.
 
-**Dependencies:**
-Purchase Request đã được Approved; dữ liệu Supplier và Quotation.
+**Dependencies:** Approved Purchase Request; Supplier và Quotation data.
 
 **Estimate:** 3 pts
 
@@ -220,98 +200,124 @@ Purchase Request đã được Approved; dữ liệu Supplier và Quotation.
 
 ## US-06 — So sánh Quotation
 
-**Là một Procurement, tôi muốn so sánh Quotation từ nhiều Supplier, để tôi có thể đánh giá các lựa chọn Supplier hiện có.**
+**Là một Procurement user, tôi muốn so sánh các Quotation từ nhiều Supplier, để đánh giá các phương án Supplier hiện có.**
 
 **Context:**
-Bao gồm `REQ-FR-12`. User Research xác định việc so sánh thủ công nhiều Quotation là một khó khăn của Procurement. Hệ thống hỗ trợ so sánh các Quotation.
+Bao gồm `REQ-FR-12`. User Research xác định việc thu thập và so sánh nhiều Quotation là khó khăn đối với Procurement. Hệ thống hỗ trợ tổng hợp và so sánh các Quotation.
 
 **Acceptance Criteria:**
 
 **AC1**
-**Given** có nhiều Quotation cho một Purchase Request
-**When** Procurement mở chức năng Quotation Comparison
-**Then** hệ thống hiển thị các Quotation để so sánh.
+Given có nhiều Quotation cho một Purchase Request
+When Procurement mở chức năng Quotation Comparison
+Then hệ thống hiển thị các Quotation để so sánh.
 
 **AC2**
-**Given** có Quotation từ nhiều Supplier
-**When** Procurement thực hiện so sánh
-**Then** hệ thống cho phép so sánh các Quotation dựa trên thông tin hiện có.
+Given có Quotation từ nhiều Supplier
+When Procurement thực hiện so sánh
+Then hệ thống cho phép đối chiếu các thông tin của Quotation.
 
-**Out of Scope:**
-AI Recommendation; tự động lựa chọn Supplier.
+**Out of Scope:** AI Recommendation; tự động lựa chọn Supplier.
 
-**Dependencies:**
-`US-05` — Thu thập và chuẩn hóa Quotation.
+**Dependencies:** Quotation collection và standardization.
 
 **Estimate:** 3 pts
 
 ---
 
-## US-07 — AI phân tích và Recommendation Supplier
+## US-07 — AI phân tích và Recommendation
 
-**Là một Procurement, tôi muốn AI phân tích kết quả so sánh Quotation và đưa ra Recommendation, để tôi có thể sử dụng thông tin Quotation nhằm hỗ trợ lựa chọn Supplier.**
+**Là một Procurement user, tôi muốn AI phân tích các Quotation và đưa ra Recommendation, để hỗ trợ tôi đánh giá và lựa chọn Supplier.**
 
 **Context:**
-Bao gồm `REQ-FR-13`, `REQ-FR-14`, `REQ-BR-08`, `REQ-BR-09`. AI phân tích kết quả so sánh Quotation và đưa ra Recommendation dựa trên thông tin và tiêu chí được sử dụng để so sánh. AI không đưa ra quyết định Supplier cuối cùng.
+Bao gồm `REQ-FR-13`, `REQ-FR-14`. AI phân tích thông tin Quotation và đưa ra Recommendation dựa trên các tiêu chí được sử dụng trong quá trình so sánh. AI không tự quyết định Supplier cuối cùng.
 
 **Acceptance Criteria:**
 
 **AC1**
-**Given** nhiều Quotation đã được chuẩn bị để so sánh
-**When** Procurement yêu cầu AI phân tích
-**Then** AI hiển thị kết quả phân tích so sánh Quotation.
+Given có nhiều Quotation đã được chuẩn bị để so sánh
+When Procurement yêu cầu AI phân tích
+Then AI hiển thị kết quả phân tích Quotation.
 
 **AC2**
-**Given** có thông tin Quotation và các tiêu chí so sánh
-**When** AI tạo Recommendation
-**Then** hệ thống hiển thị Recommendation dựa trên thông tin và các tiêu chí đó.
+Given có thông tin Quotation và các tiêu chí so sánh
+When AI tạo Recommendation
+Then hệ thống hiển thị Recommendation dựa trên các thông tin và tiêu chí đó.
 
 **AC3**
-**Given** AI đã đưa ra Recommendation
-**When** Procurement lựa chọn Supplier
-**Then** quyết định lựa chọn Supplier cuối cùng vẫn thuộc về Procurement.
+Given AI đã đưa ra Recommendation
+When Procurement lựa chọn Supplier
+Then quyết định Supplier cuối cùng vẫn thuộc về Procurement.
 
-**Out of Scope:**
-AI tự động lựa chọn Supplier.
+**Out of Scope:** AI tự động lựa chọn Supplier.
 
-**Dependencies:**
-`US-05`; `US-06`; AI Analysis.
+**Dependencies:** Quotation Comparison; AI analysis.
 
 **Estimate:** 3 pts
+
+---
+
+## US-08 — AI cảnh báo bất thường
+
+**Là một Procurement user, tôi muốn AI phát hiện và cảnh báo các giá báo bất thường, để tôi có thể xem xét trước khi lựa chọn Supplier.**
+
+**Context:**
+Bao gồm `REQ-FR-15`. AI hỗ trợ phát hiện trường hợp giá báo có dấu hiệu bất thường dựa trên thông tin được sử dụng trong hệ thống.
+
+**Acceptance Criteria:**
+
+**AC1**
+Given có Quotation được đưa vào phân tích
+When AI kiểm tra thông tin giá
+Then hệ thống xác định trường hợp giá bất thường theo tiêu chí đã được xác định.
+
+**AC2**
+Given AI phát hiện giá bất thường
+When kết quả phân tích được hiển thị
+Then hệ thống hiển thị cảnh báo để Procurement xem xét.
+
+**AC3**
+Given AI hiển thị cảnh báo bất thường
+When Procurement đánh giá Quotation
+Then Procurement vẫn là người đưa ra quyết định cuối cùng.
+
+**Out of Scope:** AI tự động loại Supplier hoặc tự động quyết định Supplier.
+
+**Dependencies:** Quotation data; AI analysis.
+
+**Estimate:** 2 pts
 
 ---
 
 # EPIC-04 — Purchase Order
 
-## US-08 — Lựa chọn Supplier và tạo Purchase Order
+## US-09 — Lựa chọn Supplier và tạo Purchase Order
 
-**Là một Procurement, tôi muốn lựa chọn Supplier và tạo Purchase Order sau khi Purchase Request được Approval, để tôi có thể chuyển sang bước đặt hàng.**
+**Là một Procurement user, tôi muốn lựa chọn Supplier và tạo Purchase Order sau khi Purchase Request được Approval, để tiếp tục bước đặt hàng.**
 
 **Context:**
-Bao gồm `REQ-FR-15`, `REQ-BR-10` và `ASM-04`. Procurement lựa chọn Supplier và tạo Purchase Order chỉ sau khi Purchase Request được Approved.
+Bao gồm `REQ-FR-16`. Procurement lựa chọn Supplier và tạo Purchase Order sau khi Purchase Request đã được Approval.
 
 **Acceptance Criteria:**
 
 **AC1**
-**Given** Purchase Request đã được Approved và Supplier đã được lựa chọn
-**When** Procurement tạo Purchase Order
-**Then** hệ thống cho phép tạo Purchase Order.
+Given Purchase Request đã được Approved và Supplier đã được lựa chọn
+When Procurement tạo Purchase Order
+Then hệ thống cho phép tạo Purchase Order.
 
 **AC2**
-**Given** Purchase Request chưa được Approved
-**When** Procurement cố gắng tạo Purchase Order
-**Then** hệ thống không cho phép tạo Purchase Order.
+Given Purchase Request chưa được Approved
+When Procurement cố gắng tạo Purchase Order
+Then hệ thống không cho phép tạo Purchase Order.
 
 **AC3**
-**Given** thông tin Quotation đã được lựa chọn cho Purchase Order
-**When** Purchase Order được tạo
-**Then** AI không thay đổi thông tin Quotation đã được lựa chọn.
+Given thông tin Quotation đã được lựa chọn cho Purchase Order
+When Purchase Order được tạo
+Then thông tin được sử dụng để tạo PO được giữ nguyên.
 
-**Out of Scope:**
-Tích hợp ERP/Kế toán; thanh toán Supplier.
+**Out of Scope:** ERP/Accounting integration; Supplier Payment.
 
-**Dependencies:**
-Purchase Request đã Approved; Supplier và Quotation đã được lựa chọn.
+**Dependencies:** Approved Purchase Request; selected Supplier và Quotation.
 
 **Estimate:** 3 pts
 
@@ -319,60 +325,58 @@ Purchase Request đã Approved; Supplier và Quotation đã được lựa chọ
 
 # EPIC-05 — Receiving & Close
 
-## US-09 — Ghi nhận Receiving
+## US-10 — Ghi nhận Receiving
 
-**Là một người dùng có quyền, tôi muốn ghi nhận việc Receiving hàng hóa hoặc dịch vụ, để quy trình mua sắm có thể ghi nhận việc giao nhận.**
+**Là một người dùng có quyền, tôi muốn ghi nhận Receiving cho hàng hóa hoặc dịch vụ, để hệ thống ghi nhận việc nhận hàng trong quy trình mua sắm.**
 
 **Context:**
-Bao gồm `REQ-FR-16` và `ASM-06`. Người dùng có quyền phù hợp có thể ghi nhận Receiving. Theo giả định của MVP, tổng số lượng Receiving không được vượt quá số lượng trên PO.
+Bao gồm `REQ-FR-17`. Người dùng có quyền có thể ghi nhận Receiving trong quá trình xử lý Purchase Order.
 
 **Acceptance Criteria:**
 
 **AC1**
-**Given** đã có Purchase Order
-**When** người dùng có quyền ghi nhận Receiving
-**Then** hệ thống ghi nhận thông tin Receiving.
+Given có Purchase Order
+When người dùng có quyền ghi nhận Receiving
+Then hệ thống ghi nhận thông tin Receiving.
 
 **AC2**
-**Given** số lượng Receiving sẽ vượt quá số lượng trên Purchase Order
-**When** người dùng ghi nhận Receiving
-**Then** hệ thống không cho phép tổng số lượng Receiving vượt quá số lượng trên PO.
+Given số lượng Receiving vượt quá số lượng trên Purchase Order
+When người dùng ghi nhận Receiving
+Then hệ thống không cho phép tổng số lượng Receiving vượt quá số lượng trên PO.
 
-**Out of Scope:**
-Quản lý kho (Inventory Management).
+**Out of Scope:** Inventory Management.
 
-**Dependencies:**
-Purchase Order; quyền của người dùng.
+**Dependencies:** Purchase Order; user permission.
 
 **Estimate:** 2 pts
 
 ---
 
-## US-10 — Đóng Purchase Request
+## US-11 — Đóng Purchase Request
 
-**Là một người dùng có quyền, tôi muốn đóng Purchase Request sau khi các bước mua sắm hoàn tất, để Purchase Request kết thúc quy trình xử lý.**
+**Là một người dùng có quyền, tôi muốn đóng Purchase Request sau khi các bước mua sắm hoàn tất, để Purchase Request kết thúc quy trình.**
 
 **Context:**
-Bao gồm `REQ-FR-17` và `REQ-BR-11`. Purchase Request chỉ có thể được Close sau khi Receiving và các bước mua sắm liên quan đã hoàn tất.
+Bao gồm `REQ-FR-18`. Purchase Request chỉ được Close sau khi Receiving và các bước liên quan đã hoàn tất.
 
 **Acceptance Criteria:**
 
 **AC1**
-**Given** Receiving và các bước mua sắm liên quan đã hoàn tất
-**When** người dùng có quyền đóng Purchase Request
-**Then** hệ thống cho phép Purchase Request được chuyển sang Closed.
+Given Receiving và các bước liên quan đã hoàn tất
+When người dùng có quyền Close Purchase Request
+Then hệ thống cho phép Purchase Request chuyển sang Closed.
 
 **AC2**
-**Given** Receiving hoặc các bước mua sắm liên quan chưa hoàn tất
-**When** người dùng cố gắng Close Purchase Request
-**Then** hệ thống không cho phép Purchase Request được Close.
+Given Receiving hoặc các bước liên quan chưa hoàn tất
+When người dùng cố gắng Close Purchase Request
+Then hệ thống không cho phép Close.
 
-**Out of Scope:**
-Thanh toán Supplier; Quản lý kho (Inventory Management).
+**Out of Scope:** Supplier Payment; Inventory Management.
 
-**Dependencies:**
-Receiving đã hoàn tất.
+**Dependencies:** Receiving completion.
 
 **Estimate:** 2 pts
+
+
 
 
