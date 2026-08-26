@@ -32,7 +32,7 @@
 | **ID**         | **Loại** | **Yêu cầu**                                                                                                                   | **P** |
 | -------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- | ----- |
 | **REQ-NFR-01** | NFR      | Hệ thống phải đảm bảo dữ liệu Purchase Request, Approval, Quotation và Budget được quản lý nhất quán trong toàn bộ quy trình. | Must  |
-| **REQ-NFR-02** | NFR      | Hệ thống phải phân quyền chức năng phù hợp với vai trò Employee, Manager, Procurement và Finance.                             | Must  |
+| **REQ-NFR-02** | NFR      | Hệ thống phải phân quyền chức năng phù hợp với vai trò Employee, Manager, Procurement, Finance và Admin.                             | Must  |
 | **REQ-NFR-03** | NFR      | Hệ thống phải ghi nhận thông tin cần thiết để theo dõi quá trình xử lý và Approval của Purchase Request.                      | Must  |
 
 
@@ -59,7 +59,7 @@
 | **ID**     | **Constraint**                                                                                                                                                           |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **CON-01** | Quy trình nghiệp vụ phải tuân theo thứ tự: **Purchase Request → Approve → Collect Quotations → Compare → PO → Receive → Close**.                                         |
-| **CON-02** | MVP tập trung vào các vai trò **Employee, Manager, Procurement và Finance**.                                                                                             |
+| **CON-02** | MVP tập trung vào các vai trò **Employee, Manager, Procurement, Finance và Admin**.                                                                                             |
 | **CON-03** | AI chỉ đóng vai trò **hỗ trợ**, không thay thế quyết định Approval hoặc quyết định lựa chọn Supplier của người dùng.                                                     |
 | **CON-04** | MVP được triển khai trên **nền tảng web**.                                                                                                                               |
 | **CON-05** | MVP không tích hợp trực tiếp với hệ thống **ERP hoặc kế toán**.                                                                                                          |
