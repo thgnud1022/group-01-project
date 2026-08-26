@@ -14,7 +14,7 @@
 * 📄 [Source Priority Rules](https://github.com/thgnud1022/group-01-project/blob/main/docs/02-vault/source-priority.md) - Quy tắc 6 cấp độ phân xử mâu thuẫn nguồn.
 * 📄 [Company Procurement Policies](https://github.com/thgnud1022/group-01-project/blob/main/docs/02-vault/company-policies.md) - Quy chế thu mua và hạn mức duyệt.
 * 📄 [Vault Q&A Benchmark](https://github.com/thgnud1022/group-01-project/blob/main/docs/02-vault/vault-qa-benchmark.md) - Bộ 20 câu hỏi kiểm định chất lượng AI.
-* 📄 [AI Usage Log (Phase 1)](file:///d:/THUDDN/group-01-project/docs/logs/ai-usage-log.md) - Nhật ký sử dụng AI có kiểm chứng.
+* 📄 [AI Usage Log (Phase 1)](https://github.com/thgnud1022/group-01-project/blob/main/docs/logs/ai-usage-log.md) - Nhật ký sử dụng AI có kiểm chứng.
 
 ---
 
