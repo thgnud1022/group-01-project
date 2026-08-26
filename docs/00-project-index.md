@@ -20,13 +20,13 @@
 
 ## 📌 GIAI ĐOẠN 2: PRODUCT DEFINITION & BUILD FOUNDATION (BÀI TẬP 2 - 30%)
 
-* 📄 [Product Requirements Document (PRD)](file:///d:/THUDDN/group-01-project/docs/03-product/PRD.md) - Đặc tả sản phẩm chi tiết.
-* 📄 [User Flow Diagram](file:///d:/THUDDN/group-01-project/docs/03-product/user-flow.mmd) - Sơ đồ luồng tương tác 7 bước.
-* 📄 [Design System & Figma Handoff](file:///d:/THUDDN/group-01-project/docs/04-design/DESIGN.md) - Tokens, components, UX copy.
-* 📄 [Data Model & Prisma Schema](file:///d:/THUDDN/group-01-project/docs/05-technical/data-model.md) - ERD và Prisma Schema.
-* 📄 [API Contracts Spec](file:///d:/THUDDN/group-01-project/docs/05-technical/API.md) - Đặc tả REST API endpoints và RBAC authorization.
-* 📄 [ADR-001: AI Architecture](file:///d:/THUDDN/group-01-project/docs/05-technical/ADR-001-AI-Architecture.md) - Quyết định kiến trúc LLM & Command Schema.
-* 📄 [ADR-002: Backend Architecture](file:///d:/THUDDN/group-01-project/docs/05-technical/ADR-002-Backend-Architecture.md) - Quyết định kiến trúc FastAPI, PostgreSQL & Docker.
+* 📄 [Product Requirements Document (PRD)](https://github.com/thgnud1022/group-01-project/blob/main/docs/03-product/PRD.md) - Đặc tả sản phẩm chi tiết.
+* 📄 [User Flow Diagram](https://github.com/thgnud1022/group-01-project/blob/main/docs/03-product/user-flow.mmd) - Sơ đồ luồng tương tác 7 bước.
+* 📄 [Design System & Figma Handoff](https://github.com/thgnud1022/group-01-project/blob/main/docs/04-design/DESIGN.md) - Tokens, components, UX copy.
+* 📄 [Data Model & Prisma Schema](https://github.com/thgnud1022/group-01-project/blob/main/docs/05-technical/data-model.md) - ERD và Prisma Schema.
+* 📄 [API Contracts Spec](https://github.com/thgnud1022/group-01-project/blob/main/docs/05-technical/API.md) - Đặc tả REST API endpoints và RBAC authorization.
+* 📄 [ADR-001: AI Architecture](https://github.com/thgnud1022/group-01-project/blob/main/docs/05-technical/ADR-001-AI-Architecture.md) - Quyết định kiến trúc LLM & Command Schema.
+* 📄 [ADR-002: Backend Architecture](https://github.com/thgnud1022/group-01-project/blob/main/docs/05-technical/ADR-002-Backend-Architecture.md) - Quyết định kiến trúc FastAPI, PostgreSQL & Docker.
 
 ---
 
