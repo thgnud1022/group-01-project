@@ -1,0 +1,52 @@
+flowchart TD
+    A([Employee]) --> B[Tạo Purchase Request]
+    B --> C[AI hỗ trợ chuẩn hóa PR]
+    C --> D{PR đầy đủ thông tin?}
+
+    D -- Không --> E[AI gợi ý thông tin còn thiếu]
+    E --> B
+
+    D -- Có --> F[Submit Purchase Request]
+    F --> G[Request Status]
+
+    G --> H[Manager: Xem xét PR]
+    H --> I{Approval Decision}
+
+    I -- Request Revision --> J[PR cần chỉnh sửa]
+    J --> B
+
+    I -- Reject --> K[PR Rejected]
+    K --> Z([Kết thúc])
+
+    I -- Approve --> L{Có yêu cầu Budget Review?}
+
+    L -- Có --> M[Finance: Kiểm tra PR với Budget]
+    M --> N{Trong Budget?}
+
+    N -- Không --> O[Budget Warning]
+    N -- Có --> P[Tiếp tục Approval Workflow]
+
+    L -- Không --> P
+
+    P --> Q[PR Approved]
+
+    Q --> R[Procurement: Quản lý Supplier]
+    R --> S[Thu thập Quotation]
+    S --> T[Quotation được liên kết với PR]
+
+    T --> U[Đối chiếu / So sánh nhiều Quotation]
+    U --> V[AI: Phân tích / So sánh Quotation]
+
+    V --> W[AI Recommendation]
+    W --> X{Procurement lựa chọn Supplier}
+
+    X --> Y[Supplier được lựa chọn]
+    Y --> AA[Tạo Purchase Order]
+
+    AA --> AB[Receiving]
+    AB --> AC{Các bước mua sắm liên quan đã hoàn tất?}
+
+    AC -- Chưa --> AB
+    AC -- Có --> AD[Close Purchase Request]
+
+    AD --> AE([PR Closed])
