@@ -105,7 +105,7 @@
 | AI chuẩn hóa PR                        | FR-03                      |
 | AI so sánh Quotation                   | FR-13                      |
 | AI Recommendation                      | FR-14
-| AI cảnh báo giá bất thường               FR-15
+| AI cảnh báo giá bất thường             | FR-15
 | Purchase Order                         | FR-16                      |
 | Receiving                              | FR-17                      |
 | Close                                  | FR-18                      |
