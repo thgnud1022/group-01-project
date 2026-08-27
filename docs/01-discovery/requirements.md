@@ -52,7 +52,7 @@
 | **REQ-BR-09** | AI Recommendation dựa trên thông tin và tiêu chí được sử dụng để so sánh Quotation.                           |
 | **REQ-BR-10** | Purchase Order chỉ được tạo sau khi Purchase Request được Approve và Supplier được lựa chọn.                  |
 | **REQ-BR-11** | Purchase Request chỉ được Close sau khi bước Receiving và các bước mua sắm liên quan hoàn tất.                |
-| **REQ-BR-12** |   Purchase Order phải sử dụng Supplier và thông tin thương mại từ Quotation đã được Procurement lựa chọn. Mọi thay đổi so với Quotation phải được xác nhận theo quy trình được phép.|
+| **REQ-BR-12** | Purchase Order phải sử dụng Supplier và thông tin thương mại từ Quotation đã được Procurement lựa chọn. Mọi thay đổi so với Quotation phải được xác nhận theo quy trình được phép.|
 
 ---
 
