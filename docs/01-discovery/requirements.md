@@ -106,8 +106,8 @@
 | AI so sánh Quotation                   | FR-13                      |
 | AI Recommendation                      | FR-14                      |
 | Purchase Order                         | FR-15                      |
-| Receiving                              | FR-16                      |
-| Close                                  | FR-17                      |
+| Receiving                              | FR-17                      |
+| Close                                  | FR-18                      |
 | Workflow bắt buộc                      | CON-01 / BR-02 → BR-11     |
 | AI chỉ hỗ trợ                          | CON-03 / BR-08             |
 | Web MVP                                | CON-04                     |
