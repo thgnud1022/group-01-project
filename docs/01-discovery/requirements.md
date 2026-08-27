@@ -104,8 +104,9 @@
 | Procurement quản lý Supplier/Quotation | FR-10 → FR-12              |
 | AI chuẩn hóa PR                        | FR-03                      |
 | AI so sánh Quotation                   | FR-13                      |
-| AI Recommendation                      | FR-14                      |
-| Purchase Order                         | FR-15                      |
+| AI Recommendation                      | FR-14
+| AI cảnh báo giá bất thường               FR-15
+| Purchase Order                         | FR-16                      |
 | Receiving                              | FR-17                      |
 | Close                                  | FR-18                      |
 | Workflow bắt buộc                      | CON-01 / BR-02 → BR-11     |
