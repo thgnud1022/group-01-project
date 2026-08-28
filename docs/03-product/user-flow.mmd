@@ -1,70 +1,45 @@
-# Procurement Workflow
-
-## End-to-End Workflow
-
-```mermaid
 flowchart TD
-
     Start([START])
-
     Create[Employee: Create Purchase Request]
-    AIStandardize[AI: Standardize Purchase Request]
-    Validate[System: Validate PR]
-    Complete{Information Complete?}
-
-    Revise[Employee: Revise Purchase Request]
+    AI[AI: Standardize Purchase Request]
     Submit[Employee: Submit Purchase Request]
-
-    Review[Authorized Approver: Review Purchase Request]
+    Review[Manager: Review Purchase Request]
     Decision{Approval Decision}
 
     Approve[Approve]
     Reject[Reject]
-    RequestRevision[Request Revision]
+    Revision[Request Revision]
+    Revise[Employee: Revise Purchase Request]
 
     Budget[Finance: Budget Check]
-    BudgetDecision{Within Budget?}
-
     Quotations[Procurement: Collect Quotations]
     Compare[AI: Compare Quotations]
     Recommend[AI: Provide Recommendation]
     Select[Procurement: Select Supplier]
-
     PO[Create Purchase Order]
     Receive[Receive Goods / Services]
     Close[Close Purchase Request]
-
     End([END])
 
     Start --> Create
-    Create --> AIStandardize
-    AIStandardize --> Validate
-    Validate --> Complete
-
-    Complete -->|No| Revise
-    Revise --> AIStandardize
-
-    Complete -->|Yes| Submit
+    Create --> AI
+    AI --> Submit
     Submit --> Review
     Review --> Decision
 
     Decision -->|Approve| Approve
     Decision -->|Reject| Reject
-    Decision -->|Request Revision| RequestRevision
+    Decision -->|Request Revision| Revision
 
     Approve --> Budget
     Reject --> End
+    Revision --> Revise
+    Revise --> Submit
 
-    RequestRevision --> Revise
-
-    Budget --> BudgetDecision
-    BudgetDecision -->|Yes| Quotations
-    BudgetDecision -->|No| End
-
+    Budget --> Quotations
     Quotations --> Compare
     Compare --> Recommend
     Recommend --> Select
-
     Select --> PO
     PO --> Receive
     Receive --> Close
