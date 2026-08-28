@@ -1,4 +1,59 @@
-flowchart TD
+START
+  ↓
+Employee tạo Purchase Request
+  ↓
+AI hỗ trợ chuẩn hóa PR
+  ↓
+Kiểm tra thông tin PR
+  ↓
+Đủ thông tin?
+ ├── Không → Employee chỉnh sửa → Kiểm tra lại
+ └── Có
+       ↓
+    Submit PR
+       ↓
+    Approval Workflow
+       ↓
+    Người có thẩm quyền Review
+       ↓
+    ┌─────────────────────────────┐
+    │ Approve / Reject /          │
+    │ Request Revision            │
+    └─────────────────────────────┘
+       │
+       ├── Reject → END
+       │
+       ├── Request Revision
+       │        ↓
+       │   Employee chỉnh sửa
+       │        ↓
+       │   Submit lại
+       │        ↓
+       │   Approval Workflow
+       │
+       └── Approve
+              ↓
+         Budget Check
+              ↓
+         Trong Budget?
+          ├── Không → xử lý theo Budget Rule / END
+          └── Có
+                ↓
+         Procurement thu thập Quotation
+                ↓
+         AI hỗ trợ so sánh Quotation
+                ↓
+         AI đưa Recommendation
+                ↓
+         Procurement chọn Supplier
+                ↓
+         Create Purchase Order
+                ↓
+         Receive Goods / Services
+                ↓
+         Close Purchase Request
+                ↓
+               ENDflowchart TD
     A([Employee]) --> B[Tạo Purchase Request]
     B --> C[AI hỗ trợ chuẩn hóa PR]
     C --> D{PR đầy đủ thông tin?}
