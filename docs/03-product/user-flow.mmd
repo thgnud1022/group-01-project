@@ -1,107 +1,69 @@
-START
-  ↓
-Employee tạo Purchase Request
-  ↓
-AI hỗ trợ chuẩn hóa PR
-  ↓
-Kiểm tra thông tin PR
-  ↓
-Đủ thông tin?
- ├── Không → Employee chỉnh sửa → Kiểm tra lại
- └── Có
-       ↓
-    Submit PR
-       ↓
-    Approval Workflow
-       ↓
-    Người có thẩm quyền Review
-       ↓
-    ┌─────────────────────────────┐
-    │ Approve / Reject /          │
-    │ Request Revision            │
-    └─────────────────────────────┘
-       │
-       ├── Reject → END
-       │
-       ├── Request Revision
-       │        ↓
-       │   Employee chỉnh sửa
-       │        ↓
-       │   Submit lại
-       │        ↓
-       │   Approval Workflow
-       │
-       └── Approve
-              ↓
-         Budget Check
-              ↓
-         Trong Budget?
-          ├── Không → xử lý theo Budget Rule / END
-          └── Có
-                ↓
-         Procurement thu thập Quotation
-                ↓
-         AI hỗ trợ so sánh Quotation
-                ↓
-         AI đưa Recommendation
-                ↓
-         Procurement chọn Supplier
-                ↓
-         Create Purchase Order
-                ↓
-         Receive Goods / Services
-                ↓
-         Close Purchase Request
-                ↓
-               ENDflowchart TD
-    A([Employee]) --> B[Tạo Purchase Request]
-    B --> C[AI hỗ trợ chuẩn hóa PR]
-    C --> D{PR đầy đủ thông tin?}
+# Procurement Workflow
 
-    D -- Không --> E[AI gợi ý thông tin còn thiếu]
-    E --> B
+## End-to-End Workflow
 
-    D -- Có --> F[Submit Purchase Request]
-    F --> G[Request Status]
+```mermaid
+flowchart TD
 
-    G --> H[Manager: Xem xét PR]
-    H --> I{Approval Decision}
+    Start([START])
 
-    I -- Request Revision --> J[PR cần chỉnh sửa]
-    J --> B
+    Create[Employee: Create Purchase Request]
+    AIStandardize[AI: Standardize Purchase Request]
+    Validate[System: Validate PR]
+    Complete{Information Complete?}
+    Revise[Employee: Revise Purchase Request]
+    Submit[Employee: Submit Purchase Request]
 
-    I -- Reject --> K[PR Rejected]
-    K --> Z([Kết thúc])
+    Review[Authorized Approver: Review Purchase Request]
+    Decision{Approval Decision}
 
-    I -- Approve --> L{Có yêu cầu Budget Review?}
+    Approve[Approve]
+    Reject[Reject]
+    RequestRevision[Request Revision]
 
-    L -- Có --> M[Finance: Kiểm tra PR với Budget]
-    M --> N{Trong Budget?}
+    Budget[Finance: Budget Check]
+    BudgetDecision{Within Budget?}
 
-    N -- Không --> O[Budget Warning]
-    N -- Có --> P[Tiếp tục Approval Workflow]
+    Quotations[Procurement: Collect Quotations]
+    Compare[AI: Compare Quotations]
+    Recommend[AI: Provide Recommendation]
+    Select[Procurement: Select Supplier]
 
-    L -- Không --> P
+    PO[Create Purchase Order]
+    Receive[Receive Goods / Services]
+    Close[Close Purchase Request]
 
-    P --> Q[PR Approved]
+    End([END])
 
-    Q --> R[Procurement: Quản lý Supplier]
-    R --> S[Thu thập Quotation]
-    S --> T[Quotation được liên kết với PR]
+    Start --> Create
+    Create --> AIStandardize
+    AIStandardize --> Validate
+    Validate --> Complete
 
-    T --> U[Đối chiếu / So sánh nhiều Quotation]
-    U --> V[AI: Phân tích / So sánh Quotation]
+    Complete -->|No| Revise
+    Revise --> AIStandardize
 
-    V --> W[AI Recommendation]
-    W --> X{Procurement lựa chọn Supplier}
+    Complete -->|Yes| Submit
+    Submit --> Review
+    Review --> Decision
 
-    X --> Y[Supplier được lựa chọn]
-    Y --> AA[Tạo Purchase Order]
+    Decision -->|Approve| Approve
+    Decision -->|Reject| Reject
+    Decision -->|Request Revision| RequestRevision
 
-    AA --> AB[Receiving]
-    AB --> AC{Các bước mua sắm liên quan đã hoàn tất?}
+    Approve --> Budget
+    Reject --> End
 
-    AC -- Chưa --> AB
-    AC -- Có --> AD[Close Purchase Request]
+    RequestRevision --> Revise
 
-    AD --> AE([PR Closed])
+    Budget --> BudgetDecision
+    BudgetDecision -->|Yes| Quotations
+    BudgetDecision -->|No| End
+
+    Quotations --> Compare
+    Compare --> Recommend
+    Recommend --> Select
+    Select --> PO
+    PO --> Receive
+    Receive --> Close
+    Close --> End
