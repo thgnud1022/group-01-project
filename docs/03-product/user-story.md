@@ -38,7 +38,6 @@
 
 > FR-16 → FR-17
 
-Được. Dưới đây là bản **User Story tiếng Việt**, giữ đúng **cấu trúc mẫu trước đó**, đồng thời **bám sát bảng Epic → User Story → Requirement IDs bạn vừa chốt**. Không bổ sung requirement ngoài danh sách.
 
 ---
 
