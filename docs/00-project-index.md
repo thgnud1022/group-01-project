@@ -31,7 +31,7 @@
 
 ---
 
-## 📌 GIAI ĐOẠN 3: FULL DELIVERY & RELEASE (BÀI CỦỐI - 60%)
+## 📌 GIAI ĐOẠN 3: FULL DELIVERY & RELEASE (BÀI CUỐI - 60%)
 
 * 📄 [Test Strategy & Test Cases](file:///d:/THUDDN/group-01-project/docs/06-testing/test-strategy.md) - Kịch bản test unit, integration và Playwright E2E.
 * 📄 [Runbook & Deployment Guide](file:///d:/THUDDN/group-01-project/docs/07-release/runbook.md) - Hướng dẫn khởi chạy, seed DB và vận hành.
