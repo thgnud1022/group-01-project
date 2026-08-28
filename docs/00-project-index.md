@@ -1,7 +1,7 @@
 # PROJECT INDEX: AI Procurement & Purchase Approval System
 **Nhóm:** Nhóm 1 (5 thành viên)  
 **Môn học:** Thực hành Lập trình Ứng dụng Doanh nghiệp (MIS3032_1 - 2026)  
-**Repository:** `d:\THUDDN\group-01-project`
+
 
 ---
 
@@ -21,7 +21,8 @@
 ## 📌 GIAI ĐOẠN 2: PRODUCT DEFINITION & BUILD FOUNDATION (BÀI TẬP 2 - 30%)
 
 * 📄 [Product Requirements Document (PRD)](https://github.com/thgnud1022/group-01-project/blob/main/docs/03-product/PRD.md) - Đặc tả sản phẩm chi tiết.
-* 📄 [User Flow Diagram](https://github.com/thgnud1022/group-01-project/blob/main/docs/03-product/user-flow.mmd) - Sơ đồ luồng tương tác 7 bước.
+* 📄 [User Flow Diagram](https://github.com/thgnud1022/group-01-project/blob/main/docs/03-product/user-flow.mmd) - Sơ đồ luồng tương tác.
+* 📄 [User Flow Diagram](https://github.com/thgnud1022/group-01-project/blob/main/docs/04-design/prototype.md) - Prototype.
 * 📄 [Design System & Figma Handoff](https://github.com/thgnud1022/group-01-project/blob/main/docs/04-design/DESIGN.md) - Tokens, components, UX copy.
 * 📄 [Data Model & Prisma Schema](https://github.com/thgnud1022/group-01-project/blob/main/docs/05-technical/data-model.md) - ERD và Prisma Schema.
 * 📄 [API Contracts Spec](https://github.com/thgnud1022/group-01-project/blob/main/docs/05-technical/API.md) - Đặc tả REST API endpoints và RBAC authorization.
