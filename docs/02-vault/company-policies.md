@@ -3,10 +3,7 @@
 ## 1. Phân cấp thẩm quyền phê duyệt Purchase Request
 
 * Purchase Request được thực hiện phê duyệt theo workflow được cấu hình.
-* **Purchase Request ≤ 50.000.000 VND:**
-
-  * Cần **01 cấp phê duyệt: Manager** của bộ phận khởi tạo.
-* **Purchase Request > 50.000.000 VND:**
+*Vượt Budget:
 
   * Cần **02 cấp phê duyệt**:
 
