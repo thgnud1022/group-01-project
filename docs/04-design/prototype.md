@@ -1,4 +1,4 @@
-# PROMPT CHO CLAUDE — AI Procurement & Purchase Approval System
+# PROMPT CHO CLAUDE — AI Procurement & Purchase Approval System 
 
 Tạo một **prototype web responsive cho AI Procurement & Purchase Approval System**.
 
@@ -87,4 +87,6 @@ Không đưa các chức năng ngoài phạm vi MVP vào prototype như:
 
 Trước khi tạo prototype, hãy **liệt kê riêng các Prototype Assumptions còn thiếu hoặc cần xác nhận**. Không đưa các assumption vào Requirements và không tự suy diễn các thông tin chưa được xác định.
 
-Sau khi liệt kê assumptions, tạo prototype theo đúng các flow, role, requirement và business rules đã cung cấp.
+Sau khi liệt kê assumptions, tạo prototype theo đúng các flow, role, requirement và business rules đã cung cấp. 
+
+[Link Prototype](https://www.magicpatterns.com/c/utapnp7s8wvsxbtcfalh2b/preview?hideToolbar=true&path=%2Frequests%2FPR-2026-041)
