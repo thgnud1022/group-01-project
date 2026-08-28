@@ -22,8 +22,6 @@
 **Insight**
 AI có thể hỗ trợ chuẩn hóa nội dung Purchase Request và kiểm tra các thông tin cần thiết trước khi gửi.
 
-**Requirement**
-**FR-01:** Employee shall be able to create a standardized Purchase Request with AI assistance.
 
 ---
 
@@ -36,8 +34,6 @@ AI có thể hỗ trợ chuẩn hóa nội dung Purchase Request và kiểm tra 
 **Insight**
 Hệ thống cần cung cấp đầy đủ thông tin liên quan đến Purchase Request trên màn hình Approval để hỗ trợ Manager ra quyết định.
 
-**Requirement**
-**FR-02:** Manager shall be able to review and approve Purchase Requests with complete request information.
 
 ---
 
@@ -50,8 +46,6 @@ Hệ thống cần cung cấp đầy đủ thông tin liên quan đến Purchase
 **Insight**
 AI có thể hỗ trợ chuẩn hóa và so sánh các Quotation để Procurement dễ dàng đánh giá các phương án.
 
-**Requirement**
-**FR-03:** AI shall compare supplier quotations and provide a recommendation based on the available quotation information.
 
 ---
 
@@ -64,8 +58,6 @@ AI có thể hỗ trợ chuẩn hóa và so sánh các Quotation để Procureme
 **Insight**
 Hệ thống cần cung cấp thông tin Budget cùng Purchase Request và cảnh báo các trường hợp liên quan đến giới hạn ngân sách.
 
-**Requirement**
-**FR-04:** Finance shall be able to review Purchase Requests against the available budget before approval.
 
 ---
 
