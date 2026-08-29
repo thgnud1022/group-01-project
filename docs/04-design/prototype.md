@@ -1,4 +1,4 @@
- **AI Procurement & Purchase Approval System**
+ ## AI Procurement & Purchase Approval System
 
 Dựa trên các **User Stories, Functional Requirements và Business Rules** đã cung cấp.
 
