@@ -1,6 +1,5 @@
 # MA TRẬN TRUY VẾT CHI TIẾT (TRACEABILITY MATRIX) — USER STORY US-09
 **Dự án:** AI Procurement & Purchase Approval System
-**Vai trò phụ trách:** Business Analysis / Product / Traceability (Hà)
 **Trạng thái kiểm tra:** Hoàn thành (100% Grounded in Code & Docs)
 
 Tài liệu này đóng vai trò là bằng chứng (Evidence) truy vết cốt lõi để Hà nộp cho Giảng viên trong buổi báo cáo Bài tập 2 và Bài cuối. Nó thể hiện tính liên kết chặt chẽ từ yêu cầu nghiệp vụ gốc của doanh nghiệp đến thiết kế, API contract, thực thể cơ sở dữ liệu, mã nguồn thực tế và kịch bản kiểm thử tự động, loại bỏ hoàn toàn hiện tượng yêu cầu "mồ côi" hoặc code "vô thừa nhận".
@@ -57,18 +56,12 @@ Tài liệu này đóng vai trò là bằng chứng (Evidence) truy vết cốt 
 
 ---
 
-## 3. BỘ CÂU HỎI VIVA MÔ PHỎNG (VÀ CÁCH TRẢ LỜI CỦA HÀ)
+## 3. BỘ CÂU HỎI VIVA MÔ PHỎNG
 
 Dưới đây là các câu hỏi mà Giảng viên chắc chắn sẽ hỏi Hà để kiểm tra xem bạn có thực sự hiểu bài hay chỉ đi sao chép tài liệu:
 
 *   **Câu hỏi 1 của Giảng viên:** *"Tại sao trong Ma trận truy vết của em, ở cột API POST /api/po, payload gửi lên chỉ có `purchaseRequestId` và `quotationId` mà không có trường `price` hay `total`?"*
-    *   **Cách Hà trả lời:** *"Thưa thầy/cô, đây là quy định bảo mật và chống gian lận nghiêm ngặt theo Business Rule **REQ-BR-12** và **ASM-04** của dự án. Nếu chúng em gửi `price` từ client lên, người dùng hoàn toàn có thể dùng công cụ Inspect Element để sửa đổi đơn giá trước khi submit. Vì vậy, API của chúng em chỉ nhận ID tham chiếu, sau đó Backend Service sẽ tự động truy vấn đơn giá gốc từ Database của Quotation đã được chọn để tự động điền vào PO. Điều này đảm bảo giá PO được khóa cố định 100% từ báo giá được duyệt."*
+    *   **Cách trả lời:** *"Thưa thầy/cô, đây là quy định bảo mật và chống gian lận nghiêm ngặt theo Business Rule **REQ-BR-12** và **ASM-04** của dự án. Nếu chúng em gửi `price` từ client lên, người dùng hoàn toàn có thể dùng công cụ Inspect Element để sửa đổi đơn giá trước khi submit. Vì vậy, API của chúng em chỉ nhận ID tham chiếu, sau đó Backend Service sẽ tự động truy vấn đơn giá gốc từ Database của Quotation đã được chọn để tự động điền vào PO. Điều này đảm bảo giá PO được khóa cố định 100% từ báo giá được duyệt."*
 
 *   **Câu hỏi 2 của Giảng viên:** *"Nếu một Procurement cố tình tạo PO cho một Purchase Request chưa được Manager phê duyệt thì hệ thống của em xử lý thế nào? Code ở file nào kiểm soát việc đó?"*
-    *   **Cách Hà trả lời:** *"Dạ thưa thầy/cô, hành vi này vi phạm Business Rule **REQ-BR-10** (PO chỉ được tạo sau khi PR được Approve). Trong file service `backend/app/services/po_service.py`, trước khi thực hiện Transaction tạo PO, hệ thống sẽ kiểm tra trường `status` của `PurchaseRequest`. Nếu status khác `APPROVED` (ví dụ đang ở `PENDING_MANAGER_APPROVAL`), hệ thống sẽ lập tức chặn lại, trả về mã lỗi HTTP 400 Bad Request và rollback toàn bộ transaction. Việc này cũng đã được chúng em viết kịch bản kiểm thử tự động **TC-08** để chạy kiểm tra định kỳ."*
-
----
-
-## 4. HÀNH ĐỘNG TIẾP THEO ĐỂ HOÀN THIỆN ĐẦU ĐIỂM CỦA HÀ
-1.  **Tích hợp bảng này vào file `docs/05-technical/TRACEABILITY.md`** hoặc file tổng quan dự án của bạn để giảng viên dễ dàng chấm điểm Ma trận truy vết (đạt điểm tối đa 3.0 điểm phần "Documentation & Traceability" ở Bài cuối).
-2.  **Mở Taiga Board**, cập nhật story `US-09` sang trạng thái **Done** sau khi đối chiếu toàn bộ các task kỹ thuật `T-901` đến `T-905` đã được kiểm thử tự động thành công (PASS).
+    *   **Cách trả lời:** *"Dạ thưa thầy/cô, hành vi này vi phạm Business Rule **REQ-BR-10** (PO chỉ được tạo sau khi PR được Approve). Trong file service `backend/app/services/po_service.py`, trước khi thực hiện Transaction tạo PO, hệ thống sẽ kiểm tra trường `status` của `PurchaseRequest`. Nếu status khác `APPROVED` (ví dụ đang ở `PENDING_MANAGER_APPROVAL`), hệ thống sẽ lập tức chặn lại, trả về mã lỗi HTTP 400 Bad Request và rollback toàn bộ transaction. Việc này cũng đã được chúng em viết kịch bản kiểm thử tự động **TC-08** để chạy kiểm tra định kỳ."*
