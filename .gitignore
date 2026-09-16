@@ -1,0 +1,24 @@
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Node modules & build outputs
+node_modules/
+dist/
+build/
+
+# Python virtual environment & cache
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Playwright test results
+playwright-report/
+test-results/
+
+# System files
+.DS_Store
+Thumbs.db

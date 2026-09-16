@@ -1,0 +1,46 @@
+flowchart TD
+    Start([START])
+    Create[Employee: Create Purchase Request]
+    AI[AI: Standardize Purchase Request]
+    Submit[Employee: Submit Purchase Request]
+    Review[Manager: Review Purchase Request]
+    Decision{Approval Decision}
+
+    Approve[Approve]
+    Reject[Reject]
+    Revision[Request Revision]
+    Revise[Employee: Revise Purchase Request]
+
+    Budget[Finance: Budget Check]
+    Quotations[Procurement: Collect Quotations]
+    Compare[AI: Compare Quotations]
+    Recommend[AI: Provide Recommendation]
+    Select[Procurement: Select Supplier]
+    PO[Create Purchase Order]
+    Receive[Receive Goods / Services]
+    Close[Close Purchase Request]
+    End([END])
+
+    Start --> Create
+    Create --> AI
+    AI --> Submit
+    Submit --> Review
+    Review --> Decision
+
+    Decision -->|Approve| Approve
+    Decision -->|Reject| Reject
+    Decision -->|Request Revision| Revision
+
+    Approve --> Budget
+    Reject --> End
+    Revision --> Revise
+    Revise --> Submit
+
+    Budget --> Quotations
+    Quotations --> Compare
+    Compare --> Recommend
+    Recommend --> Select
+    Select --> PO
+    PO --> Receive
+    Receive --> Close
+    Close --> End
