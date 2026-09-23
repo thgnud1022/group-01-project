@@ -239,7 +239,7 @@ Mỗi thành viên làm **Primary Owner duy nhất cho đúng 1 User Story**. Th
 - **Dependency:** TASK-001, TASK-002
 - **Deliverable:** `procurement_service.py` chuyển đổi hoàn toàn từ MockDatabase sang Prisma Client.
 - **Test / Evidence:** Integration test thực hiện CRUD các entity trên Supabase.
-- **Status:** IN PROGRESS (STEP 0: DONE, STEP 1: DONE, STEP 2A: DONE, HD-REQ-05/06: APPROVED, STEP 2B: DONE, STEP 3A: DONE, HD-REQ-07/08: APPROVED, STEP 3B.1: DONE, STEP 3B.2: DONE, STEP 3B.3A: DONE, HD-REQ-09/10: APPROVED, STEP 3B.3: DONE, STEP 3B.4A: DONE, STEP 3B.4B: DONE, STEP 3B.4C: DONE)
+- **Status:** IN PROGRESS (STEP 0: DONE, STEP 1: DONE, STEP 2A: DONE, HD-REQ-05/06: APPROVED, STEP 2B: DONE, STEP 3A: DONE, HD-REQ-07/08: APPROVED, STEP 3B.1: DONE, STEP 3B.2: DONE, STEP 3B.3A: DONE, HD-REQ-09/10: APPROVED, STEP 3B.3: DONE, STEP 3B.4A: DONE, STEP 3B.4B: DONE, STEP 3B.4C: DONE, STEP 3B.5A: DONE, STEP 3B.5: DONE)
 
 **Current State:**
 - Step 0 (Audit & Mapping): DONE (`AI-033`).
@@ -250,7 +250,7 @@ Mỗi thành viên làm **Primary Owner duy nhất cho đúng 1 User Story**. Th
 - **Human Decisions Recorded:**
   - **HD-REQ-05:** APPROVED — Option A (demo password `"password123"` bcrypt-hashed in `User.passwordHash`, no plaintext in DB).
   - **HD-REQ-06:** APPROVED — Option A (Initial Budget Period: `fiscalYear = 2026`, `quarter = 1` as technical seeding convention).
-  - **HD-REQ-07:** APPROVED — Server-side Email → `User.id` Resolution for PR and Approval entities.
+  - **HD-REQ-07:** APPROVED — Server-side Email → `User.id` Resolution for PR, Approval, and PO entities.
   - **HD-REQ-08:** APPROVED — 2026 Q1 Active Budget Period Technical Convention for PR Creation & Budget Resolution.
   - **HD-REQ-09:** APPROVED — Option B (Mandatory `approverEmail` in `ApprovePRSchema`, server-side `approverEmail → User.id` UUID resolution, role authorization from `User.role` in DB, no role-to-demo-user fallback).
   - **HD-REQ-10:** APPROVED — Approval Status Guard (`approve_pr` strictly restricted to `PENDING_MANAGER_APPROVAL` or `PENDING_FINANCE_APPROVAL`; all other statuses rejected).
@@ -260,17 +260,20 @@ Mỗi thành viên làm **Primary Owner duy nhất cho đúng 1 User Story**. Th
 - **Step 3B.3 (Approval Migration Implementation):** DONE (`AI-046`). PR Approval flow đã được migrate hoàn toàn sang Supabase PostgreSQL qua `ProcurementService.approve_pr_prisma()` (15/15 integration tests PASS).
 - **Step 3B.4A (Supplier & Quotation Read-Only Audit):** DONE (`AI-047`). Hoàn thành audit toàn diện Supplier & Quotation domain trước migration. Kết quả PASS WITH FINDINGS.
 - **Step 3B.4B (Implementation Design & Plan Revision):** DONE (`AI-048`). Hoàn thiện thiết kế chi tiết: API table, transaction boundary, test suite `test_supplier_quotation_prisma.py` (15 integration tests), ranh giới regression và database cleanup.
-- **Step 3B.4C (Supplier & Quotation Implementation):** DONE (`AI-049`).
-  - Implemented Supplier API: `POST /api/suppliers` (unique name conflict handled with 400), `GET /api/suppliers`, `GET /api/suppliers/{id}` via `backend/app/routers/suppliers.py` and `ProcurementService.*_prisma` methods.
-  - Implemented Quotation API: `POST /api/quotations`, `GET /api/quotations`, `GET /api/quotations/{id}`, `GET /api/purchase-requests/{id}/quotations`, and `POST /api/quotations/compare`.
-  - T-052 Approved PR Guard: Enforced server-side check with PostgreSQL row-level lock (`SELECT ... FOR UPDATE`) inside transaction (`prisma.tx()`), rejecting non-approved PRs.
-  - T-053 Relation Integrity: Foreign keys `purchaseRequestId` and `supplierId` strictly verified against PostgreSQL records; no resolution by `supplierName`.
-  - Derived Decimal unitPrice: `unitPrice = (totalAmount / quantity).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)`.
-  - Deterministic comparison (T-061): Reads PostgreSQL records, joins Supplier, detects price anomalies (>= 20% above average), zero MockDB writes, zero external LLM dependencies (preserving TASK-009 boundary).
-  - HRD-03 Partial Blocker: Stored `fileUrl: String` metadata; binary upload/bucket deferred per HRD-03.
-  - Tests & Verification: 15/15 integration tests in `test_supplier_quotation_prisma.py` PASS (100% in 117.50s). Selected regression suite has 74/78 tests passing across the codebase, with 4 tests encountering expected MockDB migration boundaries.
-  - Database Hygiene: 100% test data cleanup verified (0 orphan quotations, 0 orphan PRs, 3 seeded suppliers intact, tempReserved = 0).
-- Runtime business logic in `procurement_service.py` currently has PR creation, PR Approval, Supplier, and Quotation migrated to PostgreSQL. PO, Receiving, Close PR remain on MockDB awaiting subsequent migration steps.
+- **Step 3B.4C (Supplier & Quotation Implementation):** DONE (`AI-049`). Supplier & Quotation CRUD/compare đã được migrate hoàn toàn sang Supabase PostgreSQL qua `ProcurementService.*_prisma` (15/15 integration tests PASS).
+- **Step 3B.5A (Purchase Order & Price Lock Read-Only Audit):** DONE (`AI-050`). Khảo sát chi tiết hiện trạng runtime PO, Schema model `PurchaseOrder`, ràng buộc T-091..T-094, identity resolution và concurrency risks. Human phê duyệt Option A cho chiến lược sinh mã `poNumber`.
+- **Step 3B.5 (Purchase Order Migration Implementation):** DONE (`AI-051`).
+  - Triển khai `ProcurementService.create_po_prisma` và `list_pos_prisma` bất đồng bộ; chuyển `POST /api/po` và `GET /api/po` sang gọi Prisma client.
+  - T-093 PR APPROVED Guard: Khóa dòng `PurchaseRequest` bằng `SELECT ... FOR UPDATE` bên trong transaction `prisma.tx()`, bắt buộc `pr.status == 'APPROVED'`.
+  - 1 PR -> 1 PO Constraint: Kiểm tra `tx.purchaseorder.find_first(purchaseRequestId == pr_id)` trong cùng transaction có row lock.
+  - T-094 Price & Quantity Lock: Khóa cố định 100% `totalAmount` và `quantity` từ bản ghi `Quotation` trong PostgreSQL; bỏ qua hoàn toàn mọi giá trị thương mại do client gửi.
+  - HD-REQ-07 Identity Resolution: Resolve `creatorEmail` sang `User.id` (UUID) thông qua `resolve_user_id_by_email`.
+  - HD-08 Option A `poNumber`: Sinh mã duy nhất dạng `PO-NUM-2026-YYYYMMDD-<8-char-hex>` kèm cơ chế retry (tối đa 3 lần qua transaction độc lập mới) khi gặp unique collision, loại bỏ hoàn toàn race condition của `count() + 1`.
+  - Atomic Transaction: Tạo PO và cập nhật `PurchaseRequest.status = 'PO_CREATED'` trong cùng 1 transaction; tự động rollback toàn bộ nếu có lỗi. Zero dual-write vào `db.pos`.
+  - Tests & Verification: Tạo `backend/tests/test_po_prisma.py` với 18 integration tests đạt 100% PASS (18/18 in 194.92s). Selected Prisma suite đạt 72/72 tests PASS.
+  - Database Hygiene: Dọn sạch 100% test data (0 orphan POs, 0 orphan PRs, 0 orphan Quotations, 3 seeded suppliers, tempReserved = 0).
+  - Migration Boundary: PO đã được migrate sang PostgreSQL. Các domain downstream Receiving (STEP 3B.6) và Close PR (STEP 3B.7) tiếp tục đọc MockDB cho tới các bước migration tương ứng.
+- Runtime business logic in `procurement_service.py` currently has PR creation, PR Approval, Supplier, Quotation, and Purchase Order migrated to PostgreSQL. Receiving and Close PR remain on MockDB awaiting subsequent migration steps.
 
 **Target State:** Toàn bộ thao tác đọc/ghi dữ liệu (PR, Approval, Supplier, Quotation, PO, Receiving) thực thi qua Prisma Client bất đồng bộ (`prisma.purchaserequest`, `prisma.purchaseorder`, v.v.).
 

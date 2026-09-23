@@ -1,3 +1,5 @@
+import uuid
+from datetime import datetime
 from typing import Dict, Any, List, Optional
 from decimal import Decimal, ROUND_HALF_UP, InvalidOperation as DecimalException
 from prisma import errors
@@ -919,69 +921,225 @@ class ProcurementService:
         return po_record
 
     @staticmethod
+    def _generate_po_number() -> str:
+        """
+        Generate human-readable, unique PO number adhering to HD-08 / Option A.
+        Format: PO-NUM-2026-YYYYMMDD-<8-char-hex>
+        Zero reliance on count() + 1, eliminating race conditions under concurrency.
+        """
+        date_str = datetime.now().strftime("%Y%m%d")
+        suffix = uuid.uuid4().hex[:8].upper()
+        return f"PO-NUM-2026-{date_str}-{suffix}"
+
+    @staticmethod
     async def create_po_prisma(
         pr_id: str,
         quotation_id: str,
-        creator_id: str,
-        quantity: Any = None
+        creator_email: str = "procurement@company.com",
     ) -> Dict[str, Any]:
         """
-        Prisma Client Python implementation for PO creation directly to Supabase PostgreSQL.
-        Enforces T-094 / HD-08 Option A: quantity is resolved from db_quote.quantity if not explicitly provided.
+        Create a new Purchase Order directly in Supabase PostgreSQL via Prisma Client (US-09).
+        Enforces:
+        - T-093 / REQ-BR-10 / HD-04: PR MUST exist and be in 'APPROVED' status.
+        - 1 PR -> 1 PO integrity: PR cannot have more than 1 PO.
+        - T-092 / T-053: Quotation MUST exist in PostgreSQL and belong to pr_id (quotation.purchaseRequestId == pr_id).
+        - T-091: Supplier linked via Quotation.supplierId.
+        - T-094 / HD-08 Option A: 100% price lock (totalAmount) and quantity lock (quantity) from Quotation in PostgreSQL.
+          Client commercial fields (totalAmount, quantity) are STRICTLY IGNORED.
+        - HD-REQ-07: Creator email resolved to User.id (UUID).
+        - HD-08 Option A: poNumber generated with timestamp/random suffix and multi-tx retry on collision.
+        - Atomic transaction: PO creation + PR status update to PO_CREATED with SELECT ... FOR UPDATE row lock.
+        - Zero dual-write to MockDB.
         """
-        from prisma import Prisma
-        prisma_client = Prisma()
-        await prisma_client.connect()
-        try:
-            # Query PR from DB
-            db_pr = await prisma_client.purchaserequest.find_unique(where={"id": pr_id})
-            if not db_pr:
-                raise ValueError(f"Không tìm thấy Purchase Request {pr_id} trong PostgreSQL")
-            if db_pr.status != "APPROVED":
-                raise ValueError(
-                    f"Không thể tạo PO: Purchase Request {pr_id} chưa được duyệt "
-                    f"(trạng thái hiện tại: {db_pr.status}). Yêu cầu trạng thái phải là APPROVED."
+        if not pr_id or not isinstance(pr_id, str) or not pr_id.strip():
+            raise ValueError("Mã Purchase Request (purchaseRequestId) không hợp lệ hoặc rỗng.")
+        clean_pr_id = pr_id.strip()
+
+        if not quotation_id or not isinstance(quotation_id, str) or not quotation_id.strip():
+            raise ValueError("Mã báo giá (quotationId) không hợp lệ hoặc rỗng.")
+        clean_quotation_id = quotation_id.strip()
+
+        if not creator_email or not isinstance(creator_email, str) or not creator_email.strip():
+            raise ValueError("Email người tạo PO không hợp lệ hoặc rỗng.")
+        clean_creator_email = creator_email.strip()
+
+        await connect_db()
+        prisma = get_prisma()
+
+        # HD-REQ-07: Resolve creator identity to User.id UUID
+        if "@" in clean_creator_email:
+            creator_user_id = await resolve_user_id_by_email(clean_creator_email)
+        else:
+            creator_user = await prisma.user.find_unique(where={"id": clean_creator_email})
+            if not creator_user:
+                raise ValueError(f"Không tìm thấy người dùng với ID: '{clean_creator_email}'.")
+            creator_user_id = creator_user.id
+
+        # Multi-Tx Retry loop for Option A poNumber collision
+        max_retries = 3
+        created_po_id = None
+        total_amount_dec = None
+        po_quantity = None
+
+        for attempt in range(max_retries):
+            po_number = ProcurementService._generate_po_number()
+            try:
+                async with prisma.tx() as tx:
+                    # 1. Row-level lock on PurchaseRequest and verify APPROVED status
+                    locked_prs = await tx.query_raw(
+                        'SELECT id, status FROM "PurchaseRequest" WHERE id = $1 FOR UPDATE',
+                        clean_pr_id,
+                    )
+                    if not locked_prs:
+                        raise ValueError(f"Không tìm thấy Purchase Request với mã: '{clean_pr_id}'")
+                    pr_status = locked_prs[0]["status"]
+                    if pr_status != "APPROVED":
+                        raise ValueError(
+                            f"Không thể tạo PO: Purchase Request {clean_pr_id} chưa được duyệt "
+                            f"(trạng thái hiện tại: '{pr_status}'). Yêu cầu trạng thái phải là APPROVED."
+                        )
+
+                    # 2. Check 1-1 PR -> PO constraint
+                    existing_po = await tx.purchaseorder.find_first(
+                        where={"purchaseRequestId": clean_pr_id}
+                    )
+                    if existing_po:
+                        raise ValueError(
+                            f"Purchase Request {clean_pr_id} đã có Purchase Order ({existing_po.poNumber}), không thể tạo thêm."
+                        )
+
+                    # 3. Query Quotation from PostgreSQL (T-092)
+                    quote = await tx.quotation.find_unique(
+                        where={"id": clean_quotation_id},
+                        include={"supplier": True},
+                    )
+                    if not quote:
+                        raise ValueError(f"Không tìm thấy Quotation {clean_quotation_id} trong hệ thống.")
+
+                    # Validate quotation belongs to current PR
+                    if quote.purchaseRequestId != clean_pr_id:
+                        raise ValueError(
+                            f"Quotation {clean_quotation_id} không thuộc về Purchase Request {clean_pr_id} "
+                            f"(Quotation thuộc về PR {quote.purchaseRequestId})."
+                        )
+
+                    # 4. T-094 / HD-08 Option A: 100% server-side commercial data lock from Quotation
+                    # Validate totalAmount
+                    total_amount_dec = quote.totalAmount
+                    if total_amount_dec is None or Decimal(str(total_amount_dec)) <= Decimal("0.00"):
+                        raise ValueError(f"Quotation {clean_quotation_id} không có totalAmount hợp lệ.")
+
+                    # Validate quantity
+                    po_quantity = quote.quantity
+                    if po_quantity is None or not isinstance(po_quantity, int) or po_quantity <= 0:
+                        raise ValueError(
+                            f"Tạo PO thất bại: Quotation {clean_quotation_id} có số lượng (quantity) không hợp lệ: {po_quantity}. "
+                            f"Yêu cầu số lượng phải là số nguyên dương (> 0)."
+                        )
+
+                    # 5. Create Purchase Order in PostgreSQL
+                    created_po = await tx.purchaseorder.create(
+                        data={
+                            "purchaseRequestId": clean_pr_id,
+                            "quotationId": clean_quotation_id,
+                            "creatorId": creator_user_id,
+                            "poNumber": po_number,
+                            "totalAmount": total_amount_dec,
+                            "quantity": po_quantity,
+                            "status": "SENT",
+                        }
+                    )
+
+                    # 6. Update PR status to PO_CREATED
+                    await tx.purchaserequest.update(
+                        where={"id": clean_pr_id},
+                        data={"status": "PO_CREATED"},
+                    )
+
+                    created_po_id = created_po.id
+
+                # Transaction committed successfully! Break retry loop
+                break
+            except Exception as e:
+                err_str = str(e)
+                is_unique_violation = (
+                    "Unique constraint failed" in err_str
+                    or "UniqueViolationError" in type(e).__name__
+                    or ("unique" in err_str.lower() and "ponumber" in err_str.lower())
                 )
+                if is_unique_violation and attempt < max_retries - 1:
+                    continue
+                raise
 
-            # Query Quotation from DB
-            db_quote = await prisma_client.quotation.find_unique(where={"id": quotation_id})
-            if not db_quote:
-                raise ValueError(f"Không tìm thấy Quotation {quotation_id} trong PostgreSQL")
-            if db_quote.purchaseRequestId != pr_id:
-                raise ValueError(
-                    f"Quotation {quotation_id} không thuộc về PR {pr_id} (thuộc PR {db_quote.purchaseRequestId})"
-                )
+        # Query created PO with joined relations for complete response
+        po_record = await prisma.purchaseorder.find_unique(
+            where={"id": created_po_id},
+            include={
+                "quotation": {"include": {"supplier": True}},
+                "creator": True,
+            },
+        )
 
-            # T-094 / HD-08 Option A: Lock quantity from Quotation
-            po_quantity = db_quote.quantity if quantity is None else quantity
-            if po_quantity is None or po_quantity <= 0:
-                raise ValueError(
-                    f"Tạo PO thất bại: Quotation {quotation_id} trong PostgreSQL có quantity không hợp lệ: {po_quantity}"
-                )
+        unit_price_dec = (Decimal(str(total_amount_dec)) / Decimal(str(po_quantity))).quantize(
+            Decimal("0.01"), rounding=ROUND_HALF_UP
+        )
 
-            count_pos = await prisma_client.purchaseorder.count()
-            po_number = f"PO-NUM-2026-00{count_pos + 1}"
+        supp_name = po_record.quotation.supplier.name if (po_record.quotation and po_record.quotation.supplier) else None
+        supp_id = po_record.quotation.supplierId if po_record.quotation else None
 
-            # Create PO in PostgreSQL
-            created = await prisma_client.purchaseorder.create(
-                data={
-                    "purchaseRequestId": pr_id,
-                    "quotationId": quotation_id,
-                    "creatorId": creator_id,
-                    "poNumber": po_number,
-                    "totalAmount": db_quote.totalAmount,
-                    "quantity": po_quantity,
-                    "status": "SENT"
-                }
-            )
-            # Update PR status to PO_CREATED
-            await prisma_client.purchaserequest.update(
-                where={"id": pr_id},
-                data={"status": "PO_CREATED"}
-            )
-            return created.model_dump() if hasattr(created, "model_dump") else dict(created)
-        finally:
-            await prisma_client.disconnect()
+        return {
+            "id": po_record.id,
+            "poNumber": po_record.poNumber,
+            "purchaseRequestId": po_record.purchaseRequestId,
+            "prId": po_record.purchaseRequestId,
+            "quotationId": po_record.quotationId,
+            "creatorId": po_record.creatorId,
+            "creatorEmail": clean_creator_email,
+            "supplierId": supp_id,
+            "supplierName": supp_name,
+            "totalAmount": float(total_amount_dec),
+            "quantity": po_quantity,
+            "unitPrice": float(unit_price_dec),
+            "status": po_record.status,
+            "createdAt": po_record.created_at.isoformat() if po_record.created_at else None,
+            "created_at": po_record.created_at.isoformat() if po_record.created_at else None,
+        }
+
+    @staticmethod
+    async def list_pos_prisma() -> List[Dict[str, Any]]:
+        """List all Purchase Orders from PostgreSQL (US-09)."""
+        await connect_db()
+        prisma = get_prisma()
+        pos = await prisma.purchaseorder.find_many(
+            include={
+                "quotation": {"include": {"supplier": True}},
+                "creator": True,
+            },
+            order={"created_at": "desc"},
+        )
+        results = []
+        for p in pos:
+            tot = Decimal(str(p.totalAmount))
+            qty = p.quantity
+            u_price = (tot / Decimal(str(qty))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP) if qty > 0 else Decimal("0.00")
+            supp_name = p.quotation.supplier.name if (p.quotation and p.quotation.supplier) else None
+            results.append({
+                "id": p.id,
+                "poNumber": p.poNumber,
+                "purchaseRequestId": p.purchaseRequestId,
+                "prId": p.purchaseRequestId,
+                "quotationId": p.quotationId,
+                "creatorId": p.creatorId,
+                "supplierId": p.quotation.supplierId if p.quotation else None,
+                "supplierName": supp_name,
+                "totalAmount": float(tot),
+                "quantity": qty,
+                "unitPrice": float(u_price),
+                "status": p.status,
+                "createdAt": p.created_at.isoformat() if p.created_at else None,
+                "created_at": p.created_at.isoformat() if p.created_at else None,
+            })
+        return results
 
 
     @staticmethod
