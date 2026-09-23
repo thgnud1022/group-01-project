@@ -15,9 +15,9 @@
 
 Tài liệu này là bản kế hoạch triển khai chính thức (Implementation Plan), dùng để:
 - Lập kế hoạch triển khai với dependency kỹ thuật, thứ tự thực thi và phân công công việc rõ ràng cho nhóm 5 thành viên.
-- Phân định rõ ràng **cấu trúc 2 tầng trách nhiệm User Story** theo yêu cầu của giảng viên môn học:
-  * **Tầng 1 — 5 Primary Presentation Stories:** Mỗi thành viên sở hữu đúng 1 User Story để trình bày độc lập (~5 phút) và bảo vệ Viva.
-  * **Tầng 2 — 6 Supporting Implementation Stories:** Phân bổ cho 5 thành viên dưới dạng công việc kỹ thuật bổ trợ, bảo đảm 100% phạm vi hệ thống/MVP trong Project Backlog được triển khai và kiểm thử đầy đủ.
+- Phân định rõ ràng **cấu trúc phân bổ trách nhiệm User Story chính thức** theo phiên bản mới Group-01:
+  * Mỗi thành viên chịu trách nhiệm chính về các User Story cụ thể theo `taiga-backlog.md`, không gộp trách nhiệm và bảo đảm khả năng truy vết 1:1.
+  * Mỗi thành viên làm chủ **User Story cốt lõi (Primary Core Story)** để chuẩn bị kịch bản trình bày độc lập (~5 phút) và bảo vệ Viva.
 - Phân biệt tuyệt đối giữa **Backlog Tasks (T-xxx)** (nghiệp vụ do giảng viên/Project Backlog quy định) và **Implementation Tasks (TASK-xxx)** (công việc kỹ thuật của nhóm).
 - Thiết lập chuỗi truy xuất nguồn gốc hai chiều xuyên suốt:  
   `Requirement → Business Rule → User Story → Backlog Task (T-xxx) → Implementation Task (TASK-xxx) → Code Module → Automated Test → Execution Evidence → Git Commit/PR → 5-Minute Demo → Viva Defense`.
@@ -27,42 +27,30 @@ Tài liệu này là bản kế hoạch triển khai chính thức (Implementati
 
 ## 2. Project Context & Ownership Model
 
-### 2.1. Cấu trúc phân công 2 tầng (Two-Tier Story Assignment)
+### 2.1. Cấu trúc phân công trách nhiệm User Story (Theo phiên bản mới Group-01)
 
-Nhóm có **5 thành viên**. Giảng viên yêu cầu tại buổi bảo vệ cuối kỳ, **mỗi thành viên chỉ trình bày 1 User Story trong khoảng 5 phút**. Do đó, toàn bộ 11 User Story của Project Backlog được phân bổ theo mô hình 2 tầng sau:
+> **Cập nhật chính thức từ Human Decision:** Phân bổ trách nhiệm User Story được chuẩn hóa và đồng bộ 100% theo phiên bản mới từ `_IMPORT_EARLY_PHASE/group-01` (`taiga-backlog.md`). Không gộp các User Story của mỗi người; từng User Story được phân định rõ ràng người chịu trách nhiệm chính (Primary Owner) và thành viên phối hợp:
 
-#### A. 5 PRIMARY PRESENTATION STORIES (Khung trình bày chính 5 phút)
-Mỗi thành viên làm **Primary Owner duy nhất cho đúng 1 User Story**. Thành viên này chịu trách nhiệm toàn diện từ khâu đặc tả, điều phối kỹ thuật, kiểm thử, thu thập bằng chứng, chuẩn bị kịch bản demo 5 phút và trả lời vấn đáp Viva:
-
-| Thành viên | Primary Presentation Story | Epic liên quan | Yêu cầu cốt lõi |
-|---|---|---|---|
-| Nguyễn Trương Thuỳ **Dương** | **US-01** — Tạo và chuẩn hóa Purchase Request | EPIC-01 (Purchase Request) | Form tạo PR, AI hỗ trợ điền & chuẩn hóa, kiểm tra thông tin bắt buộc trước submit. |
-| Nguyễn Trúc **Lam** | **US-03** — Xem và xử lý Approval | EPIC-02 (Approval & Budget) | Manager inbox, phê duyệt/từ chối/yêu cầu sửa PR, server-side RBAC guard, audit trail. |
-| Nguyễn Thị Thuỳ **Dung** | **US-05** — Quản lý Supplier và thu thập Quotation | EPIC-03 (Supplier & Quotation) | Quản lý nhà cung cấp, thu thập và liên kết báo giá khi PR đã được Approved. |
-| Trần Thị Kiều **Giang** | **US-07** — AI phân tích và Recommendation | EPIC-03 (Supplier & Quotation) | Mô hình Hybrid LLM so sánh báo giá, đề xuất nhà cung cấp tối ưu kèm giải thích logic. |
-| Trần Thị Thu **Hà** | **US-09** — Lựa chọn Supplier và tạo Purchase Order | EPIC-04 (Purchase Order) | Chọn báo giá trúng thầu, tạo PO khớp số lượng/đơn giá, chặn tạo PO khi PR chưa duyệt (HD-04). |
-
-#### B. 6 SUPPORTING IMPLEMENTATION STORIES (Công việc kỹ thuật bổ trợ)
-6 User Story còn lại **thuộc phạm vi hệ thống/MVP và bắt buộc phải triển khai** theo yêu cầu môn học. Nhóm phân bổ các User Story này dưới dạng **Supporting Implementation Work** dựa trên quan hệ nghiệp vụ trực tiếp và cân bằng khối lượng kỹ thuật:
-
-> **Important Note on Supporting Assignment:** "Supporting Assignee is an implementation responsibility only and does not create a second Primary Presentation Story." (Trách nhiệm của Supporting Assignee chỉ thuần túy là thực hiện phần việc kỹ thuật được phân bổ, tuyệt đối không tạo thành Primary Presentation Story thứ hai của bất kỳ thành viên nào).
-
-| User Story bổ trợ | Tên User Story | Backlog Tasks | Supporting Assignee (Người hỗ trợ triển khai) | Cơ sở nghiệp vụ & kỹ thuật |
+| Thành viên | Vai trò chính | User Story cốt lõi (Primary Core) | Toàn bộ User Stories chịu trách nhiệm | Phạm vi nghiệp vụ & Kỹ thuật |
 |---|---|---|---|---|
-| **US-02** | Theo dõi Purchase Request | T-021 | **Dương** (hỗ trợ bởi Lam) | Gắn liền trực tiếp với vòng đời Purchase Request do Dương phụ trách ở US-01. |
-| **US-04** | Kiểm tra Budget | T-041, T-042 | **Lam** (hỗ trợ bởi Dương) | Gắn liền với quy trình duyệt PR của Manager ở US-03 (hiển thị Budget Warning và từ chối khi vượt ngân sách). |
-| **US-06** | So sánh Quotation | T-061, T-062, T-063 | **Dung** (hỗ trợ bởi Giang) | Dữ liệu so sánh lấy trực tiếp từ các Quotation thu thập ở US-05 do Dung phụ trách; Giang hỗ trợ hiển thị so sánh. |
-| **US-08** | AI cảnh báo bất thường | T-081, T-082, T-083 | **Giang** (hỗ trợ bởi Dung) | Gắn liền dịch vụ AI của Giang ở US-07 (phát hiện giá lệch ≥20% so với đơn giá lịch sử); Dung hỗ trợ dữ liệu lịch sử giá. |
-| **US-10** | Ghi nhận Receiving | T-101, T-102, T-103 | **Hà** (hỗ trợ bởi Dung) | Kế thừa trực tiếp từ Purchase Order ở US-09 của Hà; Dung hỗ trợ giao diện ghi nhận hàng giao từ NCC. |
-| **US-11** | Close Purchase Request | T-111 | **Hà** (hỗ trợ bởi Lam) | Điều kiện đóng PR phụ thuộc vào PO (US-09) và tổng lượng hàng nhận (US-10) theo guard HD-07; Lam hỗ trợ luồng kết thúc PR. |
+| **Trần Thị Kiều Giang** | Frontend / Engineering | **US-01** — Tạo & Chuẩn hóa Purchase Request | **US-01** | Thiết kế Form tạo PR, validation bắt buộc trước Submit, tích hợp gợi ý AI chuẩn hóa mô tả. Phối hợp UI cho US-02, US-04, US-06, US-07, US-08, US-09. |
+| **Nguyễn Trương Thuỳ Dương** | BA / PO | **US-04** — Manager Review, Approval & Budget | **US-04**, **US-05**, **US-06** | **US-04:** Màn hình duyệt PR cho Manager, định tuyến, phân cấp duyệt, Audit Trail.<br>**US-05:** Finance kiểm tra Budget, hiển thị cảnh báo vượt ngân sách.<br>**US-06:** Thu thập, quản lý và liên kết danh sách Báo giá (Quotation) với PR. |
+| **Nguyễn Trúc Lam** | AI Vault / Data | **US-07** — AI Extraction & Quotation Recommendation | **US-03**, **US-07** | **US-03:** AI gợi ý hoàn thiện mô tả PR, cơ chế Human-in-the-loop review.<br>**US-07:** Trích xuất báo giá, ma trận so sánh giá, phát hiện Anomaly $\ge 20\%$, đề xuất nhà cung cấp tối ưu. |
+| **Nguyễn Thị Thuỳ Dung** | Backend / Architecture | **US-08** — Lựa chọn NCC & Tạo Purchase Order | **US-02**, **US-08**, **US-09**, **GOV-01** | **US-02:** Theo dõi trạng thái và timeline PR.<br>**US-08:** Tạo PO từ PR đã duyệt, khóa cứng số lượng & đơn giá server-side (T-094).<br>**US-09:** Giao diện & nghiệp vụ ghi nhận bàn giao hàng (Receiving) thực tế.<br>**GOV-01:** Ma trận RBAC 5 vai trò, chặn No Self-Approval. |
+| **Trần Thị Thu Hà** | QA / Tester | **US-10** — Close Purchase Request & Đối soát | **US-10**, **GOV-02** | **US-10:** Điều kiện đóng PR (HD-07 / REQ-BR-11), kiểm tra hoàn tất Receiving trước khi Close, giải phóng và settle ngân sách.<br>**GOV-02:** Ghi nhận sự kiện Audit Trail toàn diện, truy xuất lịch sử xử lý. |
 
 ### 2.2. Các quy tắc phân công bất di bất dịch
-1. **Duy nhất 1 Primary Presentation Story:** Tuyệt đối không gán thêm Primary Owner thứ hai cho bất kỳ ai. Mỗi thành viên chỉ đại diện cho 1 User Story duy nhất trong bài thuyết trình 5 phút.
-2. **Không bỏ sót 6 Supporting Stories:** 6 User Story bổ trợ không phải là "tùy chọn" hay "bị hủy", mà là các module chức năng bắt buộc hoàn thiện để hệ thống chạy thông suốt end-to-end.
+1. **Không gộp User Story:** Mỗi User Story có người chịu trách nhiệm chính rõ ràng (theo `taiga-backlog.md`), bảo đảm tính độc lập và khả năng truy vết trách nhiệm 1:1.
+2. **Khung trình bày 5 phút (5-Minute Viva Presentation):** Khi báo cáo cá nhân 5 phút, mỗi thành viên tập trung vào **User Story cốt lõi (Primary Core Story)** của mình:
+   - **Giang:** US-01 (Tạo PR)
+   - **Dương:** US-04 (Approval & Budget)
+   - **Lam:** US-07 (AI So sánh & Recommendation)
+   - **Dung:** US-08 (Purchase Order & Khóa giá/lượng)
+   - **Hà:** US-10 (Close PR & Đối soát giao nhận)
 3. **Phân biệt rành mạch T-xxx và TASK-xxx:** 
-   - `T-xxx`: Business Task do Project Backlog quy định (27 tasks từ T-011 đến T-111).
-   - `TASK-xxx`: Technical Implementation Task do nhóm quy hoạch (18 tasks từ TASK-001 đến TASK-018).
-4. **Primary Owner ≠ Technical Role:** Trách nhiệm của Primary Owner kéo dài xuyên suốt toàn bộ vòng đời (Requirements → Design → Code → Unit Test → E2E Test → Evidence → Commit/PR → Demo → Viva).
+   - `T-xxx`: Business Task do Project Backlog quy định (ví dụ: T-01..T-42 trong Taiga Backlog).
+   - `TASK-xxx`: Technical Implementation Task do nhóm quy hoạch (TASK-001 đến TASK-018).
+4. **Trách nhiệm toàn diện:** Người phụ trách User Story chịu trách nhiệm kiểm thử, thu thập minh chứng và bảo đảm tính toàn vẹn của nghiệp vụ đó trên hệ thống.
 
 ---
 
@@ -132,8 +120,8 @@ Mỗi thành viên làm **Primary Owner duy nhất cho đúng 1 User Story**. Th
 - **Related Epic:** CROSS-CUTTING (Database Foundation)
 - **Related User Story:** Cung cấp nền tảng lưu trữ cho toàn bộ 11 User Stories
 - **Related Backlog Tasks:** N/A (Technical Infrastructure)
-- **Primary Presentation Owner:** Shared Infrastructure
-- **Supporting Implementation Assigned:** Tất cả thành viên
+- **Responsible Owner:** Shared Infrastructure (Giang phụ trách chính kết nối hạ tầng)
+- **Collaborators / Assigned:** Tất cả thành viên
 - **Dependency:** Phase 0 (Chuẩn bị repository và biến môi trường local)
 - **Deliverable:** Kết nối Supabase PostgreSQL thành công, file `schema.prisma` được đồng bộ.
 - **Test / Evidence:** Script kiểm tra kết nối DB (`SELECT 1`), log `prisma db push`.
@@ -181,10 +169,10 @@ Mỗi thành viên làm **Primary Owner duy nhất cho đúng 1 User Story**. Th
 ### TASK-002 — Add `quantity` to PurchaseOrder Schema & Apply Migration
 
 - **Related Epic:** EPIC-04 (Purchase Order), EPIC-05 (Receiving & Close)
-- **Related User Story:** US-09 (Primary Presentation của Hà), US-11 (Supporting Story)
-- **Related Backlog Tasks:** T-093, T-094, T-111
-- **Primary Presentation Owner:** Hà (Primary của US-09)
-- **Supporting Implementation Assigned:** Hà, Dung
+- **Related User Story:** US-08 (Tạo Purchase Order & Khóa giá/lượng), US-10 (Close PR & Đối soát)
+- **Related Backlog Tasks:** T-26, T-27, T-28, T-29 (T-094 server-side quantity lock)
+- **Responsible Owner:** Nguyễn Thị Thùy Dung (Phụ trách US-08)
+- **Collaborators / Assigned:** Nguyễn Thị Thùy Dung, Trần Thị Thu Hà (Phụ trách US-10)
 - **Dependency:** TASK-001
 - **Deliverable:** Prisma schema có trường `quantity Int` trên model `PurchaseOrder`, migration thành công.
 - **Test / Evidence:** Schema inspection log, screenshot cột `quantity` trên Supabase, runtime information_schema inspection.
@@ -234,8 +222,8 @@ Mỗi thành viên làm **Primary Owner duy nhất cho đúng 1 User Story**. Th
 - **Related Epic:** CROSS-CUTTING (Data Access Layer)
 - **Related User Story:** Nền tảng truy xuất dữ liệu cho toàn bộ 11 User Stories
 - **Related Backlog Tasks:** N/A (Data Layer Architecture)
-- **Primary Presentation Owner:** Shared Infrastructure
-- **Supporting Implementation Assigned:** Tất cả thành viên
+- **Responsible Owner:** Shared Infrastructure / Backend Lead (Dung phụ trách chính backend migration)
+- **Collaborators / Assigned:** Tất cả thành viên
 - **Dependency:** TASK-001, TASK-002
 - **Deliverable:** `procurement_service.py` chuyển đổi hoàn toàn từ MockDatabase sang Prisma Client.
 - **Test / Evidence:** Integration test thực hiện CRUD các entity trên Supabase.
@@ -337,8 +325,8 @@ Mỗi thành viên làm **Primary Owner duy nhất cho đúng 1 User Story**. Th
 - **Related Epic:** CROSS-CUTTING (Security & Auth)
 - **Related User Story:** Nền tảng xác thực cho toàn bộ 11 User Stories (đặc biệt US-01, US-03, US-05, US-09)
 - **Related Backlog Tasks:** N/A (Security Infrastructure)
-- **Primary Presentation Owner:** Shared Infrastructure
-- **Supporting Implementation Assigned:** Tất cả thành viên
+- **Responsible Owner:** Shared Infrastructure (Dương, Lam phối hợp cùng Dung)
+- **Collaborators / Assigned:** Tất cả thành viên
 - **Dependency:** TASK-001
 - **Deliverable:** Middleware xác thực JWT token từ Supabase Auth, trích xuất `user_id` chuẩn hóa.
 - **Test / Evidence:** Pytest kiểm tra token hợp lệ, token hết hạn, token giả mạo (401 Unauthorized).
@@ -384,11 +372,11 @@ Mỗi thành viên làm **Primary Owner duy nhất cho đúng 1 User Story**. Th
 
 ### TASK-005 — Implement Server-Side RBAC
 
-- **Related Epic:** EPIC-02 (Approval & Budget), EPIC-04 (Purchase Order)
-- **Related User Story:** US-03 (Primary của Lam), US-09 (Primary của Hà)
-- **Related Backlog Tasks:** T-032, T-033, T-093
-- **Primary Presentation Owner:** Lam (Primary của US-03)
-- **Supporting Implementation Assigned:** Lam, Hà, Tất cả
+- **Related Epic:** EPIC-02 (Approval & Budget), EPIC-05 (Purchase Order), EPIC-07 (Governance)
+- **Related User Story:** GOV-01 (Ma trận RBAC 5 vai trò), US-04 (Manager Review & Approval), US-08 (Purchase Order)
+- **Related Backlog Tasks:** T-37, T-38, T-39 (GOV-01), T-11 (US-04), T-27 (US-08)
+- **Responsible Owner:** Nguyễn Thị Thùy Dung (Phụ trách GOV-01 & US-08)
+- **Collaborators / Assigned:** Nguyễn Thị Thùy Dung, Nguyễn Trương Thùy Dương, Tất cả
 - **Dependency:** TASK-003, TASK-004
 - **Deliverable:** Decorator / Dependency `@require_role` tra cứu vai trò từ Database và chặn truy cập trái phép với HTTP 403 Forbidden.
 - **Test / Evidence:** Pytest log chặn user role EMPLOYEE khi gọi endpoint duyệt đơn (403 Forbidden).
@@ -432,11 +420,11 @@ Mỗi thành viên làm **Primary Owner duy nhất cho đúng 1 User Story**. Th
 
 ### TASK-006 — Fix BUG-001: Enforce PR APPROVED Guard in `create_po()`
 
-- **Related Epic:** EPIC-04 (Purchase Order)
-- **Related User Story:** US-09 (Primary Presentation của Hà)
-- **Related Backlog Tasks:** T-093, T-094
-- **Primary Presentation Owner:** Hà (Primary của US-09)
-- **Supporting Implementation Assigned:** Hà, Lam
+- **Related Epic:** EPIC-05 (Purchase Order)
+- **Related User Story:** US-08 (Lựa chọn NCC & Tạo Purchase Order — REQ-BR-10 / HD-04)
+- **Related Backlog Tasks:** T-26, T-27, T-28, T-29
+- **Responsible Owner:** Nguyễn Thị Thùy Dung (Phụ trách US-08)
+- **Collaborators / Assigned:** Nguyễn Thị Thùy Dung, Trần Thị Thu Hà (QA Verification)
 - **Dependency:** TASK-003
 - **Deliverable:** Guard bắt buộc kiểm tra `pr.status == "APPROVED"` trước khi tạo Purchase Order trong `create_po()`.
 - **Test / Evidence:** Pytest log kiểm thử HD-04 PASS (chặn tạo PO khi PR ở trạng thái DRAFT hoặc REJECTED).
@@ -482,11 +470,11 @@ Mỗi thành viên làm **Primary Owner duy nhất cho đúng 1 User Story**. Th
 
 ### TASK-007 — Fix HD-07: Enforce Receiving Completion Guard in `close_pr()`
 
-- **Related Epic:** EPIC-05 (Receiving & Close)
-- **Related User Story:** US-11 (Close Purchase Request — Supporting Story) [Dữ liệu đầu vào kế thừa từ US-10: Ghi nhận Receiving]
-- **Related Backlog Tasks:** T-111 (Kiểm tra điều kiện Close) [Upstream context: T-101, T-102]
-- **Primary Presentation Owner:** None (US-11 là Supporting Story; Hà là Primary của US-09)
-- **Supporting Implementation Assigned:** Hà (Lead phụ trách supporting US-10 & US-11), Lam (hỗ trợ kiểm thử luồng Close)
+- **Related Epic:** EPIC-06 (Receiving & Close)
+- **Related User Story:** US-10 (Close Purchase Request & Đối soát — REQ-BR-11 / HD-07) [Dữ liệu đầu vào kế thừa từ US-09: Ghi nhận Receiving]
+- **Related Backlog Tasks:** T-34, T-35, T-36 (Kiểm tra điều kiện Close, đối soát 3-way matching)
+- **Responsible Owner:** Trần Thị Thu Hà (Phụ trách US-10)
+- **Collaborators / Assigned:** Trần Thị Thu Hà, Nguyễn Thị Thùy Dung (Phụ trách US-09 Receiving)
 - **Dependency:** TASK-002, TASK-003
 - **Deliverable:** Logic tổng hợp và kiểm tra `SUM(receivedQty) >= PO.quantity` trong `close_pr()`.
 - **Test / Evidence:** Pytest log kiểm thử HD-07 PASS (chặn đóng PR khi chưa nhận đủ hàng; cho phép đóng khi đã nhận đủ).
@@ -495,9 +483,9 @@ Mỗi thành viên làm **Primary Owner duy nhất cho đúng 1 User Story**. Th
 **Current State:** Hàm `close_pr()` trong `procurement_service.py` hiện tại đóng PR ngay lập tức mà không kiểm tra xem hàng hóa đã được nhận đủ hay chưa.  
 **Target State:** Thực hiện đúng quyết định nghiệp vụ HD-07 / REQ-BR-11: `close_pr()` truy vấn tất cả các bản ghi Receiving liên quan đến PO của PR, tính tổng số lượng đã nhận `SUM(receivedQty)`. Nếu `SUM(receivedQty) < PO.quantity`, lập tức từ chối đóng PR và báo lỗi.
 
-> **Lưu ý nghiệp vụ quan trọng về quan hệ US-10 và US-11:**  
-> - **US-10 (Ghi nhận Receiving):** Là bước nghiệp vụ đi trước, cung cấp dữ liệu ghi nhận việc giao nhận hàng hóa từ nhà cung cấp (tạo ra các bản ghi Receiving trong database).  
-> - **US-11 (Close Purchase Request) & TASK-007:** Chịu trách nhiệm thực thi guard condition kiểm tra điều kiện đóng PR dựa trên dữ liệu do US-10 tạo ra. Tuyệt đối không đánh đồng TASK-007 là toàn bộ US-10.
+> **Lưu ý nghiệp vụ quan trọng về quan hệ US-09 và US-10:**
+> - **US-09 (Ghi nhận Receiving - do Dung phụ trách):** Là bước nghiệp vụ đi trước, cung cấp dữ liệu ghi nhận việc giao nhận hàng hóa từ nhà cung cấp (tạo ra các bản ghi Receiving trong database).
+> - **US-10 (Close Purchase Request & Đối soát - do Hà phụ trách) & TASK-007:** Chịu trách nhiệm thực thi guard condition kiểm tra điều kiện đóng PR dựa trên dữ liệu do US-09 tạo ra và đối soát 3 bên (PR-PO-Receiving).
 
 **Dependencies:** TASK-002 (trường `quantity` trong schema PO), TASK-003 (Prisma relation PR → PO → Receiving).  
 **Potential Blockers:** TASK-002 và TASK-003 phải hoàn thành để query relation hoạt động trên CSDL thật.
@@ -533,10 +521,10 @@ Mỗi thành viên làm **Primary Owner duy nhất cho đúng 1 User Story**. Th
 ### TASK-008 — Supplier & Quotation Backend API
 
 - **Related Epic:** EPIC-03 (Supplier & Quotation)
-- **Related User Story:** US-05 (Primary Presentation của Dung), US-06 (Supporting Story)
-- **Related Backlog Tasks:** T-051, T-052, T-053, T-054, T-061, T-062, T-063
-- **Primary Presentation Owner:** Dung (Primary của US-05)
-- **Supporting Implementation Assigned:** Dung, Giang, Hà
+- **Related User Story:** US-06 (Thu thập & Liên kết Quotation), US-05 (Finance Budget Check)
+- **Related Backlog Tasks:** T-17, T-18, T-19, T-20 (US-06), T-14, T-15, T-16 (US-05)
+- **Responsible Owner:** Nguyễn Trương Thùy Dương (Phụ trách US-04, US-05, US-06)
+- **Collaborators / Assigned:** Nguyễn Trương Thùy Dương, Nguyễn Thị Thùy Dung (Backend API), Trần Thị Kiều Giang (Frontend UI)
 - **Dependency:** TASK-003, TASK-005
 - **Deliverable:** Trọn bộ RESTful API quản lý Supplier CRUD, tải lên và liên kết Quotation với PR, truy xuất bảng so sánh Quotation.
 - **Test / Evidence:** Pytest & API integration logs kiểm tra CRUD Supplier và Quotation linking.
@@ -583,11 +571,11 @@ Mỗi thành viên làm **Primary Owner duy nhất cho đúng 1 User Story**. Th
 
 ### TASK-009 — Integrate Real LLM API into `ai_service.py`
 
-- **Related Epic:** EPIC-01 (Purchase Request), EPIC-03 (Supplier & Quotation)
-- **Related User Story:** US-07 (Primary của Giang), US-01 (Primary của Dương), US-08 (Supporting Story)
-- **Related Backlog Tasks:** T-013, T-014, T-071, T-072, T-081, T-082, T-083
-- **Primary Presentation Owner:** Giang (Primary của US-07)
-- **Supporting Implementation Assigned:** Giang, Dương
+- **Related Epic:** EPIC-01 (Purchase Request), EPIC-04 (AI Quotation Comparison)
+- **Related User Story:** US-03 (AI Suggestion Description), US-07 (AI Extraction & Quotation Recommendation), US-01 (Tạo & Chuẩn hóa PR)
+- **Related Backlog Tasks:** T-07, T-08, T-09 (US-03), T-21, T-22, T-23, T-24, T-25 (US-07), T-01, T-02, T-03 (US-01)
+- **Responsible Owner:** Nguyễn Trúc Lam (Phụ trách US-03, US-07)
+- **Collaborators / Assigned:** Nguyễn Trúc Lam, Trần Thị Kiều Giang (Phụ trách US-01)
 - **Dependency:** Phase 0 (Cần chốt AI Provider và API Key theo HRD-01)
 - **Deliverable:** Module `ai_service.py` gọi LLM API thật (Gemini/OpenAI), phân tích cấu trúc qua Pydantic và cơ chế fallback an toàn.
 - **Test / Evidence:** Unit test kiểm tra parse output Pydantic, test xử lý khi API gặp sự cố (fallback).
@@ -637,11 +625,11 @@ Mỗi thành viên làm **Primary Owner duy nhất cho đúng 1 User Story**. Th
 
 ### TASK-010 — Build AI Evaluation Set (≥20 Cases)
 
-- **Related Epic:** EPIC-03 (Supplier & Quotation)
-- **Related User Story:** US-07 (Primary Presentation của Giang)
-- **Related Backlog Tasks:** T-071, T-072
-- **Primary Presentation Owner:** Giang (Primary của US-07)
-- **Supporting Implementation Assigned:** Giang, Dương
+- **Related Epic:** EPIC-04 (AI Quotation Comparison)
+- **Related User Story:** US-07 (AI Extraction & Quotation Recommendation)
+- **Related Backlog Tasks:** T-21, T-22, T-23, T-24, T-25
+- **Responsible Owner:** Nguyễn Trúc Lam (Phụ trách US-07)
+- **Collaborators / Assigned:** Nguyễn Trúc Lam, Trần Thị Thu Hà (QA Evaluation Verification)
 - **Dependency:** TASK-009
 - **Deliverable:** Bộ dữ liệu kiểm thử đánh giá chất lượng AI gồm ≥20 test cases đa dạng và script đánh giá tự động.
 - **Test / Evidence:** File báo cáo kết quả đánh giá AI Evaluation Report.
@@ -691,8 +679,8 @@ Mỗi thành viên làm **Primary Owner duy nhất cho đúng 1 User Story**. Th
 - **Related Epic:** CROSS-CUTTING (Frontend Architecture)
 - **Related User Story:** Cung cấp khung điều hướng và đăng nhập cho toàn bộ 11 User Stories
 - **Related Backlog Tasks:** N/A (Frontend Framework)
-- **Primary Presentation Owner:** Shared Infrastructure
-- **Supporting Implementation Assigned:** Tất cả thành viên
+- **Responsible Owner:** Shared Infrastructure (Giang phụ trách kiến trúc Frontend)
+- **Collaborators / Assigned:** Tất cả thành viên
 - **Dependency:** TASK-004, TASK-005
 - **Deliverable:** Ứng dụng frontend được cấu hình React Router, màn hình Login với Supabase Auth, quản lý JWT token và Role state.
 - **Test / Evidence:** Manual UI test & screenshot luồng login, lưu token vào context/storage, chuyển trang theo role.
@@ -743,16 +731,16 @@ Mỗi thành viên làm **Primary Owner duy nhất cho đúng 1 User Story**. Th
 
 ### TASK-012 — Frontend: Implement Procurement Workflow UI
 
-- **Related Epic:** ALL EPICS (EPIC-01 → EPIC-05)
-- **Related User Story:** Cả 11 User Stories (5 Primary Stories + 6 Supporting Stories)
-- **Related Backlog Tasks:** T-011, T-012, T-021, T-031, T-034, T-042, T-051, T-053, T-061, T-062, T-073, T-083, T-091, T-092, T-101, T-103
-- **Primary Presentation Owner:** Từng thành viên đảm nhiệm giao diện cho Story của mình:
-  * Dương: US-01 (Tạo PR + AI normalize), US-02 (Theo dõi trạng thái PR)
-  * Lam: US-03 (Manager Approval inbox), US-04 (Budget Warning banner)
-  * Dung: US-05 (Supplier management & Quotation upload), US-06 (Bảng so sánh Quotation)
-  * Giang: US-07 (Thẻ đề xuất AI Recommendation), US-08 (Cảnh báo bất thường giá)
-  * Hà: US-09 (Lựa chọn báo giá & Tạo PO), US-10 (Giao diện Receiving), US-11 (Nút đóng PR)
-- **Supporting Implementation Assigned:** Tất cả thành viên phối hợp
+- **Related Epic:** ALL EPICS (E-01 → E-07)
+- **Related User Story:** Toàn bộ User Stories từ US-01 đến US-10, GOV-01, GOV-02
+- **Related Backlog Tasks:** T-01..T-42
+- **Responsible Owner:** Từng thành viên đảm nhiệm giao diện cho User Story do mình phụ trách chính:
+  * Giang: US-01 (Form tạo PR + tích hợp gợi ý AI)
+  * Dương: US-04 (Màn hình Manager Review & Approval), US-05 (Hiển thị Budget Check & cảnh báo), US-06 (Quản lý Supplier & Upload Quotation)
+  * Lam: US-03 (Component AI Suggestion hoàn thiện mô tả PR), US-07 (Ma trận so sánh báo giá, Anomaly Alert & Recommendation card)
+  * Dung: US-02 (Timeline theo dõi trạng thái PR), US-08 (Lựa chọn báo giá & Tạo PO có khóa giá/lượng), US-09 (Giao diện ghi nhận bàn giao Receiving), GOV-01 (Phân quyền RBAC 5 vai trò)
+  * Hà: US-10 (Màn hình đối soát 3-way matching & nút Close PR), GOV-02 (Màn hình tra soát Audit Trail)
+- **Collaborators / Assigned:** Tất cả thành viên phối hợp (Giang hỗ trợ kiến trúc UI dùng chung)
 - **Dependency:** TASK-011
 - **Deliverable:** Bộ giao diện người dùng hoàn chỉnh cho toàn bộ quy trình mua sắm từ tạo yêu cầu đến đóng đơn.
 - **Test / Evidence:** Screenshot từng màn hình chức năng, manual end-to-end user walk-through log.
@@ -800,10 +788,10 @@ Mỗi thành viên làm **Primary Owner duy nhất cho đúng 1 User Story**. Th
 ### TASK-013 — Playwright E2E Critical-Path Tests
 
 - **Related Epic:** CROSS-CUTTING (Quality Assurance)
-- **Related User Story:** Bao phủ luồng chính của 5 Primary Stories (US-01, US-03, US-05, US-07, US-09) và các Supporting Stories (US-10, US-11)
-- **Related Backlog Tasks:** T-011, T-032, T-052, T-072, T-093, T-101, T-111
-- **Primary Presentation Owner:** Shared Infrastructure / QA Lead
-- **Supporting Implementation Assigned:** Tất cả thành viên
+- **Related User Story:** Bao phủ luồng chính end-to-end từ US-01 đến US-10 (Tạo PR → Duyệt & Budget → Báo giá & AI So sánh → Tạo PO → Receiving → Close PR & Audit Trail)
+- **Related Backlog Tasks:** T-01..T-03, T-10..T-13, T-17..T-20, T-21..T-25, T-26..T-29, T-30..T-33, T-34..T-36
+- **Responsible Owner:** Trần Thị Thu Hà (QA Lead / E2E Automation)
+- **Collaborators / Assigned:** Tất cả thành viên
 - **Dependency:** TASK-011, TASK-012, TASK-014
 - **Deliverable:** Bộ kịch bản Playwright E2E tự động hóa luồng nghiệp vụ mua sắm xuyên suốt, chạy trên giao diện web thật.
 - **Test / Evidence:** Playwright HTML Test Report có kết quả thực thi chi tiết.
@@ -852,8 +840,8 @@ Mỗi thành viên làm **Primary Owner duy nhất cho đúng 1 User Story**. Th
 - **Related Epic:** CROSS-CUTTING (Automated Testing)
 - **Related User Story:** Cả 11 User Stories
 - **Related Backlog Tasks:** N/A (Test Automation)
-- **Primary Presentation Owner:** Từng thành viên viết unit test cho Story của mình + QA Lead tổng hợp
-- **Supporting Implementation Assigned:** Tất cả thành viên
+- **Responsible Owner:** Trần Thị Thu Hà (QA Lead) phối hợp cùng tác giả từng User Story
+- **Collaborators / Assigned:** Tất cả thành viên
 - **Dependency:** TASK-003, TASK-006, TASK-007
 - **Deliverable:** Bộ test tự động backend (Pytest) bao phủ toàn bộ các quy tắc nghiệp vụ và file báo cáo HTML.
 - **Test / Evidence:** Pytest HTML Report hoặc terminal execution log chi tiết.
@@ -905,8 +893,8 @@ Mỗi thành viên làm **Primary Owner duy nhất cho đúng 1 User Story**. Th
 - **Related Epic:** CROSS-CUTTING (Security & NFR)
 - **Related User Story:** N/A (Phi chức năng)
 - **Related Backlog Tasks:** N/A
-- **Primary Presentation Owner:** Shared Infrastructure
-- **Supporting Implementation Assigned:** Tất cả thành viên
+- **Responsible Owner:** Shared Infrastructure
+- **Collaborators / Assigned:** Tất cả thành viên
 - **Dependency:** TASK-004, TASK-005, TASK-014
 - **Deliverable:** Tài liệu `docs/05-technical/security-nfr.md` tổng hợp bằng chứng đáp ứng các yêu cầu phi chức năng.
 - **Test / Evidence:** Kết quả scan bảo mật, bằng chứng HTTP 401/403, kiểm tra bảo vệ API Keys.
@@ -945,8 +933,8 @@ Mỗi thành viên làm **Primary Owner duy nhất cho đúng 1 User Story**. Th
 - **Related Epic:** CROSS-CUTTING (DevOps)
 - **Related User Story:** N/A (Hạ tầng triển khai)
 - **Related Backlog Tasks:** N/A
-- **Primary Presentation Owner:** Shared Infrastructure
-- **Supporting Implementation Assigned:** Tất cả thành viên
+- **Responsible Owner:** Shared Infrastructure
+- **Collaborators / Assigned:** Tất cả thành viên
 - **Dependency:** TASK-014
 - **Deliverable:** `Dockerfile` cho Backend & Frontend, workflow GitHub Actions tự động build và chạy test.
 - **Test / Evidence:** GitHub Actions execution log (hiển thị trạng thái xanh / pass).
@@ -994,8 +982,8 @@ Mỗi thành viên làm **Primary Owner duy nhất cho đúng 1 User Story**. Th
 - **Related Epic:** CROSS-CUTTING (Deployment)
 - **Related User Story:** N/A (Hạ tầng sản phẩm)
 - **Related Backlog Tasks:** N/A
-- **Primary Presentation Owner:** Shared Infrastructure
-- **Supporting Implementation Assigned:** Tất cả thành viên
+- **Responsible Owner:** Shared Infrastructure
+- **Collaborators / Assigned:** Tất cả thành viên
 - **Dependency:** TASK-016, TASK-011, TASK-012
 - **Deliverable:** Backend và Frontend được triển khai lên nền tảng đám mây công khai với Live URLs hoạt động ổn định.
 - **Test / Evidence:** Đường link Live URL công khai, screenshot trang web hoạt động trên môi trường production.
@@ -1039,8 +1027,8 @@ Mỗi thành viên làm **Primary Owner duy nhất cho đúng 1 User Story**. Th
 - **Related Epic:** CROSS-CUTTING (Documentation & Release)
 - **Related User Story:** Toàn bộ 11 User Stories
 - **Related Backlog Tasks:** N/A (Bàn giao sản phẩm)
-- **Primary Presentation Owner:** Toàn bộ nhóm 5 thành viên
-- **Supporting Implementation Assigned:** Tất cả thành viên
+- **Responsible Owner:** Toàn bộ nhóm 5 thành viên
+- **Collaborators / Assigned:** Tất cả thành viên
 - **Dependency:** TASK-017
 - **Deliverable:** Báo cáo QA Report, Runbook hướng dẫn cài đặt và vận hành, Compliance Matrix được cập nhật theo đúng bằng chứng thực nghiệm, chuẩn bị slide và kịch bản bảo vệ.
 - **Test / Evidence:** Toàn bộ thư mục `docs/evidence/` đầy đủ và liên kết chính xác.
@@ -1051,7 +1039,7 @@ Mỗi thành viên làm **Primary Owner duy nhất cho đúng 1 User Story**. Th
 - Cập nhật file `OUTPUT_COMPLIANCE_MATRIX.md` phản ánh chính xác trạng thái thực tế dựa trên các bằng chứng đã thu thập (COMPLETE nếu có evidence; PARTIAL nếu chưa trọn vẹn).
 - Đóng gói toàn bộ screenshot, log files, test reports vào thư mục `docs/evidence/`.
 - Hoàn thiện tài liệu `Runbook.md` hướng dẫn chi tiết cách clone, setup và chạy dự án.
-- Chuẩn bị sẵn sàng kịch bản demo 5 phút cho 5 thành viên tương ứng với 5 Primary Presentation Stories.
+- Chuẩn bị sẵn sàng kịch bản demo 5 phút cho 5 thành viên tương ứng với 5 User Story cốt lõi (Giang: US-01, Dương: US-04, Lam: US-07, Dung: US-08, Hà: US-10).
 
 **Dependencies:** TASK-017  
 **Potential Blockers:** Không có.
@@ -1175,84 +1163,75 @@ Dự án không có một đường thẳng tuyến tính đơn lẻ mà bao g�
 
 ---
 
-## 10. User Story → Backlog Task → Implementation Task Traceability
+## 10. User Story → Backlog Task → Implementation Task Traceability (Theo Group-01 Allocation)
 
-Bảng dưới đây thiết lập mối liên kết chính thức giữa **Project Backlog (T-xxx)** và **Kế hoạch Triển khai (TASK-xxx)**, phân biệt rõ ràng 5 Primary Presentation Stories và 6 Supporting Implementation Stories:
+Bảng dưới đây thiết lập mối liên kết chính thức giữa **Project Backlog (`taiga-backlog.md`)** và **Kế hoạch Triển khai (`TASK-xxx`)**, phân định rõ User Story cốt lõi thuyết trình 5 phút và phân công toàn diện cho 5 thành viên:
 
-### TẦNG 1: 5 PRIMARY PRESENTATION STORIES (Khung trình bày chính 5 phút)
-
-| Epic | User Story | Backlog Tasks (T-xxx) | Implementation Tasks (TASK-xxx) | Primary Presentation Owner (5-min Viva) | Supporting Implementation Assigned | Required Evidence |
+| Epic | User Story | Backlog Tasks (T-xxx) | Implementation Tasks (TASK-xxx) | Người chịu trách nhiệm chính (Group-01) | Thành viên phối hợp | Required Evidence |
 |---|---|---|---|---|---|---|
-| **EPIC-01** | **US-01** — Tạo và chuẩn hóa Purchase Request | **T-011** — Tạo Purchase Request<br>**T-012** — Kiểm tra thông tin bắt buộc<br>**T-013** — AI hỗ trợ chuẩn hóa PR<br>**T-014** — AI gợi ý thông tin còn thiếu | TASK-009, TASK-012, TASK-014 | **Nguyễn Trương Thuỳ Dương** | Giang (AI prompts), Tất cả | UI Form Screenshot, AI Prompt/Response Log, Pytest log validation |
-| **EPIC-02** | **US-03** — Xem và xử lý Approval | **T-031** — Hiển thị thông tin PR cho Manager<br>**T-032** — Approve Purchase Request<br>**T-033** — Reject Purchase Request<br>**T-034** — Request Revision | TASK-005, TASK-012, TASK-014 | **Nguyễn Trúc Lam** | Hà (RBAC guard), Tất cả | UI Approval Inbox Screenshot, Log chặn 403 Forbidden khi sai role, Pytest log BR-02 |
-| **EPIC-03** | **US-05** — Quản lý Supplier và thu thập Quotation | **T-051** — Quản lý thông tin Supplier<br>**T-052** — Thu thập Quotation sau khi PR Approved<br>**T-053** — Liên kết Quotation với PR<br>**T-054** — Chuẩn hóa thông tin Quotation | TASK-008, TASK-012, TASK-014 | **Nguyễn Thị Thuỳ Dung** | Giang, Hà | UI Supplier & Quotation Screenshots, API Response logs, Database records trên Supabase |
-| **EPIC-03** | **US-07** — AI phân tích và Recommendation | **T-071** — Phân tích kết quả so sánh Quotation<br>**T-072** — Tạo AI Recommendation<br>**T-073** — Hiển thị Recommendation cho Procurement | TASK-009, TASK-010, TASK-012 | **Trần Thị Kiều Giang** | Dung, Dương | Thẻ AI Recommendation trên giao diện, AI Evaluation Report (>=20 cases), LLM Log |
-| **EPIC-04** | **US-09** — Lựa chọn Supplier và tạo Purchase Order | **T-091** — Lựa chọn Supplier<br>**T-092** — Lựa chọn Quotation<br>**T-093** — Tạo Purchase Order từ Quotation<br>**T-094** — Đảm bảo đơn giá và số lượng khớp | TASK-002, TASK-006, TASK-012, TASK-014 | **Trần Thị Thu Hà** | Lam (Status check), Dung | UI Tạo PO Screenshot, Pytest log chặn tạo PO khi PR chưa duyệt (HD-04), DB record PO có `quantity` |
-
----
-
-### TẦNG 2: 6 SUPPORTING IMPLEMENTATION STORIES (Phân công triển khai kỹ thuật bổ trợ)
-
-> **Important Note:** "Supporting Assignee is an implementation responsibility only and does not create a second Primary Presentation Story."
-
-| Epic | User Story | Backlog Tasks (T-xxx) | Implementation Tasks (TASK-xxx) | Primary Presentation Owner | Supporting Assignee (Người hỗ trợ triển khai) | Required Evidence |
-|---|---|---|---|---|---|---|
-| **EPIC-01** | **US-02** — Theo dõi Purchase Request | **T-021** — Hiển thị trạng thái Purchase Request | TASK-012 | *None (Supporting Story)* | **Dương** (hỗ trợ bởi Lam) | UI hiển thị trạng thái PR theo thời gian thực (DRAFT, SUBMITTED, APPROVED, ORDERED, CLOSED) |
-| **EPIC-02** | **US-04** — Kiểm tra Budget | **T-041** — Kiểm tra PR với Budget<br>**T-042** — Hiển thị Budget Warning | TASK-003, TASK-012, TASK-014 | *None (Supporting Story)* | **Lam** (hỗ trợ bởi Dương) | Banner Budget Warning trên giao diện duyệt đơn, Pytest log kiểm tra quy tắc ngân sách REQ-BR-01 |
-| **EPIC-03** | **US-06** — So sánh Quotation | **T-061** — Hiển thị các Quotation của PR<br>**T-062** — Hiển thị bảng so sánh Quotation<br>**T-063** — So sánh thông tin giữa các Supplier | TASK-008, TASK-012 | *None (Supporting Story)* | **Dung** (hỗ trợ bởi Giang) | Giao diện bảng so sánh trực quan đa tiêu chí (đơn giá, lead time, bảo hành) giữa các NCC |
-| **EPIC-03** | **US-08** — AI cảnh báo bất thường | **T-081** — Phân tích đơn giá Quotation<br>**T-082** — So sánh với đơn giá lịch sử<br>**T-083** — Phát hiện giá bất thường ≥20% | TASK-009, TASK-012, TASK-014 | *None (Supporting Story)* | **Giang** (hỗ trợ bởi Dung) | Badge cảnh báo giá cao hơn >=20% so với lịch sử, logic phân tích đơn giá trong `ai_service.py` |
-| **EPIC-05** | **US-10** — Ghi nhận Receiving | **T-101** — Ghi nhận Receiving<br>**T-102** — Kiểm tra số lượng Receiving<br>**T-103** — Hỗ trợ Receiving một phần | TASK-012, TASK-014 | *None (Supporting Story)* | **Hà** (hỗ trợ bởi Dung) | Giao diện nhập phiếu Receiving, kiểm tra số lượng nhận, bản ghi Receiving trong database Supabase |
-| **EPIC-05** | **US-11** — Close Purchase Request | **T-111** — Kiểm tra điều kiện Close | TASK-007, TASK-012, TASK-014 | *None (Supporting Story)* | **Hà** (hỗ trợ bởi Lam) | Pytest log chặn đóng PR khi chưa nhận đủ hàng (HD-07), chuyển trạng thái PR thành CLOSED khi đủ |
+| **E-01** | **US-01** — Tạo & Chuẩn hóa Purchase Request | **T-01** Thiết kế form PR<br>**T-02** Kiểm tra trường bắt buộc<br>**T-03** Submit PR và ghi trạng thái | TASK-009, TASK-012, TASK-014 | **Trần Thị Kiều Giang (Core 5-min)** | Dung (Backend API) | Form PR Screenshot, Validation Error Logs, Pytest log (`test_pr_creation_prisma.py`) |
+| **E-01** | **US-02** — Theo dõi Purchase Request | **T-04** Thiết kế trạng thái PR<br>**T-05** Hiển thị timeline/status<br>**T-06** Liên kết với Audit Trail | TASK-012 | **Nguyễn Thị Thùy Dung** | Giang (Frontend UI) | UI Timeline badge trạng thái thời gian thực (`DRAFT`, `SUBMITTED`, `APPROVED`, `PO_CREATED`, `CLOSED`) |
+| **E-01** | **US-03** — AI Suggestion Description | **T-07** Hiển thị AI suggestion<br>**T-08** Cho phép chỉnh sửa gợi ý<br>**T-09** Ghi nhận human review | TASK-009, TASK-012 | **Nguyễn Trúc Lam** | Dung, Giang | UI Suggestion Component, Log gọi prompt AI, Unit test Human-in-the-loop review |
+| **E-02** | **US-04** — Manager Review & Approval | **T-10** Màn hình Manager Review<br>**T-11** Các action Approval<br>**T-12** Nhánh chuyển Finance (>50M)<br>**T-13** Ghi Audit Trail duyệt | TASK-005, TASK-012, TASK-014 | **Nguyễn Trương Thùy Dương (Core 5-min)** | Giang, Dung | UI Approval Inbox, Log 403 Forbidden chặn sai quyền, Pytest log threshold 50M (`test_pr_approval_prisma.py`) |
+| **E-02** | **US-05** — Finance Budget Check | **T-14** Hiển thị Budget Check<br>**T-15** Cảnh báo vượt Budget<br>**T-16** Finance Approval/Reject | TASK-003, TASK-012, TASK-014 | **Nguyễn Trương Thùy Dương** | Dung (Backend DB) | Banner cảnh báo vượt ngân sách, Pytest log REQ-BR-01 reject khi vượt budget |
+| **E-03** | **US-06** — Thu thập & Liên kết Quotations | **T-17** Quản lý Supplier<br>**T-18** Upload/lưu Quotation<br>**T-19** Liên kết Quotation với PR<br>**T-20** Chuẩn hóa dữ liệu so sánh | TASK-008, TASK-012, TASK-014 | **Nguyễn Trương Thùy Dương** | Dung, Giang | UI Supplier & Upload Quotation, API response log, Supabase records |
+| **E-04** | **US-07** — AI Extraction & Recommendation | **T-21** Trích xuất báo giá<br>**T-22** Màn hình review dữ liệu<br>**T-23** Ma trận so sánh đa chiều<br>**T-24** AI Recommendation<br>**T-25** Anomaly Alert $\ge 20\%$ | TASK-009, TASK-010, TASK-012 | **Nguyễn Trúc Lam (Core 5-min)** | Dung, Giang | Thẻ AI Recommendation, Anomaly Alert badge, AI Evaluation Report (>=20 cases), LLM log |
+| **E-05** | **US-08** — Lựa chọn NCC & Tạo PO | **T-26** Tạo PO từ PR đã duyệt<br>**T-27** Kiểm tra điều kiện (HD-04)<br>**T-28** Lưu liên kết PO<br>**T-29** Khóa giá/lượng server-side (T-094) | TASK-002, TASK-006, TASK-012, TASK-014 | **Nguyễn Thị Thùy Dung (Core 5-min)** | Giang, Dương, Hà | UI Tạo PO, Pytest log HD-04 PASS, Pytest log khóa số lượng/đơn giá T-094 (14/14 PASS), PO.quantity Supabase |
+| **E-06** | **US-09** — Ghi nhận Receiving | **T-30** Form Receiving<br>**T-31** Trạng thái nhận đủ/một phần<br>**T-32** Kiểm tra quyền nhận hàng<br>**T-33** Kiểm tra số lượng $\le$ PO | TASK-012, TASK-014 | **Nguyễn Thị Thùy Dung** | Giang, Hà | UI Phiếu Receiving, Pytest log kiểm tra cumulative receiving $\le$ PO.quantity (`test_receiving_prisma.py`) |
+| **E-06** | **US-10** — Close PR & Đối soát 3 bên | **T-34** Đối soát PR-PO-Receiving<br>**T-35** Điều kiện Close (HD-07)<br>**T-36** Audit Trail & Budget settlement | TASK-007, TASK-012, TASK-014 | **Trần Thị Thu Hà (Core 5-min)** | Dương, Dung | UI Đối soát 3 bên & nút Close PR, Pytest log HD-07 PASS (`test_close_prisma.py`), PR status `CLOSED` |
+| **E-07** | **GOV-01** — Phân quyền RBAC 5 vai trò | **T-37** Ma trận RBAC<br>**T-38** Kiểm tra quyền theo action<br>**T-39** Test No Self-Approval | TASK-005, TASK-014 | **Nguyễn Thị Thùy Dung** | Lam, Hà | Bằng chứng HTTP 401 & 403 logs, Pytest chặn No Self-Approval |
+| **E-07** | **GOV-02** — Audit Trail toàn diện | **T-40** Audit event model<br>**T-41** Ghi log Approval/Reject/Close<br>**T-42** Màn hình tra soát Audit | TASK-012, TASK-014 | **Trần Thị Thu Hà** | Dung, Giang | UI Tra soát lịch sử Audit, Audit event records trong CSDL |
 
 ---
 
 ## 10b. Requirement → Task Traceability
 
-| Requirement / Business Rule | Epic | User Story | Backlog Task (T-xxx) | Implementation Task (TASK-xxx) | Primary Presentation Owner / Supporting Assignee | Required Evidence | Status |
+| Requirement / Business Rule | Epic | User Story | Backlog Task (T-xxx) | Implementation Task (TASK-xxx) | Chịu trách nhiệm chính (Group-01 Allocation) | Required Evidence | Status |
 |---|---|---|---|---|---|---|---|
-| REQ-FR-01, FR-02, FR-03 | EPIC-01 | US-01 | T-011, T-012, T-013, T-014 | TASK-009, TASK-012 | **Dương (Primary Owner)** | AI log chuẩn hóa + UI Screenshot tạo PR | PLANNED |
-| REQ-FR-04 | EPIC-01 | US-02 | T-021 | TASK-012 | Supporting Assignee: Dương | UI Screenshot danh sách PR kèm badge trạng thái | PLANNED |
-| REQ-FR-05, FR-06, FR-07 | EPIC-02 | US-03 | T-031, T-032, T-033, T-034 | TASK-005, TASK-012 | **Lam (Primary Owner)** | Log 403 Forbidden khi sai role + UI Manager Inbox | PLANNED |
-| REQ-FR-08, FR-09 | EPIC-02 | US-04 | T-041, T-042 | TASK-003, TASK-012 | Supporting Assignee: Lam | UI Budget Warning Banner + Pytest log BR-01 | PLANNED |
-| REQ-FR-10, FR-11 | EPIC-03 | US-05 | T-051, T-052, T-053, T-054 | TASK-008, TASK-012 | **Dung (Primary Owner)** | UI Supplier & Quotation + API response logs | PLANNED |
-| REQ-FR-12 | EPIC-03 | US-06 | T-061, T-062, T-063 | TASK-008, TASK-012 | Supporting Assignee: Dung | UI Bảng so sánh Quotation đa cột | PLANNED |
-| REQ-FR-13, FR-14 | EPIC-03 | US-07 | T-071, T-072, T-073 | TASK-009, TASK-010, TASK-012 | **Giang (Primary Owner)** | LLM Output log + AI Evaluation Report (>=20) | PLANNED |
-| REQ-FR-15 | EPIC-03 | US-08 | T-081, T-082, T-083 | TASK-009, TASK-012 | Supporting Assignee: Giang | Badge cảnh báo giá bất thường >=20% trên UI | PLANNED |
-| REQ-FR-16 | EPIC-04 | US-09 | T-091, T-092, T-093, T-094 | TASK-002, TASK-006, TASK-012 | **Hà (Primary Owner)** | Pytest log HD-04 + UI tạo PO từ Quotation | PLANNED |
-| REQ-FR-17 | EPIC-05 | US-10 | T-101, T-102, T-103 | TASK-012, TASK-014 | Supporting Assignee: Hà (hỗ trợ bởi Dung) | UI Phiếu Receiving + Bản ghi CSDL Supabase | PLANNED |
-| REQ-FR-18 | EPIC-05 | US-11 | T-111 | TASK-007, TASK-012 | Supporting Assignee: Hà (hỗ trợ bởi Lam) | Pytest log HD-07 + PR trạng thái CLOSED | PLANNED |
-| REQ-BR-01 (Budget reject) | EPIC-02 | US-04 | T-041 | TASK-003, TASK-014 | Supporting Assignee: Lam | Pytest log kiểm tra vượt ngân sách | PLANNED |
-| REQ-BR-02 (Multi-level approval) | EPIC-02 | US-03 | T-032 | TASK-005, TASK-014 | **Lam (Primary Owner)** | Pytest log PR > 50M chuyển duyệt cấp cao | PLANNED |
-| REQ-BR-10 (PO Approved Guard) | EPIC-04 | US-09 | T-093 | TASK-006 | **Hà (Primary Owner)** | Pytest log HD-04 PASS | PLANNED |
-| REQ-BR-11 (Receiving Close Guard) | EPIC-05 | US-11 | T-111 (upstream: T-101) | TASK-007 | Supporting Assignee: Hà (hỗ trợ bởi Lam) | Pytest log HD-07 PASS | PLANNED |
-| REQ-NFR-02 (RBAC Role separation) | CROSS | ALL | N/A | TASK-004, TASK-005 | Shared Infrastructure | Bằng chứng HTTP 401 & 403 logs | PLANNED |
+| REQ-FR-01, FR-02, FR-03 | E-01 | US-01 | T-01, T-02, T-03 | TASK-009, TASK-012 | **Trần Thị Kiều Giang (Core 5-min)** | AI log chuẩn hóa + UI Screenshot tạo PR + Pytest PASS | PLANNED |
+| REQ-FR-04 | E-01 | US-02 | T-04, T-05, T-06 | TASK-012 | Nguyễn Thị Thùy Dung | UI Screenshot danh sách PR kèm badge trạng thái thời gian thực | PLANNED |
+| REQ-FR-03 (AI Suggestion) | E-01 | US-03 | T-07, T-08, T-09 | TASK-009, TASK-012 | Nguyễn Trúc Lam | UI gợi ý AI hoàn thiện mô tả + Log Human-in-the-loop review | PLANNED |
+| REQ-FR-05, FR-06, FR-07 | E-02 | US-04 | T-10, T-11, T-12, T-13 | TASK-005, TASK-012 | **Nguyễn Trương Thùy Dương (Core 5-min)** | Log 403 Forbidden khi sai role + UI Manager Inbox | PLANNED |
+| REQ-FR-08, FR-09 | E-02 | US-05 | T-14, T-15, T-16 | TASK-003, TASK-012 | Nguyễn Trương Thùy Dương | UI Budget Warning Banner + Pytest log BR-01 | PLANNED |
+| REQ-FR-10, FR-11, FR-12 | E-03 | US-06 | T-17, T-18, T-19, T-20 | TASK-008, TASK-012 | Nguyễn Trương Thùy Dương | UI Supplier & Quotation + Bảng so sánh đa cột | PLANNED |
+| REQ-FR-13, FR-14, FR-15 | E-04 | US-07 | T-21, T-22, T-23, T-24, T-25 | TASK-009, TASK-010, TASK-012 | **Nguyễn Trúc Lam (Core 5-min)** | LLM Output log + AI Evaluation Report (>=20 cases) | PLANNED |
+| REQ-FR-16 | E-05 | US-08 | T-26, T-27, T-28, T-29 | TASK-002, TASK-006, TASK-012 | **Nguyễn Thị Thùy Dung (Core 5-min)** | Pytest log HD-04 + UI tạo PO từ Quotation có quantity lock | PLANNED |
+| REQ-FR-17 | E-06 | US-09 | T-30, T-31, T-32, T-33 | TASK-012, TASK-014 | Nguyễn Thị Thùy Dung | UI Phiếu Receiving + Bản ghi CSDL Supabase | PLANNED |
+| REQ-FR-18 | E-06 | US-10 | T-34, T-35, T-36 | TASK-007, TASK-012 | **Trần Thị Thu Hà (Core 5-min)** | Pytest log HD-07 + PR trạng thái CLOSED | PLANNED |
+| REQ-BR-01 (Budget reject) | E-02 | US-05 | T-15, T-16 | TASK-003, TASK-014 | Nguyễn Trương Thùy Dương | Pytest log kiểm tra vượt ngân sách | PLANNED |
+| REQ-BR-02 (Multi-level approval) | E-02 | US-04 | T-11, T-12 | TASK-005, TASK-014 | **Nguyễn Trương Thùy Dương (Core 5-min)** | Pytest log PR > 50M chuyển duyệt cấp cao | PLANNED |
+| REQ-BR-10 (PO Approved Guard) | E-05 | US-08 | T-27 | TASK-006 | **Nguyễn Thị Thùy Dung (Core 5-min)** | Pytest log HD-04 PASS | PLANNED |
+| REQ-BR-11 (Receiving Close Guard) | E-06 | US-10 | T-35 (upstream: T-30) | TASK-007 | **Trần Thị Thu Hà (Core 5-min)** | Pytest log HD-07 PASS | PLANNED |
+| REQ-NFR-02 (RBAC Role separation) | E-07 | GOV-01 | T-37, T-38, T-39 | TASK-004, TASK-005 | Nguyễn Thị Thùy Dung | Bằng chứng HTTP 401 & 403 logs | PLANNED |
+| REQ-NFR-03 (Audit Trail) | E-07 | GOV-02 | T-40, T-41, T-42 | TASK-012, TASK-014 | Trần Thị Thu Hà | Truy vết lịch sử thao tác toàn diện | PLANNED |
 | HD-01 (Supabase PostgreSQL) | CROSS | ALL | N/A | TASK-001, TASK-003 | Shared Infrastructure | Screenshot Supabase Tables & Connection test | PLANNED |
 | HD-02 (JWT & Server-side RBAC) | CROSS | ALL | N/A | TASK-004, TASK-005 | Shared Infrastructure | Bằng chứng verify JWT & tra cứu role từ DB | PLANNED |
-| HD-03 (Hybrid AI Architecture) | EPIC-03 | US-07 | T-071, T-072 | TASK-009, TASK-010 | **Giang (Primary Owner)** | LLM Pydantic schemas + AI Eval Report | PLANNED |
-| HD-04 (Fix BUG-001 PR Guard) | EPIC-04 | US-09 | T-093 | TASK-006 | **Hà (Primary Owner)** | Pytest log HD-04 PASS | PLANNED |
-| HD-05 (Playwright Critical E2E) | CROSS | ALL | N/A | TASK-013 | Shared / QA Lead | Playwright HTML Test Report | PLANNED |
+| HD-03 (Hybrid AI Architecture) | E-04 | US-07 | T-21, T-22 | TASK-009, TASK-010 | **Nguyễn Trúc Lam (Core 5-min)** | LLM Pydantic schemas + AI Eval Report | PLANNED |
+| HD-04 (Fix BUG-001 PR Guard) | E-05 | US-08 | T-27 | TASK-006 | **Nguyễn Thị Thùy Dung (Core 5-min)** | Pytest log HD-04 PASS | PLANNED |
+| HD-05 (Playwright Critical E2E) | CROSS | ALL | N/A | TASK-013 | Trần Thị Thu Hà (QA Lead) | Playwright HTML Test Report | PLANNED |
 | HD-06 (Git Setup & Branching) | CROSS | ALL | N/A | N/A | Toàn bộ nhóm | Git commit history (`git log`) | DONE (Local) |
-| HD-07 (Receiving Completion Guard)| EPIC-05 | US-11 | T-111 (upstream: T-101) | TASK-007 | Supporting Assignee: Hà (hỗ trợ bởi Lam) | Pytest log HD-07 PASS | PLANNED |
+| HD-07 (Receiving Completion Guard)| E-06 | US-10 | T-35 (upstream: T-30) | TASK-007 | **Trần Thị Thu Hà (Core 5-min)** | Pytest log HD-07 PASS | PLANNED |
 
 ---
 
 ## 11. User Story → Evidence
 
-Bảng dưới đây xác định các bằng chứng bắt buộc phải thu thập cho từng User Story, phân định rõ vai trò thuyết trình 5 phút hay hỗ trợ kỹ thuật:
+Bảng dưới đây xác định các bằng chứng bắt buộc phải thu thập cho từng User Story, thể hiện phân công chính thức theo Group-01:
 
-| User Story | Backlog Tasks | Implementation Tasks | Code Evidence | Test Evidence | Traceability Evidence | Git Commit / PR Scope | Presentation & Viva Role |
+| User Story | Backlog Tasks | Implementation Tasks | Code Evidence | Test Evidence | Traceability Evidence | Git Commit / PR Scope | Vai trò & Người chịu trách nhiệm chính |
 |---|---|---|---|---|---|---|---|
-| **US-01** Tạo và chuẩn hóa PR | T-011, T-012, T-013, T-014 | TASK-009, TASK-012 | `CreatePR.tsx`, `ai_service.py` | Pytest validation & fallback | Row US-01 trong matrix | `feat(pr): create with ai [TASK-009][012]` | **Dương: Primary Presentation Story (Thuyết trình 5 phút & Viva)** |
-| **US-02** Theo dõi PR | T-021 | TASK-012 | `PRList.tsx` | UI verification log | Row US-02 trong matrix | `feat(pr): list and tracking [TASK-012]` | Supporting Assignee: Dương (Hỗ trợ triển khai kỹ thuật) |
-| **US-03** Xem và xử lý Approval | T-031, T-032, T-033, T-034 | TASK-005, TASK-012 | `ApprovalInbox.tsx`, `rbac.py` | Pytest RBAC 403 & BR-02 | Row US-03 trong matrix | `feat(approval): rbac & workflow [TASK-005][012]` | **Lam: Primary Presentation Story (Thuyết trình 5 phút & Viva)** |
-| **US-04** Kiểm tra Budget | T-041, T-042 | TASK-003, TASK-012 | `BudgetWarning.tsx` | Pytest reject over-budget | Row US-04 trong matrix | `feat(budget): warning & check [TASK-003][012]` | Supporting Assignee: Lam (Hỗ trợ triển khai kỹ thuật) |
-| **US-05** Quản lý Supplier & Quotation | T-051, T-052, T-053, T-054 | TASK-008, TASK-012 | `Suppliers.tsx`, `Quotations.tsx` | Pytest supplier CRUD & link | Row US-05 trong matrix | `feat(quotation): supplier & upload [TASK-008][012]` | **Dung: Primary Presentation Story (Thuyết trình 5 phút & Viva)** |
-| **US-06** So sánh Quotation | T-061, T-062, T-063 | TASK-008, TASK-012 | `ComparisonView.tsx` | UI comparison matrix test | Row US-06 trong matrix | `feat(quotation): comparison view [TASK-008][012]` | Supporting Assignee: Dung (Hỗ trợ triển khai kỹ thuật) |
-| **US-07** AI Recommendation | T-071, T-072, T-073 | TASK-009, 010, 012 | `AIRecommendationCard.tsx` | AI Eval Report (>=20 cases) | Row US-07 trong matrix | `feat(ai): hybrid recommendation [TASK-009][010]` | **Giang: Primary Presentation Story (Thuyết trình 5 phút & Viva)** |
-| **US-08** AI cảnh báo bất thường | T-081, T-082, T-083 | TASK-009, TASK-012 | `PriceAnomalyBadge.tsx` | Unit test >=20% anomaly | Row US-08 trong matrix | `feat(ai): price anomaly warning [TASK-009][012]` | Supporting Assignee: Giang (Hỗ trợ triển khai kỹ thuật) |
-| **US-09** Tạo Purchase Order | T-091, T-092, T-093, T-094 | TASK-002, 006, 012 | `CreatePO.tsx`, `schema.prisma` | Pytest HD-04 PASS | Row US-09 trong matrix | `fix(po): quantity & guard [TASK-002][006][012]` | **Hà: Primary Presentation Story (Thuyết trình 5 phút & Viva)** |
-| **US-10** Ghi nhận Receiving | T-101, T-102, T-103 | TASK-012, TASK-014 | `ReceivingForm.tsx` | Pytest quantity check | Row US-10 trong matrix | `feat(receiving): record receipt [TASK-012][014]` | Supporting Assignee: Hà (Hỗ trợ triển khai kỹ thuật) |
-| **US-11** Close Purchase Request | T-111 | TASK-007, TASK-012 | `procurement_service.py` | Pytest HD-07 PASS | Row US-11 trong matrix | `fix(pr): receiving completion guard [TASK-007]` | Supporting Assignee: Hà (Hỗ trợ triển khai kỹ thuật) |
+| **US-01** Tạo và chuẩn hóa PR | T-01, T-02, T-03 | TASK-009, TASK-012 | `CreatePR.tsx`, `ai_service.py` | Pytest validation & fallback | Row US-01 trong matrix | `feat(pr): create with ai [TASK-009][012]` | **Trần Thị Kiều Giang: User Story cốt lõi (Thuyết trình 5 phút & Viva)** |
+| **US-02** Theo dõi PR | T-04, T-05, T-06 | TASK-012 | `PRList.tsx` | UI verification log | Row US-02 trong matrix | `feat(pr): list and tracking [TASK-012]` | **Nguyễn Thị Thùy Dung:** Chịu trách nhiệm chính (Hỗ trợ UI: Giang) |
+| **US-03** AI Suggestion Description | T-07, T-08, T-09 | TASK-009, TASK-012 | `ai_service.py`, `CreatePR.tsx` | Unit test AI suggestion & HITL | Row US-03 trong matrix | `feat(ai): description suggestion [TASK-009]` | **Nguyễn Trúc Lam:** Chịu trách nhiệm chính (Hỗ trợ UI: Giang, API: Dung) |
+| **US-04** Manager Review & Approval | T-10, T-11, T-12, T-13 | TASK-005, TASK-012 | `ApprovalInbox.tsx`, `rbac.py` | Pytest RBAC 403 & BR-02 | Row US-04 trong matrix | `feat(approval): rbac & workflow [TASK-005][012]` | **Nguyễn Trương Thùy Dương: User Story cốt lõi (Thuyết trình 5 phút & Viva)** |
+| **US-05** Finance Budget Check | T-14, T-15, T-16 | TASK-003, TASK-012 | `BudgetWarning.tsx` | Pytest reject over-budget | Row US-05 trong matrix | `feat(budget): warning & check [TASK-003][012]` | **Nguyễn Trương Thùy Dương:** Chịu trách nhiệm chính (Hỗ trợ DB: Dung) |
+| **US-06** Thu thập & Liên kết Quotations | T-17, T-18, T-19, T-20 | TASK-008, TASK-012 | `Suppliers.tsx`, `Quotations.tsx` | Pytest supplier CRUD & link | Row US-06 trong matrix | `feat(quotation): supplier & upload [TASK-008][012]` | **Nguyễn Trương Thùy Dương:** Chịu trách nhiệm chính (Hỗ trợ API: Dung) |
+| **US-07** AI Recommendation & So sánh | T-21, T-22, T-23, T-24, T-25 | TASK-009, 010, 012 | `AIRecommendationCard.tsx` | AI Eval Report (>=20 cases) | Row US-07 trong matrix | `feat(ai): hybrid recommendation [TASK-009][010]` | **Nguyễn Trúc Lam: User Story cốt lõi (Thuyết trình 5 phút & Viva)** |
+| **US-08** Tạo Purchase Order & Khóa giá/lượng | T-26, T-27, T-28, T-29 | TASK-002, 006, 012 | `CreatePO.tsx`, `schema.prisma` | Pytest HD-04 PASS | Row US-08 trong matrix | `fix(po): quantity & guard [TASK-002][006][012]` | **Nguyễn Thị Thùy Dung: User Story cốt lõi (Thuyết trình 5 phút & Viva)** |
+| **US-09** Ghi nhận Receiving | T-30, T-31, T-32, T-33 | TASK-012, TASK-014 | `ReceivingForm.tsx` | Pytest quantity check | Row US-09 trong matrix | `feat(receiving): record receipt [TASK-012][014]` | **Nguyễn Thị Thùy Dung:** Chịu trách nhiệm chính (Hỗ trợ UI: Giang, QA: Hà) |
+| **US-10** Close PR & Đối soát 3 bên | T-34, T-35, T-36 | TASK-007, TASK-012 | `procurement_service.py` | Pytest HD-07 PASS | Row US-10 trong matrix | `fix(pr): receiving completion guard [TASK-007]` | **Trần Thị Thu Hà: User Story cốt lõi (Thuyết trình 5 phút & Viva)** |
+| **GOV-01** Phân quyền RBAC 5 vai trò | T-37, T-38, T-39 | TASK-005, TASK-014 | `rbac.py`, `dependencies.py` | Pytest RBAC 403 & No Self-Approval | Row GOV-01 trong matrix | `feat(gov): rbac matrix 5 roles [TASK-005]` | **Nguyễn Thị Thùy Dung:** Chịu trách nhiệm chính |
+| **GOV-02** Audit Trail toàn diện | T-40, T-41, T-42 | TASK-012, TASK-014 | `audit_service.py`, `AuditLog.tsx` | Audit event logging test | Row GOV-02 trong matrix | `feat(gov): audit trail tracking [TASK-012]` | **Trần Thị Thu Hà:** Chịu trách nhiệm chính |
 
 ---
 
@@ -1398,37 +1377,62 @@ Một tác vụ kỹ thuật chỉ được xác nhận là **DONE** (hoàn thà
 
 ---
 
-## 19. User Story Ownership & Presentation/Implementation Framework
+## 19. Individual 5-Minute Presentation & Team Assignment (Theo Group-01 Allocation)
 
-### 19.1. Khung phân công 2 tầng chi tiết
-Nhằm đáp ứng yêu cầu chấm điểm cá nhân của giảng viên (mỗi sinh viên trình bày độc lập 1 User Story trong 5 phút), nhóm thiết lập cấu trúc trách nhiệm rõ ràng:
-- **5 Primary Presentation Stories:** Là trọng tâm đánh giá cá nhân của từng thành viên.
-- **6 Supporting Implementation Stories:** Là công việc tập thể nhằm đảm bảo hệ thống chạy hoàn chỉnh end-to-end.
+### 19.1. Khung phân công trách nhiệm User Story chính thức
+
+> **Căn cứ xác lập:** Quyết định chính thức HD-11 đồng bộ 100% với `docs/03-product/taiga-backlog.md` từ phiên bản Group-01. Không gộp User Story của mỗi người; từng thành viên có User Story chịu trách nhiệm chính và một **User Story cốt lõi (Primary Core Story)** để thuyết trình độc lập 5 phút và bảo vệ Viva.
+
+- **5 User Story cốt lõi (Primary Core Stories):** Là trọng tâm đánh giá cá nhân và thuyết trình độc lập 5 phút của từng thành viên:
+  1. **Trần Thị Kiều Giang:** **US-01** — Tạo và chuẩn hóa Purchase Request
+  2. **Nguyễn Trương Thùy Dương:** **US-04** — Manager Review, Approval & Budget
+  3. **Nguyễn Trúc Lam:** **US-07** — AI Extraction & Quotation Recommendation
+  4. **Nguyễn Thị Thùy Dung:** **US-08** — Lựa chọn NCC & Tạo Purchase Order (Server-Side Quantity Lock T-094)
+  5. **Trần Thị Thu Hà:** **US-10** — Close Purchase Request & Đối soát giao nhận (3-Way Matching & HD-07 Guard)
+- **Các User Story phối hợp & quản trị (Supporting & Governance Stories):** Được phân bổ rõ ràng cho các thành viên phụ trách chính để bảo đảm toàn bộ hệ thống/MVP hoạt động hoàn chỉnh end-to-end:
+  - **US-02:** Nguyễn Thị Thùy Dung (Theo dõi trạng thái PR)
+  - **US-03:** Nguyễn Trúc Lam (AI Suggestion Description)
+  - **US-05:** Nguyễn Trương Thùy Dương (Finance Budget Check)
+  - **US-06:** Nguyễn Trương Thùy Dương (Thu thập & Liên kết Quotations)
+  - **US-09:** Nguyễn Thị Thùy Dung (Ghi nhận Receiving)
+  - **GOV-01:** Nguyễn Thị Thùy Dung (Ma trận RBAC 5 vai trò)
+  - **GOV-02:** Trần Thị Thu Hà (Audit Trail toàn diện)
 
 ---
 
-### 19.2. KHUNG CHUẨN BỊ 5 PHÚT TRÌNH BÀY & VIVA CHO 5 PRIMARY PRESENTATION STORIES
+### 19.2. KHUNG CHUẨN BỊ 5 PHÚT TRÌNH BÀY & VIVA CHO 5 USER STORIES CỐT LÕI
 
-#### 1. US-01: Nguyễn Trương Thuỳ Dương — Tạo và chuẩn hóa Purchase Request
+```
+Mỗi thành viên có đúng 5 phút để trình bày và bảo vệ User Story cốt lõi của mình.
+Phân bổ thời gian đề xuất:
+- Phút 1: Giới thiệu mục tiêu nghiệp vụ, Actor, Acceptance Criteria và vai trò của Story trong luồng mua sắm.
+- Phút 2: Trình diễn (Demo) luồng thao tác trên giao diện người dùng (UI) đã tích hợp API thật.
+- Phút 3: Minh chứng kiểm soát dữ liệu, validation và các trường hợp biên (edge cases) / quy tắc nghiệp vụ.
+- Phút 4: Trình chiếu bằng chứng kỹ thuật: Log API, truy vấn CSDL Supabase, kết quả chạy Automated Tests.
+- Phút 5: Mở source code chỉ rõ các module kỹ thuật cốt lõi do mình triển khai; sẵn sàng trả lời Viva.
+```
+
+---
+
+#### 1. US-01: Trần Thị Kiều Giang — Tạo và chuẩn hóa Purchase Request
 - **User Story ID & Tên:** **US-01** — Tạo và chuẩn hóa Purchase Request
-- **Primary Presentation Owner:** **Nguyễn Trương Thuỳ Dương** (Duy nhất 1 Primary Story)
+- **Chịu trách nhiệm chính (Primary Core Owner):** **Trần Thị Kiều Giang**
 - **Authoritative Backlog Tasks (T-xxx):**
-  * `T-011` — Tạo Purchase Request
-  * `T-012` — Kiểm tra thông tin bắt buộc
-  * `T-013` — AI hỗ trợ chuẩn hóa Purchase Request
-  * `T-014` — AI gợi ý thông tin còn thiếu
-- **Technical Implementation Tasks:** `TASK-009` (AI integration), `TASK-012` (PR UI), `TASK-014` (Pytest validation)
-- **Dependencies:** `TASK-004` (Auth state / Employee role), `TASK-009` (LLM API normalization endpoint)
+  * `T-01` — Thiết kế form PR và các trường bắt buộc
+  * `T-02` — Kiểm tra trường bắt buộc trước khi Submit
+  * `T-03` — Submit PR và ghi trạng thái SUBMITTED
+- **Technical Implementation Tasks:** `TASK-009` (Tích hợp gợi ý chuẩn hóa AI), `TASK-012` (Form tạo PR UI), `TASK-014` (Unit tests validation)
+- **Dependencies:** `TASK-001` (Supabase DB), `TASK-003` (Prisma PR creation), `TASK-004` (Supabase Auth/JWT)
 - **Code Area / Modules:** `frontend/src/pages/CreatePR.tsx`, `backend/app/services/ai_service.py`, `backend/app/routers/pr.py`
 - **Acceptance Criteria (AC):**
-  * *AC1:* Người dùng nhập thiếu các trường bắt buộc (mô tả, số lượng, ngày cần hàng) → hệ thống hiển thị thông báo lỗi cụ thể trước khi submit.
-  * *AC2:* Người dùng bấm nút hỗ trợ AI → AI phân tích văn bản mô tả sơ sài, tự động điền các trường danh mục (category) và gợi ý thông tin còn thiếu.
-  * *AC3:* Khi thông tin đã đầy đủ hợp lệ → hệ thống cho phép submit và tạo PR thành công.
+  * *AC1:* Người dùng nhập thiếu các trường bắt buộc (mô tả, số lượng, ngày cần hàng, phòng ban) → hệ thống hiển thị thông báo lỗi cụ thể trước khi submit.
+  * *AC2:* Người dùng bấm nút hỗ trợ AI → AI phân tích văn bản mô tả sơ sài, tự động chuẩn hóa và gợi ý thông tin còn thiếu.
+  * *AC3:* Khi thông tin đã đầy đủ hợp lệ → hệ thống cho phép submit và tạo PR thành công với trạng thái `SUBMITTED`.
 - **Kiểm thử bắt buộc:** Unit test Pydantic schema cho kết quả chuẩn hóa AI; Unit test kiểm tra validation bắt buộc; Component test cho form tạo PR.
-- **Bằng chứng cần thu thập:** Screenshot form tạo PR kèm gợi ý của AI; Log request/response gọi API AI; Pytest execution log.
+- **Bằng chứng cần thu thập:** Screenshot form tạo PR kèm gợi ý của AI; Log request/response gọi API AI; Pytest execution log (`test_pr_creation_prisma.py`).
 - **Git Commit / PR Scope:** `feat(pr): implement create purchase request with ai assistance [TASK-009][TASK-012]`
 - **Kịch bản Demo 5 phút:**
-  * *Phút 1:* Đăng nhập tài khoản Employee, mở trang "Tạo Purchase Request". Nhập mô tả rất ngắn gọn (ví dụ: "cần mua 5 màn hình máy tính Dell").
+  * *Phút 1:* Đăng nhập tài khoản Employee, mở trang "Tạo Purchase Request". Nhập mô tả ngắn gọn (ví dụ: "cần mua 5 màn hình máy tính Dell").
   * *Phút 2:* Bấm "AI Chuẩn hóa & Gợi ý" → Giao diện hiển thị gợi ý thông minh từ AI (danh mục: IT Equipment, thông số khuyến nghị, nhắc nhở bổ sung ngày cần hàng và ngân sách dự kiến).
   * *Phút 3:* Điền nốt thông tin theo gợi ý của AI. Thử bấm Submit khi cố tình xóa số lượng → hệ thống chặn lại và báo lỗi validation.
   * *Phút 4:* Nhập đầy đủ thông tin hợp lệ, bấm "Submit Purchase Request" → PR được tạo thành công, chuyển sang trạng thái `SUBMITTED`, xuất hiện trên danh sách theo dõi.
@@ -1441,29 +1445,29 @@ Nhằm đáp ứng yêu cầu chấm điểm cá nhân của giảng viên (mỗ
 
 ---
 
-#### 2. US-03: Nguyễn Trúc Lam — Xem và xử lý Approval
-- **User Story ID & Tên:** **US-03** — Xem và xử lý Approval
-- **Primary Presentation Owner:** **Nguyễn Trúc Lam** (Duy nhất 1 Primary Story)
+#### 2. US-04: Nguyễn Trương Thùy Dương — Manager Review, Approval & Budget
+- **User Story ID & Tên:** **US-04** — Manager Review, Approval & Budget
+- **Chịu trách nhiệm chính (Primary Core Owner):** **Nguyễn Trương Thùy Dương**
 - **Authoritative Backlog Tasks (T-xxx):**
-  * `T-031` — Hiển thị thông tin Purchase Request cho Manager
-  * `T-032` — Approve Purchase Request
-  * `T-033` — Reject Purchase Request
-  * `T-034` — Request Revision
-- **Technical Implementation Tasks:** `TASK-005` (Server-side RBAC), `TASK-012` (Approval Inbox UI), `TASK-014` (Unit tests BR-02)
+  * `T-10` — Màn hình Manager Review
+  * `T-11` — Các action Approval (Approve, Reject, Request Revision)
+  * `T-12` — Nhánh chuyển Finance (ngưỡng > 50,000,000 VND)
+  * `T-13` — Ghi Audit Trail các quyết định duyệt
+- **Technical Implementation Tasks:** `TASK-005` (Server-side RBAC & Approval status guard HD-REQ-10), `TASK-012` (Approval Inbox UI), `TASK-014` (Unit tests BR-02, BR-03)
 - **Dependencies:** `TASK-004` (JWT Auth), `TASK-005` (RBAC guard), `TASK-003` (Prisma query PR)
-- **Code Area / Modules:** `frontend/src/pages/ApprovalInbox.tsx`, `backend/app/routers/approval.py`, `backend/app/dependencies/rbac.py`
+- **Code Area / Modules:** `frontend/src/pages/ApprovalInbox.tsx`, `backend/app/routers/approval.py`, `backend/app/services/procurement_service.py`
 - **Acceptance Criteria (AC):**
-  * *AC1:* Manager chỉ thấy các PR có trạng thái `SUBMITTED` thuộc phòng ban mình quản lý kèm chi tiết ngân sách.
-  * *AC2:* Manager có thể Approve (chuyển trạng thái PR thành `APPROVED`) hoặc Reject (kèm bắt buộc nhập lý do từ chối).
-  * *AC3:* Manager có thể yêu cầu sửa đổi (Request Revision) → PR chuyển trạng thái thành `REVISION_REQUESTED` kèm ghi chú để Employee cập nhật lại.
+  * *AC1:* Manager chỉ thấy các PR có trạng thái `SUBMITTED` / `PENDING_MANAGER_APPROVAL` thuộc phòng ban mình quản lý kèm chi tiết ngân sách.
+  * *AC2:* Manager có thể Approve (chuyển trạng thái PR thành `APPROVED` nếu $\le 50M$ hoặc chuyển tiếp Finance nếu $> 50M$), Reject (kèm bắt buộc nhập lý do), hoặc Request Revision.
+  * *AC3:* Chặn No Self-Approval: Người tạo PR không thể tự phê duyệt đơn của chính mình.
 - **Kiểm thử bắt buộc:** Pytest chặn HTTP 403 Forbidden khi Employee cố tình gọi API approve; Pytest kiểm tra quy tắc REQ-BR-02 (> 50 triệu cần duyệt cấp cao); Test luồng Request Revision.
-- **Bằng chứng cần thu thập:** Terminal log nhận mã 403 Forbidden khi dùng token Employee; Screenshot màn hình Manager Approval Inbox; Pytest HTML execution report.
+- **Bằng chứng cần thu thập:** Terminal log nhận mã 403 Forbidden khi dùng token Employee; Screenshot màn hình Manager Approval Inbox; Pytest HTML execution report (`test_pr_approval_prisma.py`).
 - **Git Commit / PR Scope:** `feat(approval): implement manager approval workflow and rbac guards [TASK-005][TASK-012]`
 - **Kịch bản Demo 5 phút:**
-  * *Phút 1:* Đăng nhập với tài khoản role `MANAGER`, mở giao diện "Approval Inbox". Hiển thị danh sách các PR chờ xử lý.
-  * *Phút 2:* Chọn PR #101 (tổng tiền 15 triệu) → Kiểm tra chi tiết và bấm "Request Revision" kèm ghi chú "Cần bổ sung báo giá dự kiến" → PR chuyển trạng thái, người tạo nhận được phản hồi.
+  * *Phút 1:* Đăng nhập với tài khoản role `MANAGER`, mở giao diện "Approval Inbox". Hiển thị danh sách các PR chờ xử lý của phòng ban.
+  * *Phút 2:* Chọn PR #101 (tổng tiền 15 triệu) → Kiểm tra chi tiết và bấm "Request Revision" kèm ghi chú "Cần bổ sung chi tiết cấu hình" → PR chuyển trạng thái, người tạo nhận được phản hồi.
   * *Phút 3:* Chọn PR #102 (tổng tiền 35 triệu) → Bấm "Approve" → PR chuyển trạng thái thành `APPROVED` (mở khóa cho Procurement thu thập báo giá).
-  * *Phút 4:* Thao tác bảo mật trực tiếp: Chuyển token sang tài khoản `EMPLOYEE` và gửi lệnh Approve qua Postman / Swagger → Server lập tức từ chối với mã HTTP 403 Forbidden.
+  * *Phút 4:* Thao tác bảo mật trực tiếp: Thử phê duyệt PR của chính mình (No Self-Approval) hoặc dùng token `EMPLOYEE` gửi lệnh Approve → Server lập tức từ chối với mã HTTP 403 Forbidden.
   * *Phút 5:* Giải thích quy tắc duyệt đa cấp REQ-BR-02 (đơn > 50 triệu yêu cầu phê duyệt thêm từ Finance Director) và cấu trúc Server-Side RBAC.
 - **Câu hỏi Viva thường gặp & Cách trả lời:**
   * *Q: "Tại sao không để Frontend tự ẩn nút Approve khi user là Employee mà phải cài đặt guard trên Backend?"*  
@@ -1473,61 +1477,31 @@ Nhằm đáp ứng yêu cầu chấm điểm cá nhân của giảng viên (mỗ
 
 ---
 
-#### 3. US-05: Nguyễn Thị Thuỳ Dung — Quản lý Supplier và thu thập Quotation
-- **User Story ID & Tên:** **US-05** — Quản lý Supplier và thu thập Quotation
-- **Primary Presentation Owner:** **Nguyễn Thị Thuỳ Dung** (Duy nhất 1 Primary Story)
+#### 3. US-07: Nguyễn Trúc Lam — AI Quotation Extraction & Recommendation
+- **User Story ID & Tên:** **US-07** — AI Quotation Extraction & Recommendation
+- **Chịu trách nhiệm chính (Primary Core Owner):** **Nguyễn Trúc Lam**
 - **Authoritative Backlog Tasks (T-xxx):**
-  * `T-051` — Quản lý thông tin Supplier
-  * `T-052` — Thu thập Quotation sau khi PR được Approved
-  * `T-053` — Liên kết Quotation với Purchase Request
-  * `T-054` — Chuẩn hóa thông tin Quotation
-- **Technical Implementation Tasks:** `TASK-008` (Supplier & Quotation API), `TASK-012` (Supplier & Quotation UI), `TASK-014` (Integration tests)
-- **Dependencies:** `TASK-003` (Prisma schema), `TASK-005` (Procurement role RBAC), PR phải ở trạng thái `APPROVED`
-- **Code Area / Modules:** `frontend/src/pages/Suppliers.tsx`, `frontend/src/pages/Quotations.tsx`, `backend/app/routers/supplier.py`, `backend/app/routers/quotation.py`
+  * `T-21` — Trích xuất PDF/Excel báo giá qua AI
+  * `T-22` — Màn hình review dữ liệu gốc
+  * `T-23` — Ma trận so sánh đa tiêu chí
+  * `T-24` — Recommendation đề xuất nhà cung cấp tối ưu
+  * `T-25` — Anomaly Alert phát hiện chênh lệch giá $\ge 20\%$
+- **Technical Implementation Tasks:** `TASK-009` (Tích hợp Real LLM API), `TASK-010` (Bộ dữ liệu đánh giá AI Eval Set ≥20 cases), `TASK-012` (Giao diện thẻ AI Recommendation & Comparison)
+- **Dependencies:** `TASK-008` (Dữ liệu Quotation trong DB), `TASK-009` (LLM integration)
+- **Code Area / Modules:** `frontend/src/pages/Quotations.tsx`, `frontend/src/components/AIRecommendationCard.tsx`, `backend/app/services/ai_service.py`
 - **Acceptance Criteria (AC):**
-  * *AC1:* Quản lý thông tin nhà cung cấp (tên, mã số thuế, liên hệ, đánh giá uy tín).
-  * *AC2:* Chỉ cho phép nhập và liên kết Quotation vào các PR đã ở trạng thái `APPROVED` (chặn khi PR đang DRAFT hoặc REJECTED).
-  * *AC3:* Cho phép một PR liên kết với nhiều Quotation từ các nhà cung cấp khác nhau.
-  * *AC4:* Dữ liệu Quotation được chuẩn hóa: đơn giá, số lượng, thời gian giao hàng (lead time), thời hạn bảo hành.
-- **Kiểm thử bắt buộc:** Test CRUD thông tin Supplier; Test chặn upload Quotation vào PR chưa Approved; Test liên kết nhiều báo giá vào 1 PR.
-- **Bằng chứng cần thu thập:** Screenshot danh sách Supplier và form nhập Quotation; API request log tạo Quotation; Bảng dữ liệu `Supplier` và `Quotation` trên Supabase Table Editor.
-- **Git Commit / PR Scope:** `feat(quotation): implement supplier management and quotation gathering [TASK-008][TASK-012]`
-- **Kịch bản Demo 5 phút:**
-  * *Phút 1:* Đăng nhập tài khoản role `PROCUREMENT_OFFICER`, vào màn hình Quản lý Nhà cung cấp (Suppliers). Xem danh sách và tạo nhanh 1 nhà cung cấp mới.
-  * *Phút 2:* Vào danh sách Purchase Request, chọn PR #102 đã được Manager Lam phê duyệt `APPROVED` ở bước trước.
-  * *Phút 3:* Nhập báo giá thứ nhất từ Nhà cung cấp A (Đơn giá: 10 triệu, số lượng: 3, giao hàng: 5 ngày, bảo hành: 12 tháng).
-  * *Phút 4:* Tiếp tục nhập báo giá thứ hai từ Nhà cung cấp B (Đơn giá: 9.5 triệu, giao hàng: 15 ngày, bảo hành: 6 tháng). Chứng minh quan hệ 1 PR liên kết nhiều Quotations.
-  * *Phút 5:* Thử cố tình liên kết Quotation vào một PR đang ở trạng thái DRAFT → hệ thống chặn ngay và báo lỗi; mở Supabase Dashboard xác nhận các bản ghi đã lưu vào bảng `Quotation`.
-- **Câu hỏi Viva thường gặp & Cách trả lời:**
-  * *Q: "Tại sao lại có quy tắc chỉ PR đã APPROVED mới được thu thập báo giá?"*  
-    *A:* "Để tránh lãng phí nguồn lực của bộ phận Mua sắm (Procurement). Chỉ khi nhu cầu mua sắm được cấp quản lý phê duyệt về chủ trương và ngân sách thì mới tiến hành tìm kiếm và làm việc với các nhà cung cấp bên ngoài."
-  * *Q: "Dữ liệu Quotation liên kết với PR trong database như thế nào?"*  
-    *A:* "Trong `schema.prisma`, bảng `Quotation` có trường khóa ngoại `purchase_request_id` tham chiếu đến `PurchaseRequest.id` và `supplier_id` tham chiếu đến `Supplier.id`. Điều này cho phép truy vấn quan hệ 1-N một cách nhanh chóng và toàn vẹn."
-
----
-
-#### 4. US-07: Trần Thị Kiều Giang — AI phân tích và Recommendation
-- **User Story ID & Tên:** **US-07** — AI phân tích và Recommendation
-- **Primary Presentation Owner:** **Trần Thị Kiều Giang** (Duy nhất 1 Primary Story)
-- **Authoritative Backlog Tasks (T-xxx):**
-  * `T-071` — Phân tích kết quả so sánh Quotation
-  * `T-072` — Tạo AI Recommendation
-  * `T-073` — Hiển thị Recommendation cho Procurement
-- **Technical Implementation Tasks:** `TASK-009` (LLM Integration), `TASK-010` (AI Eval Set >=20 cases), `TASK-012` (AI Recommendation UI)
-- **Dependencies:** `TASK-008` (Quotation data), `HRD-01` (LLM API key)
-- **Code Area / Modules:** `backend/app/services/ai_service.py`, `backend/tests/ai_eval/run_eval.py`, `frontend/src/components/AIRecommendationCard.tsx`
-- **Acceptance Criteria (AC):**
-  * *AC1:* AI tự động tổng hợp và so sánh các Quotation theo nhiều chiều: đơn giá, tổng chi phí, thời gian giao hàng, điều khoản bảo hành.
+  * *AC1:* AI tự động trích xuất thông tin báo giá từ file và so sánh theo nhiều chiều: đơn giá, tổng chi phí, thời gian giao hàng, bảo hành.
   * *AC2:* AI sinh ra đề xuất lựa chọn nhà cung cấp tối ưu kèm phần lập luận giải thích logic (Reasoning) rõ ràng, minh bạch.
-  * *AC3:* Đề xuất của AI chỉ mang tính tham khảo (Recommendation), quyền quyết định lựa chọn báo giá cuối cùng thuộc về nhân viên Procurement.
+  * *AC3:* Cảnh báo giá bất thường khi phát hiện đơn giá chênh lệch $\ge 20\%$ so với giá trung bình/lịch sử.
+  * *AC4:* Human-in-the-loop: Đề xuất của AI chỉ mang tính tham khảo (Recommendation), quyền quyết định lựa chọn báo giá cuối cùng thuộc về nhân viên Procurement.
 - **Kiểm thử bắt buộc:** Chạy script đánh giá `run_eval.py` trên bộ dữ liệu ≥20 cases; Test Pydantic schema validation; Test timeout fallback.
 - **Bằng chứng cần thu thập:** Thẻ AI Recommendation trên giao diện người dùng; File báo cáo `ai_eval_report.md` ghi nhận kết quả chạy 20+ cases; Log prompt và response của LLM.
 - **Git Commit / PR Scope:** `feat(ai): implement hybrid llm quotation recommendation and evaluation set [TASK-009][TASK-010]`
 - **Kịch bản Demo 5 phút:**
-  * *Phút 1:* Mở màn hình So sánh Báo giá (Comparison View) của PR #102 (đã có 2 báo giá từ Dung ở US-05).
+  * *Phút 1:* Mở màn hình So sánh Báo giá (Comparison View) của PR đã có 2-3 báo giá từ các nhà cung cấp khác nhau.
   * *Phút 2:* Bấm nút "Chạy AI Phân tích & Đề xuất (AI Recommendation)". Màn hình hiển thị trạng thái xử lý bất đồng bộ.
   * *Phút 3:* Kết quả hiển thị trực quan: Bảng điểm đa tiêu chí (Chi phí 40%, Thời gian giao 30%, Bảo hành & Uy tín 30%). AI phân tích rõ ưu/nhược điểm của từng nhà cung cấp.
-  * *Phút 4:* AI đưa ra kết luận đề xuất (ví dụ: Chọn NCC A vì thời gian giao hàng nhanh hơn hẳn dù giá cao hơn 5%, phù hợp với tính khẩn cấp của PR).
+  * *Phút 4:* AI đưa ra kết luận đề xuất (ví dụ: Chọn NCC A vì thời gian giao hàng nhanh hơn hẳn dù giá cao hơn 5%, phù hợp với tính khẩn cấp của PR). Hiển thị Anomaly Alert nếu có báo giá lệch $\ge 20\%$.
   * *Phút 5:* Trình chiếu bộ kiểm thử AI Evaluation Suite (`run_eval.py`) với 20+ cases đa dạng tình huống, chứng minh tính ổn định của mô hình và cơ chế kiểm soát lỗi qua Pydantic schema.
 - **Câu hỏi Viva thường gặp & Cách trả lời:**
   * *Q: "Tại sao nhóm chọn kiến trúc Hybrid AI (HD-03) mà không để AI tự động chốt đơn và ghi vào Database?"*  
@@ -1537,69 +1511,97 @@ Nhằm đáp ứng yêu cầu chấm điểm cá nhân của giảng viên (mỗ
 
 ---
 
-#### 5. US-09: Trần Thị Thu Hà — Lựa chọn Supplier và tạo Purchase Order
-- **User Story ID & Tên:** **US-09** — Lựa chọn Supplier và tạo Purchase Order
-- **Primary Presentation Owner:** **Trần Thị Thu Hà** (Duy nhất 1 Primary Story)
+#### 4. US-08: Nguyễn Thị Thùy Dung — Lựa chọn NCC & Tạo Purchase Order
+- **User Story ID & Tên:** **US-08** — Lựa chọn NCC & Tạo Purchase Order (Server-Side Quantity Lock)
+- **Chịu trách nhiệm chính (Primary Core Owner):** **Nguyễn Thị Thùy Dung**
 - **Authoritative Backlog Tasks (T-xxx):**
-  * `T-091` — Lựa chọn Supplier
-  * `T-092` — Lựa chọn Quotation
-  * `T-093` — Tạo Purchase Order từ Quotation
-  * `T-094` — Đảm bảo đơn giá và số lượng trên PO khớp Quotation
-- **Technical Implementation Tasks:** `TASK-002` (PO Schema quantity), `TASK-006` (Fix BUG-001 PR Guard), `TASK-012` (Create PO UI), `TASK-014` (Unit tests)
+  * `T-26` — Tạo PO từ PR đã duyệt
+  * `T-27` — Kiểm tra điều kiện Approval/Supplier (Fix BUG-001 / HD-04)
+  * `T-28` — Lưu liên kết PO với PR và Quotation được chọn
+  * `T-29` — Chặn thay đổi ngoài human review & Khóa giá/lượng server-side (T-094 / HD-08)
+- **Technical Implementation Tasks:** `TASK-002` (Thêm PO.quantity & migration), `TASK-006` (Enforce PR APPROVED Guard), `TASK-012` (Create PO UI), `TASK-014` (Unit tests HD-04, T-094)
 - **Dependencies:** `TASK-002` (Trường `quantity` trong schema PO), `TASK-003` (Prisma DB), `TASK-006` (Guard PR Approved), `TASK-005` (Procurement role)
-- **Code Area / Modules:** `frontend/src/pages/CreatePO.tsx`, `backend/app/services/procurement_service.py`, `backend/prisma/schema.prisma`, `backend/tests/test_business_rules.py`
+- **Code Area / Modules:** `frontend/src/pages/CreatePO.tsx`, `backend/app/services/procurement_service.py`, `backend/prisma/schema.prisma`, `backend/tests/test_po_prisma.py`
 - **Acceptance Criteria (AC):**
-  * *AC1:* Nhân viên Procurement chọn một Quotation chiến thắng từ danh sách so sánh để tiến hành lập hợp đồng đặt hàng.
+  * *AC1:* Nhân viên Procurement chọn một Quotation trúng thầu từ danh sách so sánh để tiến hành lập đơn đặt hàng.
   * *AC2:* Hệ thống kiểm tra bắt buộc PR phải ở trạng thái `APPROVED` mới cho phép tạo PO (khắc phục hoàn toàn lỗi BUG-001 / HD-04).
-  * *AC3:* Khi tạo PO, hệ thống tự động sao chép chính xác đơn giá (`unit_price`), số lượng (`quantity`) và tổng tiền từ Quotation sang PO (không cho phép sửa đổi lệch).
-  * *AC4:* Sau khi tạo PO thành công, trạng thái PR được chuyển sang `ORDERED`.
-- **Kiểm thử bắt buộc:** Pytest kiểm tra tạo PO thành công từ PR Approved; Pytest kiểm tra chặn tạo PO khi PR ở trạng thái DRAFT hoặc REJECTED (HD-04 PASS); Test đối soát trường `quantity`.
+  * *AC3:* Khi tạo PO, hệ thống tự động khóa chính xác đơn giá (`unit_price`), số lượng (`quantity`) và tổng tiền từ Quotation sang PO server-side theo T-094 / HD-08 (không tin dữ liệu client gửi lên).
+  * *AC4:* Sau khi tạo PO thành công, trạng thái PR được chuyển sang `PO_CREATED` / `ORDERED` trong transaction nguyên tử (atomic).
+- **Kiểm thử bắt buộc:** Pytest kiểm tra tạo PO thành công từ PR Approved; Pytest kiểm tra chặn tạo PO khi PR ở trạng thái DRAFT hoặc REJECTED (HD-04 PASS); Test server-side quantity lock (14/14 test cases PASS).
 - **Bằng chứng cần thu thập:** Pytest execution log thể hiện test HD-04 PASS; Screenshot giao diện tạo PO; Bản ghi PurchaseOrder trong Supabase có cột `quantity`.
-- **Git Commit / PR Scope:** `fix(po): quantity and enforce pr approved guard [TASK-002][TASK-006][TASK-012]`
+- **Git Commit / PR Scope:** `fix(po): quantity lock and enforce pr approved guard [TASK-002][TASK-006][TASK-012]`
 - **Kịch bản Demo 5 phút:**
-  * *Phút 1:* Màn hình hiển thị danh sách các Quotation và kết quả đề xuất của AI từ US-07. Procurement Officer lựa chọn Quotation trúng thầu của Nhà cung cấp A.
+  * *Phút 1:* Màn hình hiển thị danh sách các Quotation và kết quả đề xuất của AI từ US-07. Procurement Officer lựa chọn Quotation trúng thầu của Nhà cung cấp.
   * *Phút 2:* Bấm "Tạo Purchase Order (PO)". Giao diện mở form xác nhận đơn đặt hàng.
-  * *Phút 3:* Chứng minh tính toàn vẹn dữ liệu: `quantity`, `unit_price`, `total_amount` được khóa cố định theo đúng báo giá đã chọn, không xảy ra sai lệch số liệu.
-  * *Phút 4:* Demo kiểm thử trực tiếp lỗi BUG-001 / HD-04: Thử gọi API tạo PO cho một PR chưa được Manager duyệt → Hệ thống lập tức từ chối và báo lỗi rõ ràng "Purchase Request must be APPROVED before creating a PO".
-  * *Phút 5:* Bấm xác nhận tạo PO cho PR hợp lệ → PO được sinh ra, PR chuyển trạng thái thành `ORDERED`; mở Supabase Table Editor xác nhận bản ghi PO có đầy đủ trường `quantity` đã migrate ở TASK-002.
+  * *Phút 3:* Chứng minh tính toàn vẹn dữ liệu: `quantity`, `unit_price`, `total_amount` được khóa cố định phía server theo đúng báo giá đã chọn (HD-08 Option A), không cho phép client can thiệp.
+  * *Phút 4:* Demo kiểm thử trực tiếp lỗi BUG-001 / HD-04: Thử gọi API tạo PO cho một PR chưa được duyệt → Hệ thống lập tức từ chối và báo lỗi rõ ràng "Purchase Request must be APPROVED before creating a PO".
+  * *Phút 5:* Bấm xác nhận tạo PO cho PR hợp lệ → PO được sinh ra, PR chuyển trạng thái thành `PO_CREATED`; mở Supabase Table Editor xác nhận bản ghi PO có đầy đủ trường `quantity` đã migrate ở TASK-002.
 - **Câu hỏi Viva thường gặp & Cách trả lời:**
   * *Q: "BUG-001 là lỗi gì và bạn đã khắc phục triệt để như thế nào theo quyết định HD-04?"*  
     *A:* "BUG-001 là lỗi thiếu sót trong logic ban đầu: hàm `create_po()` không kiểm tra trạng thái của PR, dẫn đến việc có thể tạo đơn đặt hàng từ một yêu cầu chưa được phê duyệt hoặc đã bị từ chối. Tôi đã cài đặt guard condition chặn đứng ngay từ đầu hàm `create_po()`, yêu cầu `pr.status == 'APPROVED'`, và viết bộ unit test tự động để bảo vệ quy tắc này không bao giờ bị phá vỡ."
   * *Q: "Tại sao việc bổ sung trường `quantity` vào model `PurchaseOrder` ở TASK-002 lại mang tính sống còn đối với hệ thống?"*  
-    *A:* "Trong schema ban đầu, model `PurchaseOrder` bị thiếu trường `quantity`, chỉ có tổng tiền. Nếu không có `quantity`, bộ phận kho khi nhận hàng (US-10) sẽ không có căn cứ để đối soát số lượng đặt mua với số lượng thực giao, và hệ thống sẽ không thể thực thi được quy tắc HD-07 (chỉ đóng PR khi tổng lượng hàng nhận đủ)."
+    *A:* "Trong schema ban đầu, model `PurchaseOrder` bị thiếu trường `quantity`, chỉ có tổng tiền. Nếu không có `quantity`, bộ phận kho khi nhận hàng (US-09) sẽ không có căn cứ để đối soát số lượng đặt mua với số lượng thực giao, và hệ thống sẽ không thể thực thi được quy tắc HD-07 (chỉ đóng PR khi tổng lượng hàng nhận đủ)."
 
 ---
 
-### 19.3. KẾ HOẠCH TRIỂN KHAI CHO 6 SUPPORTING IMPLEMENTATION STORIES
+#### 5. US-10: Trần Thị Thu Hà — Close Purchase Request & Đối soát
+- **User Story ID & Tên:** **US-10** — Close Purchase Request & Đối soát (3-Way Matching & HD-07 Guard)
+- **Chịu trách nhiệm chính (Primary Core Owner):** **Trần Thị Thu Hà**
+- **Authoritative Backlog Tasks (T-xxx):**
+  * `T-34` — Đối soát PR-PO-Receiving (3-way matching)
+  * `T-35` — Thực thi điều kiện Close PR (HD-07 / REQ-BR-11)
+  * `T-36` — Ghi nhận Audit Trail khi Close và tất toán ngân sách (Budget settlement)
+- **Technical Implementation Tasks:** `TASK-007` (Fix HD-07 Receiving Completion Guard), `TASK-012` (Màn hình đối soát & Close PR UI), `TASK-014` (Unit tests HD-07)
+- **Dependencies:** `TASK-002` (Trường `quantity` trong schema PO), `TASK-003` (Prisma relation PR → PO → Receiving), US-09 (Bản ghi Receiving)
+- **Code Area / Modules:** `frontend/src/pages/PRDetail.tsx`, `backend/app/services/procurement_service.py`, `backend/app/routers/pr.py`, `backend/tests/test_close_prisma.py`
+- **Acceptance Criteria (AC):**
+  * *AC1:* PR chỉ được phép đóng (Close) khi tất cả các bước mua sắm liên quan và việc giao nhận hàng hóa đã hoàn tất đầy đủ.
+  * *AC2:* Enforce HD-07 / REQ-BR-11: `SUM(receivedQty) >= PurchaseOrder.quantity`. Nếu tổng số lượng hàng nhận chưa đủ, hệ thống chặn hành động Close và hiển thị thông báo chi tiết số lượng còn thiếu.
+  * *AC3:* Khi đóng PR thành công, trạng thái PR chuyển sang `CLOSED`, ngân sách đã tạm giữ (encumbered) được giải phóng và chuyển thành chi phí thực chi (settled).
+  * *AC4:* Sự kiện Close PR được ghi nhận đầy đủ vào Audit Trail (thời gian, người thực hiện, lý do).
+- **Kiểm thử bắt buộc:** Pytest kiểm tra chặn đóng PR khi `SUM(receivedQty) < PO.quantity` (HD-07 PASS); Pytest kiểm tra cho phép đóng PR khi đã nhận đủ hàng; Pytest kiểm tra đối soát 3 chiều PR-PO-Receiving.
+- **Bằng chứng cần thu thập:** Pytest execution log thể hiện test HD-07 PASS; Screenshot giao diện đối soát và nút Close PR; Bản ghi CSDL thể hiện PR chuyển trạng thái `CLOSED` và budget được settle.
+- **Git Commit / PR Scope:** `feat(pr): implement close pr with receiving completion guard and budget settlement [TASK-007][TASK-012]`
+- **Kịch bản Demo 5 phút:**
+  * *Phút 1:* Đăng nhập với tài khoản Finance / Admin, mở màn hình chi tiết PR đã có PO và đơn giao nhận. Trình bày bảng đối soát 3 chiều (PR - PO - Receiving).
+  * *Phút 2:* Thử nghiệm vi phạm quy tắc HD-07: Giả lập đơn hàng PO đặt 10 chiếc nhưng kho mới ghi nhận nhận được 6 chiếc (nhận một phần). Bấm nút "Close PR" → Hệ thống chặn lại lập tức và báo lỗi: "Cannot close PR: total received quantity (6) is less than PO ordered quantity (10)".
+  * *Phút 3:* Chuyển sang ghi nhận nhận nốt 4 chiếc còn lại qua bản ghi Receiving tiếp theo để đạt đủ 10/10 chiếc.
+  * *Phút 4:* Bấm nút "Close Purchase Request" → Hệ thống xác nhận đủ điều kiện, thực thi giao dịch nguyên tử: chuyển trạng thái PR sang `CLOSED`, thực hiện giải phóng ngân sách tạm giữ và tất toán chi phí.
+  * *Phút 5:* Mở màn hình Audit Trail (GOV-02) chứng minh toàn bộ chuỗi sự kiện đóng đơn và người thực hiện đã được ghi vết không thể tẩy xóa; mở terminal chạy `pytest backend/tests/test_close_prisma.py` chứng minh 14/14 tests PASS.
+- **Câu hỏi Viva thường gặp & Cách trả lời:**
+  * *Q: "Quy tắc HD-07 định nghĩa thế nào là 'Receiving complete' và tại sao phải có quy tắc này?"*
+    *A:* "Theo HD-07 và REQ-BR-11, 'Receiving complete' được định nghĩa là: tổng số lượng hàng hóa đã nhận qua các bản ghi Receiving phải lớn hơn hoặc bằng số lượng đặt trên PO (`SUM(receivedQty) >= PO.quantity`). Quy tắc này ngăn ngừa việc gian lận hoặc sơ suất tài chính khi đóng đơn và thanh toán cho nhà cung cấp khi hàng hóa thực tế chưa được giao đủ."
+  * *Q: "Vai trò của QA/Tester trong việc bảo đảm tính toàn vẹn của quy trình mua sắm từ đầu đến cuối là gì?"*
+    *A:* "QA không chỉ kiểm thử chức năng từng màn hình riêng lẻ mà thiết lập chuỗi kiểm thử hồi quy end-to-end bảo vệ toàn bộ state machine: từ `SUBMITTED` → `APPROVED` → `ORDERED` → `CLOSED`. Đảm bảo mọi guard condition (như No Self-Approval, Budget check, PO approved guard, Receiving guard) đều được tự động hóa kiểm tra bằng Pytest và Playwright."
 
-6 User Story này là công việc kỹ thuật bổ trợ bắt buộc nhằm hoàn thiện 100% tính năng của hệ thống. **Các thành viên được phân bổ không trình bày các Story này như bài thuyết trình thứ hai**, mà tập trung vào việc đảm bảo code chạy đúng, có automated test và evidence đầy đủ.
+---
 
-> **Important Note on Supporting Assignment:** "Supporting Assignee is an implementation responsibility only and does not create a second Primary Presentation Story." (Trách nhiệm của Supporting Assignee chỉ thuần túy là thực hiện phần việc kỹ thuật được phân bổ, tuyệt đối không tạo thành Primary Presentation Story thứ hai của bất kỳ thành viên nào).
+### 19.3. KẾ HOẠCH TRIỂN KHAI VÀ PHỐI HỢP CHO CÁC USER STORIES TRONG HỆ THỐNG
 
-| User Story bổ trợ | Supporting Assignee (Người hỗ trợ triển khai) | Backlog Tasks | Implementation Tasks | Mối liên hệ nghiệp vụ & kỹ thuật với Primary Story | Yêu cầu kiểm thử & Bằng chứng |
+Bảng dưới đây quy định phân công trách nhiệm chính và các thành viên phối hợp cho toàn bộ các User Story còn lại trong hệ thống:
+
+| User Story | Thành viên chịu trách nhiệm chính | Thành viên phối hợp | Backlog Tasks | Implementation Tasks | Mô tả công việc phối hợp |
 |---|---|---|---|---|---|
-| **US-02** — Theo dõi Purchase Request | **Dương** (hỗ trợ bởi Lam) | **T-021** | TASK-012 | Gắn liền trực tiếp với vòng đời Purchase Request của Dương ở US-01. Cung cấp danh sách và badge trạng thái theo thời gian thực (DRAFT, SUBMITTED, APPROVED, ORDERED, CLOSED). | UI Screenshot danh sách PR với các badges trạng thái; Kiểm tra chuyển trạng thái sau mỗi bước nghiệp vụ. |
-| **US-04** — Kiểm tra Budget | **Lam** (hỗ trợ bởi Dương) | **T-041**, **T-042** | TASK-003, TASK-012, TASK-014 | Gắn liền với màn hình duyệt đơn của Lam ở US-03. Khi Manager xem PR, hệ thống kiểm tra ngân sách phòng ban và hiển thị Budget Warning Banner nếu PR vượt ngân sách hoặc sắp chạm trần (REQ-BR-01). | Banner cảnh báo ngân sách trên UI; Pytest log kiểm tra từ chối phê duyệt khi vượt quá ngân sách. |
-| **US-06** — So sánh Quotation | **Dung** (hỗ trợ bởi Giang) | **T-061**, **T-062**, **T-063** | TASK-008, TASK-012 | Kế thừa trực tiếp từ các báo giá do Dung thu thập ở US-05. Hiển thị bảng so sánh đa cột (side-by-side) đối chiếu đơn giá, thời gian giao hàng và bảo hành giữa các nhà cung cấp trước khi AI phân tích. | Giao diện bảng so sánh Quotation hoàn chỉnh; API log lấy danh sách quotation của 1 PR. |
-| **US-08** — AI cảnh báo bất thường | **Giang** (hỗ trợ bởi Dung) | **T-081**, **T-082**, **T-083** | TASK-009, TASK-012, TASK-014 | Gắn liền với dịch vụ AI của Giang ở US-07. Cài đặt thuật toán phân tích đơn giá và gắn badge cảnh báo nổi bật khi đơn giá của Quotation cao hơn ≥20% so với đơn giá lịch sử của cùng mặt hàng (REQ-FR-15). | Badge cảnh báo giá bất thường hiển thị trên giao diện so sánh; Pytest log kiểm tra công thức tính độ lệch giá ≥20%. |
-| **US-10** — Ghi nhận Receiving | **Hà** (hỗ trợ bởi Dung) | **T-101**, **T-102**, **T-103** | TASK-012, TASK-014 | Kế thừa trực tiếp từ Purchase Order do Hà tạo ở US-09. Cho phép thủ kho/Procurement ghi nhận số lượng hàng thực tế nhận từ nhà cung cấp, hỗ trợ nhận hàng nhiều đợt (partial receiving). | Form nhập phiếu Receiving; Bằng chứng bản ghi trong bảng `Receiving` trên Supabase PostgreSQL. |
-| **US-11** — Close Purchase Request | **Hà** (hỗ trợ bởi Lam) | **T-111** | TASK-007, TASK-012, TASK-014 | Khâu kết thúc quy trình mua sắm. Cài đặt guard HD-07 / REQ-BR-11: chỉ cho phép đóng PR khi `SUM(receivedQty) >= PO.quantity`. Nếu đủ hàng, chuyển trạng thái PR thành `CLOSED`. | Pytest log HD-07 PASS (chặn đóng khi thiếu hàng, cho phép đóng khi đủ); UI thông báo đóng PR thành công. |
+| **US-02** — Theo dõi Purchase Request | **Nguyễn Thị Thùy Dung** | Trần Thị Kiều Giang | **T-04**, **T-05**, **T-06** | TASK-012 | Dung thiết kế state machine và API truy xuất timeline; Giang dựng giao diện timeline trực quan trên Frontend. |
+| **US-03** — AI Suggestion Description | **Nguyễn Trúc Lam** | Trần Thị Kiều Giang, Nguyễn Thị Thùy Dung | **T-07**, **T-08**, **T-09** | TASK-009, TASK-012 | Lam phụ trách prompt engineering và Pydantic parser; Giang tích hợp nút AI vào form tạo PR; Dung cung cấp API lưu trữ. |
+| **US-05** — Finance Budget Check | **Nguyễn Trương Thùy Dương** | Nguyễn Thị Thùy Dung | **T-14**, **T-15**, **T-16** | TASK-003, TASK-012 | Dương đặc tả logic kiểm tra ngân sách và cảnh báo vượt hạn mức; Dung triển khai truy vấn Budget trong PostgreSQL. |
+| **US-06** — Thu thập & Liên kết Quotations | **Nguyễn Trương Thùy Dương** | Nguyễn Thị Thùy Dung, Trần Thị Kiều Giang | **T-17**, **T-18**, **T-19**, **T-20** | TASK-008, TASK-012 | Dương đặc tả luồng thu thập báo giá; Dung xây dựng CRUD API Supplier & Quotation; Giang thiết kế UI danh sách báo giá. |
+| **US-09** — Ghi nhận Receiving | **Nguyễn Thị Thùy Dung** | Trần Thị Kiều Giang, Trần Thị Thu Hà | **T-30**, **T-31**, **T-32**, **T-33** | TASK-012, TASK-014 | Dung xây dựng service ghi nhận Receiving và kiểm tra số lượng; Giang dựng Form Receiving; Hà viết test cases kiểm tra giao nhận một phần/toàn phần. |
+| **GOV-01** — Ma trận RBAC 5 vai trò | **Nguyễn Thị Thùy Dung** | Nguyễn Trúc Lam, Trần Thị Thu Hà | **T-37**, **T-38**, **T-39** | TASK-005, TASK-014 | Dung xây dựng decorator `@require_role` và kiểm tra No Self-Approval server-side; Hà viết test suite chặn 403 Forbidden. |
+| **GOV-02** — Audit Trail toàn diện | **Trần Thị Thu Hà** | Nguyễn Thị Thùy Dung, Trần Thị Kiều Giang | **T-40**, **T-41**, **T-42** | TASK-012, TASK-014 | Hà xây dựng mô hình Audit Event và kịch bản tra soát; Dung ghi log tự động trong service; Giang dựng giao diện xem lịch sử Audit. |
 
 ---
 
-### 19.4. Bảng phân định trách nhiệm vòng đời (Lifecycle Responsibility Matrix)
+### 19.4. Ma trận phân định trách nhiệm thành viên (RACI Matrix)
 
-Mô hình phân định rõ vai trò của **Primary Presentation Owner** (chịu trách nhiệm tổng thể cho Story trình bày) và **Supporting Implementors** (hỗ trợ kỹ thuật):
-
-| Giai đoạn vòng đời | Trách nhiệm của Primary Presentation Owner | Trách nhiệm của Thành viên hỗ trợ (Supporting Members) | Bằng chứng nghiệm thu bắt buộc |
-|---|---|---|---|
-| **1. Requirements & AC** | Đọc hiểu sâu, ký nhận Acceptance Criteria cho Primary Story của mình. | Đóng góp ý kiến và rà soát tính liên kết giữa các Stories. | Mục AC chi tiết trong tài liệu và backlog. |
-| **2. Technical Design** | Xác định rõ luồng dữ liệu, APIs, Pydantic schemas và bảng CSDL liên quan. | Hỗ trợ cấu hình middleware, database relations và components dùng chung. | API Spec và Schema định nghĩa rõ ràng. |
-| **3. Implementation** | Trực tiếp lập trình hoặc điều phối code chính cho Story của mình. | Viết code các tính năng bổ trợ (Supporting Stories) được phân công. | Git Commits chuẩn cú pháp có gắn ID Task. |
-| **4. Testing & Verification**| Xác nhận bộ Automated Unit Tests và Critical E2E Tests cho Story của mình PASS 100%. | Hỗ trợ viết test cases bổ trợ và chạy script kiểm thử. | Pytest & Playwright HTML Reports. |
-| **5. Evidence Packaging** | Thu thập đầy đủ screenshots, execution logs, API logs của Story mình phụ trách. | Hỗ trợ chụp màn hình và lưu log của các phần việc bổ trợ. | Thư mục `docs/evidence/` được tổ chức ngăn nắp. |
-| **6. 5-Minute Demo Prep** | Làm chủ kịch bản demo 5 phút, diễn tập thao tác mượt mà trên môi trường thật. | Đảm bảo dữ liệu test mẫu (seed data) luôn sẵn sàng cho bài demo. | Kịch bản demo chuẩn xác theo từng phút. |
-| **7. Viva Defense** | Trực tiếp trả lời các câu hỏi kỹ thuật chuyên sâu của hội đồng về Story của mình. | Phối hợp trả lời các câu hỏi về hạ tầng chung hoặc tính năng bổ trợ. | Điểm số bảo vệ của từng cá nhân và nhóm. |
+| Giai đoạn vòng đời | Trần Thị Kiều Giang | Nguyễn Trương Thùy Dương | Nguyễn Trúc Lam | Nguyễn Thị Thùy Dung | Trần Thị Thu Hà | Bằng chứng nghiệm thu |
+|---|:---:|:---:|:---:|:---:|:---:|---|
+| **1. Đặc tả yêu cầu & Backlog** | Phối hợp UI/UX | **Chịu trách nhiệm chính (BA/PO)** | Phối hợp AI Scope | Phối hợp Data Scope | Phối hợp Acceptance Criteria | `taiga-backlog.md`, `requirements.md` |
+| **2. Kiến trúc & Database** | Phối hợp Frontend | Phối hợp Business Rules | Phối hợp AI Services | **Chịu trách nhiệm chính (Backend)** | Phối hợp QA Schema | `schema.prisma`, Supabase Tables |
+| **3. Phát triển tính năng** | Form PR, UI chung (US-01) | Approval, Budget, Quotation (US-04, 05, 06) | AI Suggestion & Recommendation (US-03, 07) | PO, Receiving, RBAC (US-02, 08, 09, GOV-01) | Close PR, Audit (US-10, GOV-02) | Mã nguồn Frontend & Backend |
+| **4. Kiểm thử tự động** | Component tests | Business flow tests | AI eval tests (20+ cases) | API & DB migration tests | **Chịu trách nhiệm chính (QA Lead)** | Pytest logs, Playwright reports |
+| **5. Chuẩn bị Demo 5 phút** | Làm chủ demo US-01 | Làm chủ demo US-04 | Làm chủ demo US-07 | Làm chủ demo US-08 | Làm chủ demo US-10 | Kịch bản demo 5 phút từng cá nhân |
+| **6. Viva Defense** | Bảo vệ US-01 & Frontend | Bảo vệ US-04 & Nghiệp vụ | Bảo vệ US-07 & AI Engine | Bảo vệ US-08 & CSDL/Backend | Bảo vệ US-10 & QA/Governance | Điểm bảo vệ cá nhân và nhóm |
 
 ---
 
@@ -1609,45 +1611,45 @@ Mô hình phân định rõ vai trò của **Primary Presentation Owner** (chị
 Phase 0: Chuẩn bị môi trường & Baseline (Toàn bộ nhóm setup)
   - Khởi tạo repo local, cấu hình .env.example, tạo Supabase project và lấy LLM API Key (HRD-01).
 
-Phase 1: Database & Persistence Foundation (Shared Infra / Hà / Dung)
-  - TASK-001 (Supabase Postgres Connection)
-  - TASK-002 (Thêm quantity vào PurchaseOrder schema) — sau TASK-001
-  - TASK-003 (Refactor procurement_service sang Prisma Client) — sau TASK-001, TASK-002
+Phase 1: Database & Persistence Foundation (Shared Infra / Dung / Hà / Giang)
+  - TASK-001 (Supabase Postgres Connection) — Giang, Dung
+  - TASK-002 (Thêm quantity vào PurchaseOrder schema) — Dung, Hà
+  - TASK-003 (Refactor procurement_service sang Prisma Client) — Dung, Toàn nhóm
 
-Phase 2: Authentication Foundation (Shared Infra / Dương / Lam)
-  - TASK-004 (FastAPI Supabase JWT Verification Middleware) — có thể làm song song với TASK-002/003
+Phase 2: Authentication Foundation (Shared Infra / Dương / Lam / Dung)
+  - TASK-004 (FastAPI Supabase JWT Verification Middleware) — Dung, Dương, Lam
 
-Phase 3: Server-Side Authorization (Lam / Hà)
-  - TASK-005 (Server-side RBAC & 403 Guards) — sau TASK-003, TASK-004
+Phase 3: Server-Side Authorization (Dung / Hà / Dương)
+  - TASK-005 (Server-side RBAC & 403 Guards, GOV-01) — Dung, Hà
 
-Phase 4: Core Business Rules Guards (Hà / Lam) [Song song với Phase 5, Phase 6]
-  - TASK-006 (Fix BUG-001: Enforce PR APPROVED in create_po) — sau TASK-003
-  - TASK-007 (Fix HD-07: Enforce Receiving Completion in close_pr) — sau TASK-002, TASK-003
+Phase 4: Core Business Rules Guards (Dung / Hà)
+  - TASK-006 (Fix BUG-001: Enforce PR APPROVED in create_po, US-08) — Dung, Hà
+  - TASK-007 (Fix HD-07: Enforce Receiving Completion in close_pr, US-10) — Hà, Dung
 
-Phase 5: Supplier & Quotation Backend APIs (Dung / Giang)
-  - TASK-008 (Supplier CRUD & Quotation linking API) — sau TASK-003, TASK-005
+Phase 5: Supplier & Quotation Backend APIs (Dương / Dung / Giang)
+  - TASK-008 (Supplier CRUD & Quotation linking API, US-05, US-06) — Dương, Dung, Giang
 
-Phase 6: AI Features & Evaluation (Giang / Dương) [Bắt đầu sớm khi có HRD-01]
-  - TASK-009 (Real LLM Integration & Pydantic Validation) — cần HRD-01 resolved
-  - TASK-010 (AI Evaluation Dataset >=20 cases & Runner) — sau TASK-009
+Phase 6: AI Features & Evaluation (Lam / Giang / Hà)
+  - TASK-009 (Real LLM Integration & Pydantic Validation, US-03, US-07) — Lam, Giang
+  - TASK-010 (AI Evaluation Dataset >=20 cases & Runner, US-07) — Lam, Hà
 
-Phase 7: Frontend Modularization & UI (Toàn bộ nhóm) [Sau Phase 2, 3, 4, 5, 6]
-  - TASK-011 (React Router & Supabase Auth Login) — sau TASK-004, TASK-005
-  - TASK-012 (Procurement Workflow UI — từng thành viên làm giao diện Story của mình) — sau TASK-011, 008, 009
+Phase 7: Frontend Modularization & UI (Toàn bộ nhóm / Giang lead UI)
+  - TASK-011 (React Router & Supabase Auth Login) — Giang, Dung
+  - TASK-012 (Procurement Workflow UI — từng thành viên làm giao diện User Story do mình phụ trách) — Toàn nhóm
 
-Phase 8 & 9: Testing Suite & E2E Evidence (QA Lead / Cả nhóm)
-  - TASK-014 (Backend Automated Test Suite & Pytest Report) — sau TASK-006, TASK-007
-  - TASK-013 (Playwright Critical-Path E2E Tests) — sau TASK-011, TASK-012, TASK-014
+Phase 8 & 9: Testing Suite & E2E Evidence (Hà lead QA / Cả nhóm)
+  - TASK-014 (Backend Automated Test Suite & Pytest Report) — Hà, Toàn nhóm
+  - TASK-013 (Playwright Critical-Path E2E Tests) — Hà, Giang, Dung
 
-Phase 10: Security & Non-Functional Verification (Shared Infra)
-  - TASK-015 (Security & NFR Documentation & Evidence) — sau TASK-004, TASK-005, TASK-014
+Phase 10: Security & Non-Functional Verification (Shared Infra / Hà / Dung)
+  - TASK-015 (Security & NFR Documentation & Evidence) — Hà, Dung
 
-Phase 11: CI/CD & Cloud Deployment (Shared Infra)
-  - TASK-016 (Dockerfiles & GitHub Actions CI Workflow) — sau TASK-014
-  - TASK-017 (Deploy Backend & Frontend to Public Live URL) — sau TASK-016, TASK-011, TASK-012 (cần HRD-02)
+Phase 11: CI/CD & Cloud Deployment (Shared Infra / Giang / Dung)
+  - TASK-016 (Dockerfiles & GitHub Actions CI Workflow) — Giang, Dung
+  - TASK-017 (Deploy Backend & Frontend to Public Live URL) — Giang, Dung
 
 Phase 12: Final Release, Evidence Packaging & Viva Preparation (Cả nhóm)
-  - TASK-018 (Đóng gói evidence, cập nhật Compliance Matrix, hoàn thiện Runbook và diễn tập Demo 5 phút) — sau TASK-017
+  - TASK-018 (Đóng gói evidence, cập nhật Compliance Matrix, hoàn thiện Runbook và diễn tập Demo 5 phút cho 5 User Story cốt lõi) — Cả nhóm
 ```
 
 ---
@@ -1670,44 +1672,33 @@ Phase 12: Final Release, Evidence Packaging & Viva Preparation (Cả nhóm)
 
 ---
 
-## 22. Self-Check
+## 22. Self-Check (Kiểm tra tính nhất quán theo Group-01)
 
-- [x] Có đúng 11 User Stories từ US-01 đến US-11 (khớp 100% với `user-story.md`).
-- [x] Có đúng mapping US → T-xxx chính thức theo Project Backlog (`docs/project/backlog.md`).
-- [x] Có đầy đủ tất cả 27 mã Backlog Tasks T-xxx:
-  * US-01: `T-011`, `T-012`, `T-013`, `T-014`
-  * US-02: `T-021`
-  * US-03: `T-031`, `T-032`, `T-033`, `T-034`
-  * US-04: `T-041`, `T-042`
-  * US-05: `T-051`, `T-052`, `T-053`, `T-054`
-  * US-06: `T-061`, `T-062`, `T-063`
-  * US-07: `T-071`, `T-072`, `T-073`
-  * US-08: `T-081`, `T-082`, `T-083`
-  * US-09: `T-091`, `T-092`, `T-093`, `T-094`
-  * US-10: `T-101`, `T-102`, `T-103`
-  * US-11: `T-111`
-- [x] Có đúng 5 PRIMARY PRESENTATION STORIES làm khung thuyết trình 5 phút:
-  * Dương → US-01
-  * Lam → US-03
-  * Dung → US-05
-  * Giang → US-07
-  * Hà → US-09
-- [x] Dương chỉ là Primary Owner của US-01.
-- [x] Lam chỉ là Primary Owner của US-03.
-- [x] Dung chỉ là Primary Owner của US-05.
-- [x] Giang chỉ là Primary Owner của US-07.
-- [x] Hà chỉ là Primary Owner của US-09.
-- [x] Tuyệt đối không thành viên nào có Primary Presentation Story thứ hai.
-- [x] 6 User Story còn lại (US-02, US-04, US-06, US-08, US-10, US-11) được phân bổ vào Supporting Implementation Work rõ ràng, không bị bỏ rơi.
-- [x] Phân công supporting work không bị hiểu nhầm thành Primary Presentation Ownership.
-- [x] Tuyệt đối không có Backlog Task T-xxx nào bị đổi tên thành TASK-xxx hoặc ngược lại.
-- [x] Tuyệt đối không có Technical Task TASK-xxx nào giả mạo làm T-xxx.
-- [x] TASK-007 được mapping chính xác với US-11 / T-111, thể hiện rõ quan hệ phụ thuộc dữ liệu upstream từ US-10 (Receiving) và enforce guard `SUM(receivedQty) >= PO.quantity` per HD-07.
+- [x] Có đúng 10 User Stories từ US-01 đến US-10 và 2 Governance Stories (GOV-01, GOV-02) (khớp 100% với `docs/03-product/taiga-backlog.md`).
+- [x] Không còn tồn tại mã US-11 của mô hình tài liệu cũ; nghiệp vụ Close Purchase Request được map chuẩn xác về **US-10** (Trần Thị Thu Hà phụ trách).
+- [x] Phân công trách nhiệm chính thức (Authoritative Group-01 Allocation) được tuân thủ 100%:
+  * **Trần Thị Kiều Giang** → **US-01**
+  * **Nguyễn Trương Thùy Dương** → **US-04**, **US-05**, **US-06**
+  * **Nguyễn Trúc Lam** → **US-03**, **US-07**
+  * **Nguyễn Thị Thùy Dung** → **US-02**, **US-08**, **US-09**, **GOV-01**
+  * **Trần Thị Thu Hà** → **US-10**, **GOV-02**
+- [x] 5 User Story cốt lõi làm khung thuyết trình 5 phút cá nhân được xác định rành mạch:
+  * Giang: US-01 (Tạo và chuẩn hóa PR)
+  * Dương: US-04 (Manager Review, Approval & Budget)
+  * Lam: US-07 (AI Extraction & Recommendation)
+  * Dung: US-08 (Lựa chọn NCC & Tạo PO có khóa giá/lượng T-094)
+  * Hà: US-10 (Close PR & Đối soát giao nhận HD-07)
+- [x] Tuyệt đối không còn bất kỳ mapping sai lệch cũ nào:
+  * Không còn Dương → US-01
+  * Không còn Lam → US-03 only
+  * Không còn Dung → US-05
+  * Không còn Giang → US-07
+  * Không còn Hà → US-09
+- [x] Phân biệt rành mạch giữa Backlog Task (`T-01`..`T-42` / `T-xxx`) và Technical Implementation Task (`TASK-001`..`TASK-018`).
+- [x] TASK-007 được mapping chính xác với US-10 (Close PR), thể hiện rõ quan hệ phụ thuộc dữ liệu upstream từ US-09 (Receiving) và enforce guard `SUM(receivedQty) >= PO.quantity` per HD-07.
 - [x] Thiết lập chuỗi truy xuất hoàn chỉnh: `US → T-xxx → TASK-xxx → Code → Test → Evidence → Commit/PR → Demo → Viva`.
 - [x] Giữ nguyên 18 Technical Implementation Tasks (TASK-001 → TASK-018) với dependency graph và branching hợp lý.
 - [x] Không có bất kỳ tuyên bố bằng chứng giả mạo (no fake evidence claims).
-- [x] Không tuyên bố PASS nếu chưa có execution evidence thực tế.
-- [x] Không ép trạng thái Compliance Matrix thành GREEN khi chưa có bằng chứng.
-- [x] Các quyết định kiến trúc HD-01 đến HD-07 từ `DECISION_LOG.md` được bảo toàn nguyên vẹn.
+- [x] Các quyết định kiến trúc HD-01 đến HD-08 và các quyết định kỹ thuật HD-REQ-05 đến HD-REQ-10 từ `DECISION_LOG.md` được bảo toàn nguyên vẹn.
 - [x] Không sửa đổi bất kỳ file mã nguồn, schema hay config nào trong đợt cập nhật này.
 - [x] `docs/IMPLEMENTATION_PLAN.md` là Single Source of Truth duy nhất cho kế hoạch triển khai.

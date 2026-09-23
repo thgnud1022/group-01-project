@@ -11,7 +11,14 @@ Tài liệu này ghi nhận việc sử dụng AI (Gemini/Antigravity) trong su�
 
 ---
 
-## Nhật ký sử dụng AI (AI Usage Log)
+> **QUẢN TRỊ TRUY NGUYÊN AI USAGE LOG (AI GOVERNANCE NOTICE):**
+> - **Early Phase AI Usage Log (AI-001 đến AI-038):** Toàn bộ 38 phiên làm việc gốc của giai đoạn khám phá, phân tích nghiệp vụ, thiết lập Vault và đặc tả Backlog ban đầu được bảo toàn nguyên vẹn 100% tại [docs/02-vault/AI_USAGE_LOG.md](file:///d:/LTUD/group-01-project-main/docs/02-vault/AI_USAGE_LOG.md).
+> - **Final Delivery AI Usage Log (AI-001 đến AI-053):** Bảng dưới đây ghi nhận chi tiết hành trình kỹ thuật của giai đoạn Final Delivery (System Audit, Baseline, Git Branching, Database Migration TASK-001, TASK-002, T-094 và 100% chu trình Backend Data Migration TASK-003).
+> - **Bản đối chiếu chi tiết:** Xem báo cáo đối chiếu và giải quyết trùng mã tại [docs/AI_USAGE_LOG_RECONCILIATION.md](file:///d:/LTUD/group-01-project-main/docs/AI_USAGE_LOG_RECONCILIATION.md) và ma trận truy xuất tại [docs/AI_USAGE_TRACEABILITY.md](file:///d:/LTUD/group-01-project-main/docs/AI_USAGE_TRACEABILITY.md).
+
+---
+
+## Nhật ký sử dụng AI — Final Delivery Phase
 
 | ID | Thành viên phụ trách | Task | Prompt / Skill | Input Context | AI Output | Verification | Correction / Decision |
 |:---|:---|:---|:---|:---|:---|:---|:---|

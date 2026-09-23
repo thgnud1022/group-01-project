@@ -346,3 +346,42 @@ This log records the authoritative architectural and business decisions for the 
   - Integration tests will verify that re-approving an `APPROVED` PR is blocked.
 - **Date:** 2026-09-22
 - **Owner:** Group 01
+
+---
+
+## HD-11: Official Group-01 User Story Responsibility Allocation
+
+- **ID:** HD-11
+- **Title:** Official Group-01 User Story Responsibility Allocation
+- **Status:** **DECIDED**
+- **Decision:** Chuẩn hóa và đồng bộ 100% phân bổ trách nhiệm User Story theo phiên bản mới Group-01 (`taiga-backlog.md`), xóa bỏ mô hình phân chia 2 tầng cũ (5 Primary Presentation / 6 Supporting Implementation Stories). Mỗi thành viên chịu trách nhiệm chính về các User Story cụ thể, không gộp trách nhiệm và bảo đảm khả năng truy vết 1:1:
+  - **Trần Thị Kiều Giang:** **US-01** (Tạo & Chuẩn hóa Purchase Request)
+  - **Nguyễn Trương Thùy Dương:** **US-04** (Manager Review, Approval & Budget), **US-05** (Finance Budget Check), **US-06** (Thu thập & Liên kết Quotations)
+  - **Nguyễn Trúc Lam:** **US-03** (AI Suggestion Description), **US-07** (AI Quotation Extraction & Recommendation)
+  - **Nguyễn Thị Thùy Dung:** **US-02** (Theo dõi PR), **US-08** (Lựa chọn NCC & Tạo Purchase Order), **US-09** (Ghi nhận Receiving), **GOV-01** (Ma trận RBAC 5 vai trò)
+  - **Trần Thị Thu Hà:** **US-10** (Close Purchase Request & Đối soát), **GOV-02** (Audit Trail)
+
+  Khi chuẩn bị kịch bản thuyết trình độc lập 5 phút (5-Minute Viva Defense), mỗi thành viên tập trung vào **User Story cốt lõi (Primary Core Story)**:
+  - **Giang:** US-01 (Tạo PR)
+  - **Dương:** US-04 (Approval & Budget)
+  - **Lam:** US-07 (AI Recommendation & So sánh báo giá)
+  - **Dung:** US-08 (Purchase Order & Khóa giá/lượng T-094)
+  - **Hà:** US-10 (Close PR & Đối soát giao nhận HD-07)
+
+  Về danh mục User Story: Toàn bộ hệ thống sử dụng duy nhất dải mã `US-01` đến `US-10`, `GOV-01`, `GOV-02`. Nghiệp vụ đóng đơn mua sắm (Close Purchase Request) thuộc **US-10** (do Trần Thị Thu Hà phụ trách chính). Bãi bỏ hoàn toàn mã `US-11` của mô hình tài liệu cũ.
+- **Decision type:** Project Governance / Organization & Traceability
+- **Requirement/source:** Human Decision (Xác nhận phân công chính thức Group-01), `docs/03-product/taiga-backlog.md`, `_IMPORT_EARLY_PHASE/group-01`, `docs/POST_MERGE_DOCUMENTATION_AUDIT.md`.
+- **Reason:**
+  1. Loại bỏ hoàn toàn sự mâu thuẫn giữa Section 2 và các phần TASK-xxx trong `docs/IMPLEMENTATION_PLAN.md`.
+  2. Đồng bộ nhất quán giữa Implementation Plan, Taiga Backlog, AI Traceability Matrix và Decision Log.
+  3. Đảm bảo mỗi thành viên có quyền sở hữu nghiệp vụ rõ ràng, phục vụ đánh giá cá nhân và bảo vệ Viva độc lập.
+- **Alternatives considered:**
+  - *Giữ nguyên mô hình 2 tầng 5 Primary / 6 Supporting cũ*: Bị loại bỏ vì gây nhầm lẫn về quyền sở hữu (ownership), không khớp với backlog chính thức của Group-01.
+  - *Tạo thêm US-11 cho Close PR*: Bị loại bỏ vì Group-01 chỉ định nghĩa US-01..US-10 và Close PR đã nằm trong US-10.
+- **Consequences:**
+  - Toàn bộ tài liệu `docs/IMPLEMENTATION_PLAN.md` được cập nhật đồng bộ.
+  - Mọi tham chiếu cũ (Dương→US-01, Lam→US-03, Dung→US-05, Giang→US-07, Hà→US-09, và US-11) bị xóa bỏ hoàn toàn.
+- **Implementation implications:** Chỉ sửa đổi tài liệu (Documentation fix only). Không can thiệp mã nguồn, database hay cấu hình test.
+- **Verification/evidence required:** Báo cáo đối soát tính nhất quán `docs/ALLOCATION_CONSISTENCY_FIX_REPORT.md` xác nhận 0 xung đột tồn dư (`ALLOCATION_STATUS: CONSISTENT`).
+- **Date:** 2026-09-24
+- **Owner:** Group 01
