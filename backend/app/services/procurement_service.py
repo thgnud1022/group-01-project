@@ -1142,6 +1142,144 @@ class ProcurementService:
         return results
 
 
+    # =========================================================================
+    # STEP 3B.6: Goods Receiving Prisma Client Implementation (US-10)
+    # =========================================================================
+
+    @staticmethod
+    async def receive_goods_prisma(
+        po_id: str,
+        received_qty: int,
+        file_url: str = "https://example.com/bien-ban-giao-nhan.pdf",
+        received_items: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """
+        Create a Goods Receipt record directly in Supabase PostgreSQL via Prisma Client (US-10).
+        Enforces:
+        - PO MUST exist in PostgreSQL.
+        - Row-level lock on PurchaseOrder (SELECT ... FOR UPDATE) inside transaction.
+        - REQ-BR-04: Accumulated received quantity (SUM(receivedQty)) CANNOT exceed PO.quantity.
+        - Supports valid partial receipts (multiple receipts up to PO.quantity).
+        - received_qty MUST be a positive integer (> 0).
+        - Atomic transaction using prisma.tx().
+        - Zero dual-write to MockDB.
+        """
+        if not po_id or not isinstance(po_id, str) or not po_id.strip():
+            raise ValueError("Mã Purchase Order không hợp lệ hoặc rỗng.")
+        clean_po_id = po_id.strip()
+
+        try:
+            qty = int(received_qty)
+        except (ValueError, TypeError):
+            raise ValueError("Số lượng nhận hàng phải là số nguyên hợp lệ.")
+        if qty <= 0:
+            raise ValueError(f"Số lượng nhận hàng ({qty}) phải là số nguyên dương (> 0).")
+
+        clean_file_url = (
+            file_url.strip()
+            if (file_url and isinstance(file_url, str) and file_url.strip())
+            else "https://example.com/bien-ban-giao-nhan.pdf"
+        )
+        clean_received_items = (
+            received_items.strip()
+            if (received_items and isinstance(received_items, str) and received_items.strip())
+            else f"Bàn giao hàng hóa đợt nhận {qty} sản phẩm"
+        )
+
+        await connect_db()
+        prisma = get_prisma()
+
+        async with prisma.tx() as tx:
+            # 1. Row-level lock on PurchaseOrder
+            locked_pos = await tx.query_raw(
+                'SELECT id, quantity, "poNumber", status FROM "PurchaseOrder" WHERE id = $1 FOR UPDATE',
+                clean_po_id,
+            )
+            # Support lookup by poNumber if client passed poNumber instead of UUID
+            if not locked_pos:
+                locked_pos = await tx.query_raw(
+                    'SELECT id, quantity, "poNumber", status FROM "PurchaseOrder" WHERE "poNumber" = $1 FOR UPDATE',
+                    clean_po_id,
+                )
+
+            if not locked_pos:
+                raise ValueError(f"Không tìm thấy Purchase Order với mã: '{clean_po_id}'")
+
+            po_record = locked_pos[0]
+            po_db_id = po_record["id"]
+            po_max_quantity = int(po_record["quantity"])
+
+            # 2. Query accumulated received quantity in PostgreSQL
+            existing_receivings = await tx.receiving.find_many(
+                where={"purchaseOrderId": po_db_id}
+            )
+            total_already_received = sum(r.receivedQty for r in existing_receivings)
+
+            # 3. REQ-BR-04: Limit accumulated received quantity <= PO quantity
+            if total_already_received + qty > po_max_quantity:
+                raise ValueError(
+                    f"Nhận hàng thất bại: Tổng số lượng nhận ({total_already_received + qty}) "
+                    f"vượt quá số lượng đặt trên PO ({po_max_quantity})."
+                )
+
+            # 4. Create Receiving record in PostgreSQL
+            created_rec = await tx.receiving.create(
+                data={
+                    "purchaseOrderId": po_db_id,
+                    "receivedQty": qty,
+                    "receivedItems": clean_received_items,
+                    "fileUrl": clean_file_url,
+                }
+            )
+
+        return {
+            "id": created_rec.id,
+            "purchaseOrderId": created_rec.purchaseOrderId,
+            "poId": created_rec.purchaseOrderId,
+            "poNumber": po_record.get("poNumber"),
+            "receivedQty": created_rec.receivedQty,
+            "receivedItems": created_rec.receivedItems,
+            "fileUrl": created_rec.fileUrl,
+            "receivedDate": created_rec.receivedDate.isoformat() if created_rec.receivedDate else None,
+            "totalReceived": total_already_received + qty,
+            "poQuantity": po_max_quantity,
+        }
+
+    @staticmethod
+    async def list_receivings_prisma(purchase_order_id: Optional[str] = None) -> List[Dict[str, Any]]:
+        """List Goods Receipts from PostgreSQL, optionally filtered by purchaseOrderId."""
+        await connect_db()
+        prisma = get_prisma()
+        where_clause = {}
+        if purchase_order_id and isinstance(purchase_order_id, str) and purchase_order_id.strip():
+            clean_po = purchase_order_id.strip()
+            where_clause = {
+                "OR": [
+                    {"purchaseOrderId": clean_po},
+                    {"purchaseOrder": {"poNumber": clean_po}},
+                ]
+            }
+
+        recs = await prisma.receiving.find_many(
+            where=where_clause,
+            include={"purchaseOrder": True},
+            order={"receivedDate": "desc"},
+        )
+        return [
+            {
+                "id": r.id,
+                "purchaseOrderId": r.purchaseOrderId,
+                "poId": r.purchaseOrderId,
+                "poNumber": r.purchaseOrder.poNumber if r.purchaseOrder else None,
+                "receivedQty": r.receivedQty,
+                "receivedItems": r.receivedItems,
+                "fileUrl": r.fileUrl,
+                "receivedDate": r.receivedDate.isoformat() if r.receivedDate else None,
+            }
+            for r in recs
+        ]
+
+
     @staticmethod
     def receive_goods(po_id: str, received_qty: int, file_url: str) -> Dict[str, Any]:
         po = db.pos.get(po_id)

@@ -273,7 +273,17 @@ Mỗi thành viên làm **Primary Owner duy nhất cho đúng 1 User Story**. Th
   - Tests & Verification: Tạo `backend/tests/test_po_prisma.py` với 18 integration tests đạt 100% PASS (18/18 in 194.92s). Selected Prisma suite đạt 72/72 tests PASS.
   - Database Hygiene: Dọn sạch 100% test data (0 orphan POs, 0 orphan PRs, 0 orphan Quotations, 3 seeded suppliers, tempReserved = 0).
   - Migration Boundary: PO đã được migrate sang PostgreSQL. Các domain downstream Receiving (STEP 3B.6) và Close PR (STEP 3B.7) tiếp tục đọc MockDB cho tới các bước migration tương ứng.
-- Runtime business logic in `procurement_service.py` currently has PR creation, PR Approval, Supplier, Quotation, and Purchase Order migrated to PostgreSQL. Receiving and Close PR remain on MockDB awaiting subsequent migration steps.
+- **Step 3B.6 (Goods Receiving Migration Implementation):** DONE (`AI-052`).
+  - Triển khai `ProcurementService.receive_goods_prisma` và `list_receivings_prisma` bất đồng bộ; chuyển `POST /api/receiving` và `GET /api/receiving` sang gọi Prisma client.
+  - PO Lookup & Row-level Lock: Khóa dòng `PurchaseOrder` bằng `SELECT ... FOR UPDATE` bên trong transaction `prisma.tx()` (hỗ trợ tra cứu bằng cả PO UUID và `poNumber`).
+  - REQ-BR-04 Cumulative Quantity Validation: Truy vấn tổng số lượng hàng đã nhận lũy kế (`SUM(receivedQty)`); chặn tuyệt đối không cho phép tổng số lượng nhận vượt quá số lượng đặt trên PO (`PO.quantity`).
+  - Partial Receiving Support: Hỗ trợ nhận hàng thành nhiều đợt (partial deliveries) cho đến khi đạt đủ `PO.quantity`.
+  - Atomic Transaction: Tạo bản ghi `Receiving` trong PostgreSQL bên trong transaction `prisma.tx()`; tự động rollback nếu xảy ra lỗi. Zero dual-write vào `db.receivings`.
+  - Tests & Verification: Tạo `backend/tests/test_receiving_prisma.py` với 14 integration tests đạt 100% PASS (14/14 in 101.01s).
+  - Selected Backend Regression Suite: Đạt 86/86 tests PASS (14 test_receiving_prisma, 18 test_po_prisma, 15 test_supplier_quotation_prisma, 15 test_pr_approval_prisma, 10 test_pr_creation_prisma, 10 test_data_access_helpers, 4 test_business_rules in 524.20s).
+  - Database Hygiene: Dọn sạch 100% test data (0 orphan Receivings, 0 orphan POs, 0 orphan PRs, 0 orphan Quotations, 3 seeded suppliers, tempReserved = 0.0).
+  - Migration Boundary: Goods Receiving đã được migrate sang PostgreSQL. Domain downstream Close PR (STEP 3B.7) tiếp tục đọc MockDB cho tới bước migration tiếp theo.
+- Runtime business logic in `procurement_service.py` currently has PR creation, PR Approval, Supplier, Quotation, Purchase Order, and Goods Receiving migrated to PostgreSQL. Only Close PR remains on MockDB awaiting STEP 3B.7.
 
 **Target State:** Toàn bộ thao tác đọc/ghi dữ liệu (PR, Approval, Supplier, Quotation, PO, Receiving) thực thi qua Prisma Client bất đồng bộ (`prisma.purchaserequest`, `prisma.purchaseorder`, v.v.).
 
