@@ -385,3 +385,45 @@ This log records the authoritative architectural and business decisions for the 
 - **Verification/evidence required:** Báo cáo đối soát tính nhất quán `docs/ALLOCATION_CONSISTENCY_FIX_REPORT.md` xác nhận 0 xung đột tồn dư (`ALLOCATION_STATUS: CONSISTENT`).
 - **Date:** 2026-09-24
 - **Owner:** Group 01
+
+---
+
+## HD-12: Authentication Identity Binding via Supabase Auth User ID
+
+- **ID:** HD-12
+- **Title:** Authentication Identity Binding via Supabase Auth User ID
+- **Status:** **DECIDED**
+- **Decision:** Application User trong CSDL nội bộ sẽ được liên kết trực tiếp với Supabase Auth user thông qua giá trị verified JWT `sub` (Subject), được lưu tại trường `authUserId String? @unique` của model `User`.
+  Luồng xác thực và phân quyền chính thức:
+  ```text
+  Verified Supabase JWT
+    └─► extract verified sub (Supabase Auth User UUID)
+          └─► lookup User where authUserId = sub
+                └─► resolve Application User profile
+                      └─► extract Application Role (User.role)
+                            └─► TASK-005 Server-side RBAC
+  ```
+  Backend tuyệt đối không tin tưởng role hay email do client gửi trong request body, query parameter, hoặc frontend selector.
+- **Decision type:** Architecture / Security & Identity Resolution
+- **Requirement/source:** Quyết định HD-02, REQ-NFR-02 (Role separation), TASK-004, Phê duyệt chính thức của Human từ `docs/TASK-004-AUTH-DESIGN.md` (Option B).
+- **Reason:**
+  1. Tách biệt hoàn toàn giữa Authentication Identity (do Supabase Auth quản lý tại `auth.users`) và Application Identity (do bảng `public."User"` trong CSDL Mua sắm quản lý).
+  2. Sử dụng định danh bền vững (stable immutable Auth User ID) thay vì phụ thuộc vào trường `email` làm khóa liên kết.
+  3. Tuân thủ chuẩn mực thiết kế bảo mật OAuth2/OIDC trong môi trường doanh nghiệp.
+- **Alternatives considered:**
+  - *Option A — Mapping qua Verified Email*: Không sử dụng vì gắn chặt định danh danh tính vào địa chỉ email, tiềm ẩn rủi ro nếu có sự thay đổi email hoặc chuyển đổi nhà cung cấp định danh.
+- **Consequences:**
+  - Model `User` trong `schema.prisma` cần bổ sung trường `authUserId String? @unique`.
+  - Cần thực hiện migration cơ sở dữ liệu (`prisma db push` lên Supabase PostgreSQL) khi chuyển sang pha implementation.
+  - 5 application users mẫu hiện tại trong CSDL cần được liên kết với 5 Supabase Auth users tương ứng.
+  - Middleware TASK-004 sẽ kiểm tra chữ ký số JWT qua JWKS, trích xuất `sub`, và truy vấn `User` theo `authUserId`.
+  - TASK-005 sẽ tiếp nhận `AuthenticatedUser` đã được xác thực để kiểm soát RBAC dựa trên `User.role`.
+  - Request không có token, token không hợp lệ, hoặc user không có binding trong CSDL sẽ bị từ chối với HTTP 401 Unauthorized.
+- **Verification/evidence required:**
+  - Request với Supabase JWT hợp lệ tra cứu thành công Application User thông qua `authUserId`.
+  - User có JWT hợp lệ nhưng chưa được bind `authUserId` trong CSDL bị từ chối với HTTP 401 Unauthorized (không bypass).
+  - Role được xác định tuyệt đối từ CSDL nội bộ (`User.role`), loại bỏ hoàn toàn role từ client.
+  - Token giả mạo, sai chữ ký, hết hạn bị từ chối với HTTP 401.
+  - Đầy đủ nhật ký kiểm thử và test evidence cho TASK-004.
+- **Date:** 2026-09-24
+- **Owner:** Group 01
