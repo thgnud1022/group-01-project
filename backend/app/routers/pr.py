@@ -49,9 +49,9 @@ async def approve_pr(pr_id: str, payload: ApprovePRSchema):
         raise HTTPException(status_code=400, detail=str(e))
 
 @router.post("/{pr_id}/close")
-def close_pr(pr_id: str, finance_user: str = "finance@company.com"):
+async def close_pr(pr_id: str, finance_user: str = "finance@company.com"):
     try:
-        return ProcurementService.close_pr(pr_id, finance_user)
+        return await ProcurementService.close_pr_prisma(pr_id, finance_user)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 

@@ -1309,6 +1309,121 @@ class ProcurementService:
         return rec_record
 
     @staticmethod
+    async def close_pr_prisma(pr_id: str, finance_user: str = "finance@company.com") -> Dict[str, Any]:
+        """
+        Close Purchase Request directly in Supabase PostgreSQL via Prisma Client.
+        Enforces:
+        - HD-07 / REQ-BR-11: SUM(receivedQty) >= PO.quantity before closing PR.
+        - PR must exist and not already CLOSED.
+        - PO must exist for the PR.
+        - Atomic transaction using prisma.tx() with row-level locks (SELECT ... FOR UPDATE).
+        - Budget settlement: decrease tempReservedAmount (capped at 0) and increase spentAmount.
+        - Zero MockDB read/write.
+        """
+        if not pr_id or not isinstance(pr_id, str) or not pr_id.strip():
+            raise ValueError("Mã Purchase Request (pr_id) không hợp lệ hoặc rỗng.")
+        clean_pr_id = pr_id.strip()
+
+        await connect_db()
+        prisma = get_prisma()
+
+        async with prisma.tx() as tx:
+            # 1. Lock PurchaseRequest row with SELECT ... FOR UPDATE
+            locked_prs = await tx.query_raw(
+                'SELECT id, status, "departmentId", "estimatedValue" FROM "PurchaseRequest" WHERE id = $1 FOR UPDATE',
+                clean_pr_id,
+            )
+            if not locked_prs:
+                raise ValueError(f"Không tìm thấy Purchase Request với mã: '{clean_pr_id}'")
+
+            pr_row = locked_prs[0]
+            current_status = pr_row["status"]
+            if current_status == "CLOSED":
+                raise ValueError(f"Purchase Request '{clean_pr_id}' đã ở trạng thái CLOSED.")
+
+            # 2. Lock PurchaseOrder row belonging to this PR
+            locked_pos = await tx.query_raw(
+                'SELECT id, quantity, "poNumber", "totalAmount" FROM "PurchaseOrder" WHERE "purchaseRequestId" = $1 FOR UPDATE',
+                clean_pr_id,
+            )
+            if not locked_pos:
+                raise ValueError(f"Không thể đóng PR: Purchase Request '{clean_pr_id}' chưa có Purchase Order.")
+
+            po_row = locked_pos[0]
+            po_id = po_row["id"]
+            po_qty = int(po_row["quantity"])
+
+            # 3. Query all Receivings for this PO
+            receivings = await tx.receiving.find_many(
+                where={"purchaseOrderId": po_id}
+            )
+            total_received = sum(r.receivedQty for r in receivings)
+
+            # 4. HD-07 / REQ-BR-11 Guard: SUM(receivedQty) >= PO.quantity
+            if total_received < po_qty:
+                raise ValueError(
+                    f"Không thể đóng PR: Hàng chưa được nhận đủ. "
+                    f"Tổng đã nhận: {total_received}/{po_qty} sản phẩm (theo HD-07 / REQ-BR-11)."
+                )
+
+            # 5. Budget Settlement
+            dept_id = pr_row["departmentId"]
+            est_val = Decimal(str(pr_row["estimatedValue"]))
+
+            rows = await tx.query_raw(
+                'SELECT id, "allocatedAmount", "spentAmount", "tempReservedAmount" '
+                'FROM "Budget" '
+                'WHERE "departmentId" = $1 AND "fiscalYear" = $2 AND quarter = $3 '
+                'FOR UPDATE',
+                dept_id,
+                ACTIVE_BUDGET_FISCAL_YEAR,
+                ACTIVE_BUDGET_QUARTER,
+            )
+            if not rows:
+                raise ValueError(
+                    f"Không tìm thấy ngân sách khả dụng cho phòng ban '{dept_id}' "
+                    f"trong kỳ tài chính Năm {ACTIVE_BUDGET_FISCAL_YEAR} - Quý {ACTIVE_BUDGET_QUARTER}."
+                )
+
+            budget_row = rows[0]
+            budget_id = budget_row["id"]
+            current_reserved = Decimal(str(budget_row["tempReservedAmount"]))
+            current_spent = Decimal(str(budget_row["spentAmount"]))
+
+            # Release tempReservedAmount safely (cannot drop below 0)
+            reserved_release = min(current_reserved, est_val)
+            new_reserved = current_reserved - reserved_release
+            new_spent = current_spent + est_val
+
+            await tx.budget.update(
+                where={"id": budget_id},
+                data={
+                    "tempReservedAmount": new_reserved,
+                    "spentAmount": new_spent,
+                }
+            )
+
+            # 6. Update PurchaseRequest status to CLOSED
+            updated_pr = await tx.purchaserequest.update(
+                where={"id": clean_pr_id},
+                data={"status": "CLOSED"}
+            )
+
+        return {
+            "id": updated_pr.id,
+            "title": updated_pr.title,
+            "status": updated_pr.status,
+            "departmentId": updated_pr.departmentId,
+            "deptId": updated_pr.departmentId,
+            "estimatedValue": float(updated_pr.estimatedValue),
+            "settledAmount": float(est_val),
+            "totalReceived": total_received,
+            "poQuantity": po_qty,
+            "releasedReserved": float(reserved_release),
+            "newSpentAmount": float(new_spent),
+        }
+
+    @staticmethod
     def close_pr(pr_id: str, finance_user: str) -> Dict[str, Any]:
         pr = db.prs.get(pr_id)
         if not pr:

@@ -283,9 +283,20 @@ Mỗi thành viên làm **Primary Owner duy nhất cho đúng 1 User Story**. Th
   - Selected Backend Regression Suite: Đạt 86/86 tests PASS (14 test_receiving_prisma, 18 test_po_prisma, 15 test_supplier_quotation_prisma, 15 test_pr_approval_prisma, 10 test_pr_creation_prisma, 10 test_data_access_helpers, 4 test_business_rules in 524.20s).
   - Database Hygiene: Dọn sạch 100% test data (0 orphan Receivings, 0 orphan POs, 0 orphan PRs, 0 orphan Quotations, 3 seeded suppliers, tempReserved = 0.0).
   - Migration Boundary: Goods Receiving đã được migrate sang PostgreSQL. Domain downstream Close PR (STEP 3B.7) tiếp tục đọc MockDB cho tới bước migration tiếp theo.
-- Runtime business logic in `procurement_service.py` currently has PR creation, PR Approval, Supplier, Quotation, Purchase Order, and Goods Receiving migrated to PostgreSQL. Only Close PR remains on MockDB awaiting STEP 3B.7.
+- **Step 3B.7 (Close PR & Budget Settlement Migration Implementation):** DONE (`AI-053`).
+  - Triển khai `ProcurementService.close_pr_prisma` bất đồng bộ; chuyển endpoint `POST /api/pr/{id}/close` sang async gọi Prisma client.
+  - HD-07 / REQ-BR-11 Guard: Khóa dòng `PurchaseRequest` bằng `SELECT ... FOR UPDATE` trong transaction `prisma.tx()`. Khóa và kiểm tra PO liên kết (`PurchaseOrder`).
+  - Cumulative Receiving Check: Tính tổng `SUM(Receiving.receivedQty)` của tất cả Receiving thuộc PO của PR. So sánh với `PurchaseOrder.quantity`.
+  - Nếu chưa nhận đủ: trả về HTTP 400 (Bad Request), không thay đổi PR status, không settle ngân sách.
+  - Nếu nhận đủ: cập nhật `PR.status = CLOSED`, hoàn lại `Budget.tempReservedAmount` (`-= est_val`, bảo đảm không âm bằng `min(current_reserved, est_val)`) và cộng `Budget.spentAmount` (`+= est_val`) dùng `Decimal`.
+  - Atomic Transaction: PR status update và Budget settlement thực hiện trong cùng 1 database transaction `prisma.tx()`; tự động rollback toàn bộ nếu có lỗi. Zero dual-write vào `db.prs` hoặc `db.budgets`.
+  - Tests & Verification: Tạo `backend/tests/test_close_prisma.py` với 14 integration tests đạt 100% PASS (14/14 in 119.31s).
+  - Selected Backend Regression Suite: Đạt 100/100 tests PASS (14 test_close_prisma, 14 test_receiving_prisma, 15 test_po_prisma, 15 test_supplier_quotation_prisma, 15 test_pr_approval_prisma, 10 test_pr_creation_prisma, 10 test_data_access_helpers, 4 test_business_rules).
+  - Database Hygiene: Dọn sạch 100% test data (0 Receiving, 0 PO, 0 Quotation, 0 Approval, 0 PR, 3 seeded suppliers, tempReserved = 0.0, spentAmount = 150000000.0).
+  - Hoàn tất Backend Data Migration (100% chu trình mua sắm: PR Creation -> Approval -> Supplier/Quotation -> PO -> Receiving -> Close PR & Budget Settlement đã chuyển từ MockDB sang Prisma/Supabase PostgreSQL).
+- Runtime business logic in `procurement_service.py` currently has 100% of the core procurement cycle migrated to PostgreSQL: PR Creation, PR Approval, Supplier, Quotation, Purchase Order, Goods Receiving, and Close PR & Budget Settlement.
 
-**Target State:** Toàn bộ thao tác đọc/ghi dữ liệu (PR, Approval, Supplier, Quotation, PO, Receiving) thực thi qua Prisma Client bất đồng bộ (`prisma.purchaserequest`, `prisma.purchaseorder`, v.v.).
+**Target State:** Toàn bộ thao tác đọc/ghi dữ liệu (PR, Approval, Supplier, Quotation, PO, Receiving, Close PR & Budget Settlement) thực thi qua Prisma Client bất đồng bộ (`prisma.purchaserequest`, `prisma.purchaseorder`, `prisma.receiving`, `prisma.budget`, v.v.).
 
 **Dependencies:** TASK-001, TASK-002  
 **Potential Blockers:** Chuyển đổi từ code đồng bộ (sync) sang bất đồng bộ (async/await) có thể ảnh hưởng đến các router endpoints. Seed data cần được thiết lập ở Step 2B trước khi chuyển đổi core CRUD.
