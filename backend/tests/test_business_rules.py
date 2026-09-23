@@ -50,6 +50,7 @@ def test_req_br_03_po_price_lock():
     # Create PR & Approve
     pr = ProcurementService.create_pr("DEPT-IT", "emp1", "Test PO Lock", [{"itemName": "Dell", "quantity": 3, "estimatedUnitPrice": 25_000_000}])
     ProcurementService.approve_pr(pr["id"], "MANAGER", "Manager B", "OK")
+    ProcurementService.approve_pr(pr["id"], "FINANCE", "Finance D", "OK")
     
     po = ProcurementService.create_po(pr["id"], quotation, "proc1")
     assert po["unitPrice"] == quotation["unit_price"]

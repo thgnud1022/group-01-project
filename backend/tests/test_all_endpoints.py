@@ -37,7 +37,7 @@ def test_full_7step_procurement_workflow():
     pr_id = res_pr.json()["id"]
 
     # 2. Approve PR Step 1 (Manager)
-    res_app1 = client.post(f"/api/pr/{pr_id}/approve", json={"approverRole": "MANAGER", "approverName": "Manager B"})
+    res_app1 = client.post(f"/api/pr/{pr_id}/approve", json={"approverEmail": "manager@company.com"})
     assert res_app1.status_code == 200
     assert res_app1.json()["status"] == "APPROVED"
 

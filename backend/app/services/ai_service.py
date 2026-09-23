@@ -72,17 +72,33 @@ class AIService:
             if is_anomaly:
                 anomaly_reason = f"CẢNH BÁO AI: Đơn giá {price:,.0f}đ cao hơn {price_diff_ratio*100:.1f}% so với đơn giá trung bình lịch sử ({historical_avg_price:,.0f}đ)."
                 
-            results.append({
-                "quotation_id": f"QT-2026-00{idx+1}",
+            q_id = f"QT-2026-00{idx+1}"
+            q_record = {
+                "quotation_id": q_id,
+                "id": q_id,
+                "purchaseRequestId": pr_id,
                 "supplier_name": supp["name"],
+                "supplierName": supp["name"],
                 "file_name": file_name,
+                "fileUrl": file_name,
                 "unit_price": price,
+                "unitPrice": price,
                 "quantity": 3,
                 "total_amount": price * 3,
+                "totalAmount": price * 3,
                 "delivery_days": supp["delivery"],
+                "deliveryDays": supp["delivery"],
                 "warranty_terms": supp["warranty"],
+                "warrantyTerms": supp["warranty"],
                 "is_anomaly": is_anomaly,
-                "anomaly_reason": anomaly_reason
-            })
+                "isAnomaly": is_anomaly,
+                "anomaly_reason": anomaly_reason,
+                "anomalyReason": anomaly_reason
+            }
+            results.append(q_record)
+
+            # Register into server-side database
+            from app.services.procurement_service import db
+            db.quotations[q_id] = q_record
             
         return results

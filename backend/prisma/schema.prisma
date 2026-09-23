@@ -4,7 +4,10 @@ datasource db {
 }
 
 generator client {
-  provider = "prisma-client-js"
+  provider                    = "prisma-client-py"
+  interface                   = "asyncio"
+  recursive_type_depth        = 5
+  enable_experimental_decimal = true
 }
 
 enum Role {
@@ -106,6 +109,7 @@ model Quotation {
   supplierId        String
   supplier          Supplier        @relation(fields: [supplierId], references: [id])
   totalAmount       Decimal         @db.Decimal(18, 2)
+  quantity          Int
   deliveryDays      Int
   warrantyTerms     String?
   fileUrl           String
@@ -125,6 +129,7 @@ model PurchaseOrder {
   creatorId         String
   creator           User            @relation(fields: [creatorId], references: [id])
   totalAmount       Decimal         @db.Decimal(18, 2)
+  quantity          Int
   status            String          @default("SENT")
   receivingDocs     Receiving[]
   created_at        DateTime        @default(now())

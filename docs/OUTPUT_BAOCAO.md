@@ -1,0 +1,154 @@
+# Course Deliverable Specification (Output_BaoCao)
+
+This document is derived strictly from the course `Output_BaoCao.xlsx` source. It outlines the grading checklist, mandatory artifacts, and evidence requirements.
+
+## 1. Course Output Overview
+
+- **Source Sheet:** `Output_BaoCao`, `Lich_Bao_Cao`
+- **Total Weights:** Bài 1 (10%), Bài 2 (30%), Bài cuối (60%).
+- **Nature of Deliverables:** All listed deliverables are mandatory unless stated otherwise.
+- **Reporting Format:** Each student reports exactly 2 times. 
+  - Lần 1: Bài 1 + Bài 2 (5 phút/SV, 4 phút trình bày + 1 phút Q&A)
+  - Lần 2: Bài cuối (5 phút/SV, 4 phút demo + 1 phút Q&A)
+
+## 2. Mandatory Deliverables
+
+The following artifacts are explicitly required in the "DANH SÁCH ARTIFACT PHẢI CÓ" section of `Output_BaoCao`.
+
+**Bài 1 (10%)**
+- 1.1 Project Charter (Mandatory)
+- 1.2 User Research + Synthesis (Mandatory)
+- 1.3 Requirements + Business Rules (Mandatory)
+- 1.4 Project Vault (Mandatory)
+- 1.5 Vault Q&A Benchmark (Mandatory)
+- 1.6 AI Usage Log v1 (Mandatory)
+
+**Bài 2 (30%)**
+- 2.1 PRD (Mandatory)
+- 2.2 User Flow (Mandatory)
+- 2.3 Functional Prototype (Mandatory)
+- 2.4 Usability Test (Mandatory)
+- 2.5 User Stories + Acceptance Criteria (Mandatory)
+- 2.6 Taiga Backlog (Mandatory)
+- 2.7 Figma + Design System (Mandatory)
+- 2.8 Architecture + ADR (Mandatory)
+- 2.9 ERD / Data Model (Mandatory)
+- 2.10 API Contract (Mandatory)
+- 2.11 Story Specs + Traceability v1 (Mandatory)
+
+**Bài cuối (60%)**
+- 3.1 Source Repository (Mandatory)
+- 3.2 Release chạy được (Mandatory)
+- 3.3 Authentication + Authorization (Mandatory)
+- 3.4 Business Workflow (Mandatory)
+- 3.5 AI Feature (Mandatory)
+- 3.6 Code Review Evidence (Mandatory)
+- 3.7 Bug Log (Mandatory)
+- 3.8 Automated Tests (Mandatory)
+- 3.9 QA Report (Mandatory)
+- 3.10 Security + NFR Evidence (Mandatory)
+- 3.11 CI/CD + Docker/Deployment (Mandatory)
+- 3.12 README + Runbook (Mandatory)
+- 3.13 Release Notes + Changelog (Mandatory)
+- 3.14 Traceability Final (Mandatory)
+- 3.15 AI Usage Log Final + Retrospective (Mandatory)
+
+## 3. Evidence Requirements
+
+**General Rule:** "Không có evidence => xem như chưa hoàn thành, dù có slide mô tả." (Source: Output_BaoCao, Row 1).
+
+**Items Requiring Actual Evidence:**
+All 32 deliverables listed in Section 2 require actual evidence. "Slide mô tả" is not accepted as evidence. 
+
+**Items That Cannot Be Claimed Complete Without Execution Evidence:**
+- 3.2 Release chạy được: "Ứng dụng release thực tế; dữ liệu demo; workflow chính" -> Demo URL + tag v1.0.0-final.
+- 3.3 Authentication + Authorization: "Demo allowed + denied action."
+- 3.4 Business Workflow: "Demo happy + failure path."
+- 3.5 AI Feature: "Demo 2 case pass + 1 edge/fallback."
+- 3.8 Automated Tests: "Chạy test hoặc mở CI pass."
+- 3.10 Security + NFR Evidence: "Demo unauthorized/invalid case."
+- 3.11 CI/CD + Docker/Deployment: "Mở pipeline + deploy."
+
+## 4. AI Development Evidence
+
+**Items Requiring AI Usage Log Evidence:**
+- 1.6 AI Usage Log v1: Task, prompt/skill, input context, output, verification, correction.
+- 3.15 AI Usage Log Final + Retrospective: Where AI was used, which outputs were corrected, risks, lessons.
+
+**Other AI-Related Requirements:**
+- 1.5 Vault Q&A Benchmark: >=20 questions. Must have expected answer/source and pass/fail record.
+- 3.5 AI Feature: Business value, context, structured output, validation, fallback, eval set >=20. Not just a generic chatbot.
+
+## 5. Requirements / User Stories / Acceptance Criteria
+
+- **1.3 Requirements + Business Rules:** REQ-xxx format. Functional/non-functional; scope; business rules. Must be testable, non-contradictory.
+- **2.1 PRD:** Problem, users, goals, scope, workflow, requirements, metrics. Must be consistent with requirements.
+- **2.5 User Stories + Acceptance Criteria:** 8-12 stories; persona/goal/value; Given/When/Then. Stories must be small enough; AC must be testable.
+
+## 6. Design / Figma / Prototype
+
+- **2.2 User Flow:** Happy path + error/alternative path. Diagram walkthrough required.
+- **2.3 Functional Prototype:** Prototype URL. Must click/run main workflow. Not just static screenshots.
+- **2.4 Usability Test:** >=3 people/cases. Before/after changes required.
+- **2.7 Figma + Design System:** Key screens, component states (default/hover/disabled/loading/error/empty), tokens, responsive rules, UX copy. 
+
+## 7. Architecture / Database / API
+
+- **2.8 Architecture + ADR:** Context/container, modules, integration, ADR for main choices. Do not over-engineer.
+- **2.9 ERD / Data Model:** Entities, keys, relations, constraints, audit fields.
+- **2.10 API Contract:** Endpoints, auth, request/response/error examples. Must match stories, model, and error handling.
+
+## 8. Implementation / Code Review
+
+- **3.1 Source Repository:** Code structure; branch/PR/commit; config example; migration/seed. No secrets.
+- **2.11 Story Specs + Traceability v1:** Story -> AC -> screen/API/data -> task.
+- **3.6 Code Review Evidence:** Checklist, blocker/major/minor, resolution. PR must link to story/task/test.
+
+## 9. Testing / QA
+
+- **3.7 Bug Log:** Severity, steps, expected/actual, evidence, owner, status. Bug must be reproducible.
+- **3.8 Automated Tests:** Unit/integration/API/frontend/E2E appropriate; failure paths. Not just 200 OK.
+- **3.9 QA Report:** Scope, environment, result, known issues, risk, sign-off. Release blockers = 0.
+
+## 10. Security / NFR
+
+- **3.3 Authentication + Authorization:** Login/session/token; role/permission; protected actions. Backend must enforce permission, not just hide UI buttons.
+- **3.10 Security + NFR Evidence:** RBAC, validation, secrets, dependency check, basic performance/a11y/logging. No leaked secrets/stack traces.
+
+## 11. CI/CD / Docker / Deployment
+
+- **3.11 CI/CD + Docker/Deployment:** Build/test/deploy pipeline; env example; health check. Clean clone can be setup via README.
+- **3.2 Release chạy được:** URL + tag v1.0.0-final. Must not require local code editing to run.
+- **3.13 Release Notes + Changelog:** Version, scope, features, fixes, known issues, upgrade notes. Matches v1.0.0-final.
+
+## 12. Traceability
+
+- **2.11 Story Specs + Traceability v1:** Trace 1 REQ end-to-end. No "orphan" stories.
+- **3.14 Traceability Final:** REQ -> Story -> Task -> Design/API -> Commit/PR -> Test -> Status. 100% of "Done" scope must be traceable.
+
+## 13. Final Report
+
+- **3.12 README + Runbook:** Setup, env, seed, run, test, deploy, rollback/troubleshooting. Must allow another student to run it without implicit knowledge.
+- *Status Report:* Mentioned in `Phuong_Phap_Tool` sheet as "Status report: Tóm tắt Done/Next/Risk/Decision/Blocker có link evidence."
+
+## 14. Individual Viva Evidence
+
+**Items Requiring Individual Student Evidence:**
+- **Lần 1 (Bài 1 + Bài 2):** "Mở artifact thật. Chỉ ra: phần mình làm -> evidence -> 1 REQ -> Story -> Prototype/Figma/Spec/Task." (100% cá nhân).
+- **Lần 2 (Bài cuối):** "Demo 1 story end-to-end trên release; mở commit/PR, test, traceability; nêu AI đã giúp gì và 1 output AI phải sửa."
+- **1.6 AI Usage Log v1:** "Mỗi SV chỉ ra >=1 lần AI sai/được sửa."
+- **2.5 User Stories:** "Mỗi SV giải thích story mình sở hữu."
+- **3.1 Source Repository:** "Mỗi SV mở commit/PR mình làm."
+- **3.12 README + Runbook:** "Một SV khác đọc và giải thích cách chạy."
+
+## 15. Definition of Done / Completion Conditions
+
+"Sinh viên dùng sheet này như Definition of Done. Không có evidence => xem như chưa hoàn thành, dù có slide mô tả." 
+All items in the checklist act as the DoD for the project's phases.
+
+## Source Integrity Notes
+
+- This document was extracted entirely from `docs/source/Output_BaoCao.xlsx` (including sheets `Output_BaoCao`, `Lich_Bao_Cao`, `Phuong_Phap_Tool`).
+- Information about specific grading percentages, evidence constraints, and item IDs were directly transcribed from the source.
+- *Ambiguity Note:* The source specifies "critical-path E2E tests" in the Rubric and Phuong_Phap_Tool, but the main checklist generically mentions "Automated Tests (tests/) Unit/integration/API/frontend/E2E phù hợp; failure path." - SOURCE DOES NOT SPECIFY the exact count or ratio of these tests, only that they must be "phù hợp" (appropriate) and cover failure paths.
+- *Ambiguity Note:* "AI Feature" mentions "eval set >=20", but SOURCE DOES NOT SPECIFY the exact format of the evaluation dataset (only that it requires 2 passing cases and 1 edge/fallback for the demo).
