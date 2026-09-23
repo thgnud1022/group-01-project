@@ -33,6 +33,7 @@ enum PRStatus {
 
 model User {
   id           String        @id @default(uuid())
+  authUserId   String?       @unique
   email        String        @unique
   passwordHash String
   name         String
