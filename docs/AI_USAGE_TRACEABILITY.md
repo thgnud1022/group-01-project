@@ -63,6 +63,7 @@ $$\text{AI Activity} \longrightarrow \text{Artifact} \longrightarrow \text{User 
 | **AI-054** | Schema Identity Binding (authUserId) | Nguyễn Thị Thùy Dung & Nguyễn Trương Thùy Dương | All Stories (Auth) | N/A (Security Infra) | **TASK-004 (Step 3A)** | `schema.prisma` (User.authUserId) | `prisma db push`, `verify_step3a.py` | `authUserId String? @unique` sync CSDL | `6117d39` |
 | **AI-055** | JWT/JWKS Authentication Verification | Nguyễn Thị Thùy Dung & Trần Thị Thu Hà | All Stories (Auth) | N/A (Security Infra) | **TASK-004 (Step 3B)** | `jwt_service.py`, `dependencies/auth.py`, `routers/auth.py` | `test_jwt_auth.py` (12/12 PASS) | Supabase JWT, ES256, JWKS, sub->User.authUserId | `[Uncommitted]` |
 | **AI-056** | JWKS Timeout Hardening (timeout=5.0s) | Nguyễn Thị Thùy Dung & Trần Thị Thu Hà | All Stories (Auth) | N/A (Security Infra) | **TASK-004 (Step 3B Gap Fix)** | `jwt_service.py` | `test_jwt_auth.py` (12/12 PASS), targeted (23/23 PASS) | Explicit timeout=5.0s on PyJWKClient | `[Uncommitted]` |
+| **AI-057** | Server-Side RBAC Implementation | Nguyễn Thị Thùy Dung & Trần Thị Thu Hà | All Stories (RBAC) | T-37, T-38, T-39 | **TASK-005** | `dependencies/rbac.py`, 6 routers, `procurement_service.py` | `test_rbac.py` (28/28 PASS) | 19 endpoints secured, No Self-Approval (GOV-01), zero client injection | `[Uncommitted]` |
 
 
 ---
@@ -70,7 +71,7 @@ $$\text{AI Activity} \longrightarrow \text{Artifact} \longrightarrow \text{User 
 ## 3. Rà soát khoảng trống bằng chứng (Evidence Gaps & Traceability Integrity)
 
 1. **Authentication (TASK-004):** `VERIFIED (STEP 3A & 3B)` — Đã hoàn tất thiết kế HD-12, Step 3A Schema Identity Binding (`authUserId String? @unique` trên Supabase PostgreSQL, evidence tại `docs/evidence/TASK-004-STEP-3A-SCHEMA.md`), và Step 3B JWT/JWKS Authentication Verification (PyJWT + ES256 + JWKS + `sub -> User.authUserId`, evidence tại `docs/evidence/TASK-004-STEP-3B-JWT.md`, 12/12 security test cases PASS). Sẵn sàng cung cấp verified identity cho TASK-005 (RBAC).
-2. **RBAC Server-side Middleware (TASK-005):** `MISSING EVIDENCE` — Chưa có middleware chặn theo role ở tầng HTTP (đang chặn bằng guard bên trong service).
+2. **RBAC Server-side Middleware (TASK-005):** `VERIFIED` — Đã hoàn tất triển khai `RoleChecker` dependency factory và `get_current_identity` bảo vệ 100% 19 endpoints nghiệp vụ, thực thi No Self-Approval (GOV-01) cho mọi vai trò (kể cả ADMIN), xóa bỏ hoàn toàn client identity injection, kiểm thử an ninh 28/28 test cases PASS (evidence tại `docs/evidence/TASK-005-RBAC.md`).
 3. **Real LLM Integration (TASK-009):** `MISSING EVIDENCE` — Chưa gọi API ngoài (Gemini/OpenAI); hiện đang dùng so sánh deterministic.
 4. **Frontend Architecture Refactor (TASK-006):** `MISSING EVIDENCE` — Frontend vẫn là file đơn khối `App.tsx`, chưa tách trang theo React Router.
 5. **E2E Playwright Execution (TASK-013):** `MISSING EVIDENCE` — Chưa có báo cáo HTML chạy Playwright E2E thực tế trên UI hoàn chỉnh.

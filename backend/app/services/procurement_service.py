@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Union
 from decimal import Decimal, ROUND_HALF_UP, InvalidOperation as DecimalException
 from prisma import errors
 from app.services.db import get_prisma, connect_db
@@ -9,6 +9,9 @@ from app.services.data_access import (
     ACTIVE_BUDGET_FISCAL_YEAR,
     ACTIVE_BUDGET_QUARTER,
 )
+from app.dependencies.auth import AuthenticatedUser
+from app.dependencies.rbac import AuthorizationError
+
 
 class MockDatabase:
     """
@@ -89,14 +92,16 @@ class ProcurementService:
     @staticmethod
     async def create_pr_prisma(
         dept_id: str,
-        creator_id: str,
-        title: str,
-        items: List[Dict[str, Any]],
+        creator_id: Optional[str] = None,
+        title: str = "",
+        items: Optional[List[Dict[str, Any]]] = None,
+        creator_user_id: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
         Prisma Client Python implementation for PR creation directly to Supabase PostgreSQL.
         Enforces:
-        - HD-REQ-07: Resolve creator email -> User.id (UUID).
+        - HD-02 / HD-12: Accepts creator_user_id (UUID from JWT identity) or creator_id.
+        - HD-REQ-07: Resolve creator email -> User.id (UUID) if email provided.
         - HD-REQ-08: Active budget period FY2026 Q1.
         - REQ-BR-01: Budget check and row-level reservation within an atomic transaction.
         - Decimal monetary calculations.
@@ -141,8 +146,21 @@ class ProcurementService:
                 "estimatedUnitPrice": unit_price,
             })
 
-        # 2. Resolve creator email -> User.id (HD-REQ-07)
-        user_id = await resolve_user_id_by_email(creator_id)
+        # 2. Resolve creator identity to User.id (UUID)
+        resolved_creator = (creator_user_id or creator_id or "").strip()
+        if not resolved_creator:
+            raise ValueError("Mã định danh người tạo (creatorId) không hợp lệ hoặc rỗng.")
+
+        await connect_db()
+        prisma = get_prisma()
+
+        if "@" in resolved_creator:
+            user_id = await resolve_user_id_by_email(resolved_creator)
+        else:
+            user = await prisma.user.find_unique(where={"id": resolved_creator})
+            if not user:
+                raise ValueError(f"Không tìm thấy người dùng với ID '{resolved_creator}'.")
+            user_id = user.id
 
         # 3. Validate Department independently
         if not dept_id or not isinstance(dept_id, str) or not dept_id.strip():
@@ -267,15 +285,18 @@ class ProcurementService:
     @staticmethod
     async def approve_pr_prisma(
         pr_id: str,
-        approver_email: str,
+        current_user: Optional[Union[AuthenticatedUser, str]] = None,
         comments: Optional[str] = "Phê duyệt PR",
+        approver_email: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
         Prisma Client Python implementation for PR approval directly in Supabase PostgreSQL.
         Enforces:
-        - HD-REQ-09: Resolve approverEmail -> User.id (UUID) and fetch User.role from PostgreSQL.
+        - HD-12: Acting approver identity resolved from JWT/DB authenticated user (AuthenticatedUser).
+        - GOV-01: No Self-Approval check (current_user.id != PR.creatorId, enforced for ALL roles including ADMIN).
         - HD-REQ-10: Status Guard (only execute when status is PENDING_MANAGER_APPROVAL or PENDING_FINANCE_APPROVAL).
         - REQ-BR-02: Multi-level approval threshold (> 50M VND: Manager -> Finance; <= 50M VND: Manager/Admin).
+        - Stage-based authorization raises AuthorizationError (maps to 403 Forbidden).
         - Atomic transaction using prisma.tx().
         - Row-level lock (SELECT ... FOR UPDATE) to prevent concurrency races & duplicate approvals.
         - Stage-based duplicate approval guard (allows ADMIN to legitimately approve both Step 1 and Step 2).
@@ -285,10 +306,6 @@ class ProcurementService:
             raise ValueError("Mã PR không hợp lệ hoặc rỗng.")
         clean_pr_id = pr_id.strip()
 
-        if not approver_email or not isinstance(approver_email, str) or not approver_email.strip():
-            raise ValueError("Email người phê duyệt (approverEmail) không hợp lệ hoặc rỗng.")
-        clean_approver_email = approver_email.strip().lower()
-
         await connect_db()
         prisma = get_prisma()
 
@@ -297,7 +314,7 @@ class ProcurementService:
         async with prisma.tx() as tx:
             # 1. Lock PurchaseRequest row with SELECT ... FOR UPDATE
             locked_prs = await tx.query_raw(
-                'SELECT id, status, "estimatedValue" FROM "PurchaseRequest" WHERE id = $1 FOR UPDATE',
+                'SELECT id, status, "creatorId", "estimatedValue" FROM "PurchaseRequest" WHERE id = $1 FOR UPDATE',
                 clean_pr_id,
             )
             if not locked_prs:
@@ -305,6 +322,7 @@ class ProcurementService:
 
             current_pr = locked_prs[0]
             current_status = current_pr["status"]
+            pr_creator_id = current_pr["creatorId"]
             estimated_val = Decimal(str(current_pr["estimatedValue"]))
 
             # 2. HD-REQ-10: Approval Status Guard
@@ -313,23 +331,39 @@ class ProcurementService:
                     f"PR đang ở trạng thái '{current_status}', không thể thực hiện phê duyệt."
                 )
 
-            # 3. HD-REQ-09: Resolve approver email -> User.id & User.role from PostgreSQL
-            user = await tx.user.find_unique(where={"email": clean_approver_email})
-            if not user:
-                raise ValueError(f"Không tìm thấy người dùng với email '{clean_approver_email}'.")
-
-            approver_role = user.role
-            approver_id = user.id
+            # 3. HD-12: Resolve approver identity & role
+            if isinstance(current_user, AuthenticatedUser):
+                approver_id = current_user.id
+                approver_role = current_user.role
+            elif isinstance(current_user, str) and current_user.strip():
+                ident = current_user.strip()
+                if "@" in ident:
+                    user = await tx.user.find_unique(where={"email": ident.lower()})
+                else:
+                    user = await tx.user.find_unique(where={"id": ident})
+                if not user:
+                    raise ValueError(f"Không tìm thấy người dùng '{ident}'.")
+                approver_id = user.id
+                approver_role = str(user.role)
+            elif approver_email and approver_email.strip():
+                clean_email = approver_email.strip().lower()
+                user = await tx.user.find_unique(where={"email": clean_email})
+                if not user:
+                    raise ValueError(f"Không tìm thấy người dùng với email '{clean_email}'.")
+                approver_id = user.id
+                approver_role = str(user.role)
+            else:
+                raise ValueError("Không xác định được danh tính người phê duyệt.")
 
             # 4. REQ-BR-02: Multi-level approval threshold & Stage-based authorization
             if estimated_val > threshold:
                 if current_status == "PENDING_MANAGER_APPROVAL":
                     if approver_role not in ["MANAGER", "ADMIN"]:
-                        raise ValueError("PR giá trị > 50 triệu VND cần Manager phê duyệt bước 1 trước.")
+                        raise AuthorizationError("PR giá trị > 50 triệu VND cần Manager phê duyệt bước 1 trước.")
                     new_status = "PENDING_FINANCE_APPROVAL"
                 elif current_status == "PENDING_FINANCE_APPROVAL":
                     if approver_role not in ["FINANCE", "ADMIN"]:
-                        raise ValueError("PR giá trị > 50 triệu VND bắt buộc cần Finance duyệt bước 2.")
+                        raise AuthorizationError("PR giá trị > 50 triệu VND bắt buộc cần Finance duyệt bước 2.")
                     new_status = "APPROVED"
                 else:
                     raise ValueError(
@@ -339,12 +373,18 @@ class ProcurementService:
                 # PR <= 50M VND (1-Level approval)
                 if current_status == "PENDING_MANAGER_APPROVAL":
                     if approver_role not in ["MANAGER", "ADMIN"]:
-                        raise ValueError("Không có thẩm quyền duyệt PR.")
+                        raise AuthorizationError("Không có thẩm quyền duyệt PR.")
                     new_status = "APPROVED"
                 else:
                     raise ValueError(
                         f"PR có giá trị <= 50 triệu VND không ở trạng thái PENDING_MANAGER_APPROVAL (hiện tại: '{current_status}')."
                     )
+
+            # 4.5. GOV-01: No Self-Approval check (Enforced for ALL roles, including ADMIN)
+            if approver_id == pr_creator_id:
+                raise AuthorizationError(
+                    "Không thể phê duyệt PR do chính mình tạo (No Self-Approval — GOV-01)."
+                )
 
             # 5. Insert Approval record into PostgreSQL
             await tx.approval.create(
@@ -935,7 +975,8 @@ class ProcurementService:
     async def create_po_prisma(
         pr_id: str,
         quotation_id: str,
-        creator_email: str = "procurement@company.com",
+        creator_user_id: Optional[str] = None,
+        creator_email: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
         Create a new Purchase Order directly in Supabase PostgreSQL via Prisma Client (US-09).
@@ -946,7 +987,8 @@ class ProcurementService:
         - T-091: Supplier linked via Quotation.supplierId.
         - T-094 / HD-08 Option A: 100% price lock (totalAmount) and quantity lock (quantity) from Quotation in PostgreSQL.
           Client commercial fields (totalAmount, quantity) are STRICTLY IGNORED.
-        - HD-REQ-07: Creator email resolved to User.id (UUID).
+        - HD-02 / HD-12: Creator identity extracted from verified JWT (creator_user_id UUID).
+        - HD-REQ-07: Fallback to creator email resolution if email string is passed.
         - HD-08 Option A: poNumber generated with timestamp/random suffix and multi-tx retry on collision.
         - Atomic transaction: PO creation + PR status update to PO_CREATED with SELECT ... FOR UPDATE row lock.
         - Zero dual-write to MockDB.
@@ -959,20 +1001,21 @@ class ProcurementService:
             raise ValueError("Mã báo giá (quotationId) không hợp lệ hoặc rỗng.")
         clean_quotation_id = quotation_id.strip()
 
-        if not creator_email or not isinstance(creator_email, str) or not creator_email.strip():
-            raise ValueError("Email người tạo PO không hợp lệ hoặc rỗng.")
-        clean_creator_email = creator_email.strip()
+        raw_creator = (creator_user_id or creator_email or "procurement@company.com").strip()
+        if not raw_creator:
+            raise ValueError("Email hoặc ID người tạo PO không hợp lệ hoặc rỗng.")
+        clean_creator = raw_creator
 
         await connect_db()
         prisma = get_prisma()
 
-        # HD-REQ-07: Resolve creator identity to User.id UUID
-        if "@" in clean_creator_email:
-            creator_user_id = await resolve_user_id_by_email(clean_creator_email)
+        # HD-REQ-07 / HD-12: Resolve creator identity to User.id UUID
+        if "@" in clean_creator:
+            creator_user_id = await resolve_user_id_by_email(clean_creator)
         else:
-            creator_user = await prisma.user.find_unique(where={"id": clean_creator_email})
+            creator_user = await prisma.user.find_unique(where={"id": clean_creator})
             if not creator_user:
-                raise ValueError(f"Không tìm thấy người dùng với ID: '{clean_creator_email}'.")
+                raise ValueError(f"Không tìm thấy người dùng với ID: '{clean_creator}'.")
             creator_user_id = creator_user.id
 
         # Multi-Tx Retry loop for Option A poNumber collision
@@ -1094,7 +1137,7 @@ class ProcurementService:
             "prId": po_record.purchaseRequestId,
             "quotationId": po_record.quotationId,
             "creatorId": po_record.creatorId,
-            "creatorEmail": clean_creator_email,
+            "creatorEmail": po_record.creator.email if po_record.creator else None,
             "supplierId": supp_id,
             "supplierName": supp_name,
             "totalAmount": float(total_amount_dec),
@@ -1309,10 +1352,15 @@ class ProcurementService:
         return rec_record
 
     @staticmethod
-    async def close_pr_prisma(pr_id: str, finance_user: str = "finance@company.com") -> Dict[str, Any]:
+    async def close_pr_prisma(
+        pr_id: str,
+        actor_user_id: Optional[str] = None,
+        finance_user: Optional[str] = "finance@company.com",
+    ) -> Dict[str, Any]:
         """
         Close Purchase Request directly in Supabase PostgreSQL via Prisma Client.
         Enforces:
+        - HD-02 / HD-12: Actor identity derived from server-side JWT authentication (actor_user_id).
         - HD-07 / REQ-BR-11: SUM(receivedQty) >= PO.quantity before closing PR.
         - PR must exist and not already CLOSED.
         - PO must exist for the PR.

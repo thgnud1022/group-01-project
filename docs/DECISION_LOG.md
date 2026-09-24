@@ -427,3 +427,38 @@ This log records the authoritative architectural and business decisions for the 
   - Đầy đủ nhật ký kiểm thử và test evidence cho TASK-004.
 - **Date:** 2026-09-24
 - **Owner:** Group 01
+
+---
+
+## HD-13: TASK-005 RBAC Endpoint Access Policy Decisions (K-1, K-2, K-3)
+
+- **ID:** HD-13
+- **Title:** RBAC Endpoint Access Policy for Read Operations, Quotation Comparison, and Goods Receiving
+- **Status:** **DECIDED**
+- **Decision:** Ba quyết định phân quyền (policy decisions) sau đây đã được Human phê duyệt chính thức trong quá trình thiết kế TASK-005 Server-Side RBAC, được ghi nhận tại `docs/TASK-005-RBAC-DESIGN.md` Section K, và đã được triển khai trong mã nguồn:
+
+  **K-1 — Employee READ Access:** Tất cả người dùng đã xác thực (bao gồm EMPLOYEE) được phép đọc (GET) dữ liệu Purchase Order, Quotation, Receiving và Supplier. Phân quyền READ sử dụng `get_current_identity` (chỉ yêu cầu JWT hợp lệ, không giới hạn vai trò).
+
+  **K-2 — Quotation Compare Access:** Tất cả người dùng đã xác thực (bao gồm MANAGER, FINANCE, EMPLOYEE, PROCUREMENT, ADMIN) được phép gọi `POST /api/quotations/compare`. Phân quyền sử dụng `get_current_identity` (không giới hạn vai trò). Lý do: so sánh báo giá là thao tác đọc phân tích, không phải thao tác ghi hay phê duyệt.
+
+  **K-3 — Goods Receiving Write Access:** Chỉ vai trò `PROCUREMENT` và `ADMIN` được phép ghi nhận biên bản nhận hàng (`POST /api/receiving`). Phân quyền sử dụng `RoleChecker(["PROCUREMENT", "ADMIN"])`. Lý do: thao tác nhận hàng ảnh hưởng trực tiếp đến trạng thái PO và điều kiện đóng PR; cần giới hạn cho bộ phận mua sắm.
+
+- **Decision type:** Security / Access Control Policy
+- **Requirement/source:** Human Decision trong quá trình thiết kế TASK-005 (`docs/TASK-005-RBAC-DESIGN.md` Section K); HD-02 (Zero-Trust RBAC Architecture); GOV-01 (RBAC + No Self-Approval).
+- **Reason:**
+  1. Yêu cầu nghiệp vụ cho phép nhân viên tra cứu thông tin mua sắm để theo dõi tiến độ đơn hàng.
+  2. So sánh báo giá là thao tác phân tích đọc, không tạo ra thay đổi trạng thái hay dữ liệu; giới hạn theo vai trò sẽ cản trở tính minh bạch.
+  3. Ghi nhận hàng ảnh hưởng trực tiếp đến số lượng lũy kế (cumulative `receivedQty`) và điều kiện đóng PR (REQ-BR-11); cần giới hạn cho vai trò có trách nhiệm trực tiếp.
+- **Alternatives considered:**
+  - *K-1: Giới hạn READ cho PROCUREMENT/FINANCE/ADMIN*: Bị loại bỏ vì nhân viên tạo PR cần theo dõi trạng thái đơn hàng và báo giá liên quan.
+  - *K-2: Giới hạn Compare cho PROCUREMENT/ADMIN*: Bị loại bỏ vì Manager/Finance cần so sánh báo giá để ra quyết định phê duyệt.
+  - *K-3: Cho phép tất cả vai trò ghi nhận hàng*: Bị loại bỏ vì rủi ro thao tác sai từ vai trò không có trách nhiệm nhận hàng.
+- **Consequences:**
+  - 7 endpoints GET (PO, Quotation, Receiving, Supplier) sử dụng `get_current_identity` thay vì `RoleChecker`.
+  - `POST /api/quotations/compare` sử dụng `get_current_identity`.
+  - `POST /api/receiving` sử dụng `RoleChecker(["PROCUREMENT", "ADMIN"])`.
+  - Kiểm thử: RBAC-020 (Employee record receiving → 403), RBAC-023 (Employee list all budgets → 403), RBAC-024 (Finance list all budgets → 200).
+- **Implementation implications:** Đã triển khai hoàn chỉnh trong TASK-005. Không yêu cầu thay đổi mã nguồn bổ sung.
+- **Verification/evidence required:** 28/28 RBAC integration tests PASSED (`backend/tests/test_rbac.py`); Evidence tại `docs/evidence/TASK-005-RBAC.md`.
+- **Date:** 2026-09-24
+- **Owner:** Group 01
