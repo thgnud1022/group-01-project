@@ -481,9 +481,13 @@ Tài liệu này là bản kế hoạch triển khai chính thức (Implementati
 - **Dependency:** TASK-002, TASK-003
 - **Deliverable:** Logic tổng hợp và kiểm tra `SUM(receivedQty) >= PO.quantity` trong `close_pr()`.
 - **Test / Evidence:** Pytest log kiểm thử HD-07 PASS (chặn đóng PR khi chưa nhận đủ hàng; cho phép đóng khi đã nhận đủ).
-- **Status:** PLANNED
+- **Status:** COMPLETED (ALREADY IMPLEMENTED)
 
-**Current State:** Hàm `close_pr()` trong `procurement_service.py` hiện tại đóng PR ngay lập tức mà không kiểm tra xem hàng hóa đã được nhận đủ hay chưa.  
+**Current State:** **ALREADY IMPLEMENTED**. Khảo sát và Final Audit độc lập (2026-09-24) xác nhận logic guard REQ-BR-11 / HD-07 đã được triển khai hoàn chỉnh từ trước:
+- Implementation đã tồn tại từ TASK-003 Step 3B.7 (commit `dfdd7e5`, entry AI-053) trong hàm production `close_pr_prisma()`, tích hợp transaction PostgreSQL và 3 câu lệnh khóa dòng `SELECT ... FOR UPDATE` (PR, PO, Budget).
+- Production path được xác nhận là `close_pr_prisma()` được gọi trực tiếp bởi router `POST /api/pr/{id}/close`, bảo vệ bằng Server-Side RBAC (`RoleChecker(["FINANCE", "ADMIN"])`).
+- Trong đợt nghiệm thu TASK-007, bộ test suites cũ đã được đồng bộ chuẩn hóa authentication header với TASK-005; toàn bộ chuỗi hồi quy gồm 4 test suites (PR Approval 15/15, PO 18/18, Receiving 14/14, Close 14/14) đạt 61/61 PASS (100% GREEN) và 6/6 RBAC regression PASS.
+- Không thực hiện code change mới trong `backend/app/` (xem chi tiết tại `docs/evidence/TASK-007-HD-07-CLOSE-PR-GUARD.md`).
 **Target State:** Thực hiện đúng quyết định nghiệp vụ HD-07 / REQ-BR-11: `close_pr()` truy vấn tất cả các bản ghi Receiving liên quan đến PO của PR, tính tổng số lượng đã nhận `SUM(receivedQty)`. Nếu `SUM(receivedQty) < PO.quantity`, lập tức từ chối đóng PR và báo lỗi.
 
 > **Lưu ý nghiệp vụ quan trọng về quan hệ US-09 và US-10:**
@@ -511,13 +515,13 @@ Tài liệu này là bản kế hoạch triển khai chính thức (Implementati
 - Pytest output log hiển thị rõ test case HD-07 PASS 100%.
 
 **Acceptance Criteria:**
-- [ ] Chặn đóng PR nếu tổng số lượng thực nhận nhỏ hơn số lượng đặt trên PO.
-- [ ] Cho phép đóng PR khi hàng đã nhận đủ hoặc vượt số lượng.
-- [ ] Thông báo lỗi nêu rõ số lượng thực nhận so với số lượng đặt hàng.
+- [x] Chặn đóng PR nếu tổng số lượng thực nhận nhỏ hơn số lượng đặt trên PO.
+- [x] Cho phép đóng PR khi hàng đã nhận đủ hoặc vượt số lượng.
+- [x] Thông báo lỗi nêu rõ số lượng thực nhận so với số lượng đặt hàng.
 
 **Definition of Done:**
-- [ ] Code guard hoàn tất và hoạt động với CSDL thật.
-- [ ] Unit tests PASS và có log lưu trữ.
+- [x] Code guard hoàn tất và hoạt động với CSDL thật.
+- [x] Unit tests PASS và có log lưu trữ.
 
 ---
 

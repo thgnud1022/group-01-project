@@ -25,10 +25,53 @@ import asyncio
 import threading
 import pytest
 from decimal import Decimal
+import time
+import jwt
+from cryptography.hazmat.primitives.asymmetric import ec
 from httpx import AsyncClient, ASGITransport
 from app.main import app
+from app.config import settings
+from app.services.jwt_service import SupabaseJWTService
+from app.dependencies.auth import get_jwt_service
 from app.services.db import get_prisma, connect_db, disconnect_db
 from app.services.procurement_service import ProcurementService, db
+
+
+# Deterministic auth fixtures for API integration test (HD-02, HD-12, TASK-005 RBAC)
+_AUTH_KID = "test-rec-key-id-2026"
+_AUTH_PRIVATE_KEY = ec.generate_private_key(ec.SECP256R1())
+_AUTH_PUBLIC_KEY = _AUTH_PRIVATE_KEY.public_key()
+_SUB_PROCUREMENT = "11111111-0000-0000-0000-000000000005"
+_EMAIL_PROCUREMENT = "procurement@company.com"
+
+
+class _MockSigningKey:
+    def __init__(self, key, key_id: str = _AUTH_KID):
+        self.key = key
+        self.key_id = key_id
+
+
+class _MockJWKSClient:
+    def __init__(self, key=_AUTH_PUBLIC_KEY):
+        self._key = key
+
+    def get_signing_key_from_jwt(self, token: str):
+        return _MockSigningKey(self._key)
+
+
+def _create_procurement_token() -> str:
+    now = int(time.time())
+    payload = {
+        "sub": _SUB_PROCUREMENT,
+        "email": _EMAIL_PROCUREMENT,
+        "iss": settings.JWT_ISSUER,
+        "aud": settings.JWT_AUDIENCE,
+        "exp": now + 3600,
+        "iat": now,
+        "nbf": now,
+    }
+    headers = {"kid": _AUTH_KID, "alg": "ES256"}
+    return jwt.encode(payload, _AUTH_PRIVATE_KEY, algorithm="ES256", headers=headers)
 
 
 class AsyncTestRunner:
@@ -412,29 +455,56 @@ def test_tc_rec_011_postgresql_persistence():
 # ==============================================================================
 def test_tc_rec_012_api_post_receiving_endpoint():
     async def run():
-        po = await helper_create_test_po("TC-REC-012", quantity=4)
+        prisma = get_prisma()
+        # 1. Bind authUserId to procurement user in PostgreSQL (HD-12)
+        await prisma.user.update(
+            where={"email": _EMAIL_PROCUREMENT},
+            data={"authUserId": _SUB_PROCUREMENT},
+        )
 
-        transport = ASGITransport(app=app)
-        async with AsyncClient(transport=transport, base_url="http://test") as client:
-            payload = {
-                "purchaseOrderId": po["id"],
-                "receivedQty": 4,
-                "fileUrl": "https://company.com/receipts/rec-api.pdf",
-                "receivedItems": "Giao 4 màn hình qua API"
-            }
-            res = await client.post("/api/receiving", json=payload)
-            assert res.status_code == 200, res.text
-            data = res.json()
-            assert data["purchaseOrderId"] == po["id"]
-            assert data["receivedQty"] == 4
-            assert data["totalReceived"] == 4
-            assert data["receivedItems"] == "Giao 4 màn hình qua API"
+        # 2. Configure mock JWT verifier for FastAPI dependency injection
+        mock_verifier = SupabaseJWTService(
+            jwks_url=settings.SUPABASE_JWKS_URL,
+            issuer=settings.JWT_ISSUER,
+            audience=settings.JWT_AUDIENCE,
+            jwks_client=_MockJWKSClient(key=_AUTH_PUBLIC_KEY),
+        )
+        app.dependency_overrides[get_jwt_service] = lambda: mock_verifier
+        token = _create_procurement_token()
 
-            # Verify in PostgreSQL
-            prisma = get_prisma()
-            db_rec = await prisma.receiving.find_unique(where={"id": data["id"]})
-            assert db_rec is not None
-            assert db_rec.receivedQty == 4
+        try:
+            po = await helper_create_test_po("TC-REC-012", quantity=4)
+
+            transport = ASGITransport(app=app)
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                payload = {
+                    "purchaseOrderId": po["id"],
+                    "receivedQty": 4,
+                    "fileUrl": "https://company.com/receipts/rec-api.pdf",
+                    "receivedItems": "Giao 4 màn hình qua API"
+                }
+                res = await client.post(
+                    "/api/receiving",
+                    json=payload,
+                    headers={"Authorization": f"Bearer {token}"},
+                )
+                assert res.status_code == 200, res.text
+                data = res.json()
+                assert data["purchaseOrderId"] == po["id"]
+                assert data["receivedQty"] == 4
+                assert data["totalReceived"] == 4
+                assert data["receivedItems"] == "Giao 4 màn hình qua API"
+
+                # Verify in PostgreSQL
+                db_rec = await prisma.receiving.find_unique(where={"id": data["id"]})
+                assert db_rec is not None
+                assert db_rec.receivedQty == 4
+        finally:
+            app.dependency_overrides.pop(get_jwt_service, None)
+            await prisma.user.update(
+                where={"email": _EMAIL_PROCUREMENT},
+                data={"authUserId": None},
+            )
     run_async(run())
 
 
@@ -462,19 +532,46 @@ def test_tc_rec_013_zero_mockdb_dual_write():
 # ==============================================================================
 def test_tc_rec_014_api_get_receiving_endpoint():
     async def run():
-        po = await helper_create_test_po("TC-REC-014", quantity=5)
+        prisma = get_prisma()
+        # 1. Bind authUserId to procurement user in PostgreSQL (HD-12)
+        await prisma.user.update(
+            where={"email": _EMAIL_PROCUREMENT},
+            data={"authUserId": _SUB_PROCUREMENT},
+        )
 
-        # Create 2 receipts for this PO
-        await ProcurementService.receive_goods_prisma(po["id"], 2, "receipts/part1.pdf", "Đợt 1")
-        await ProcurementService.receive_goods_prisma(po["id"], 3, "receipts/part2.pdf", "Đợt 2")
+        # 2. Configure mock JWT verifier for FastAPI dependency injection
+        mock_verifier = SupabaseJWTService(
+            jwks_url=settings.SUPABASE_JWKS_URL,
+            issuer=settings.JWT_ISSUER,
+            audience=settings.JWT_AUDIENCE,
+            jwks_client=_MockJWKSClient(key=_AUTH_PUBLIC_KEY),
+        )
+        app.dependency_overrides[get_jwt_service] = lambda: mock_verifier
+        token = _create_procurement_token()
 
-        transport = ASGITransport(app=app)
-        async with AsyncClient(transport=transport, base_url="http://test") as client:
-            # Query by purchaseOrderId
-            res = await client.get(f"/api/receiving?purchaseOrderId={po['id']}")
-            assert res.status_code == 200, res.text
-            items = res.json()
-            assert len(items) == 2
-            assert all(item["purchaseOrderId"] == po["id"] for item in items)
-            assert items[0]["poNumber"] == po["poNumber"]
+        try:
+            po = await helper_create_test_po("TC-REC-014", quantity=5)
+
+            # Create 2 receipts for this PO
+            await ProcurementService.receive_goods_prisma(po["id"], 2, "receipts/part1.pdf", "Đợt 1")
+            await ProcurementService.receive_goods_prisma(po["id"], 3, "receipts/part2.pdf", "Đợt 2")
+
+            transport = ASGITransport(app=app)
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                # Query by purchaseOrderId
+                res = await client.get(
+                    f"/api/receiving?purchaseOrderId={po['id']}",
+                    headers={"Authorization": f"Bearer {token}"},
+                )
+                assert res.status_code == 200, res.text
+                items = res.json()
+                assert len(items) == 2
+                assert all(item["purchaseOrderId"] == po["id"] for item in items)
+                assert items[0]["poNumber"] == po["poNumber"]
+        finally:
+            app.dependency_overrides.pop(get_jwt_service, None)
+            await prisma.user.update(
+                where={"email": _EMAIL_PROCUREMENT},
+                data={"authUserId": None},
+            )
     run_async(run())

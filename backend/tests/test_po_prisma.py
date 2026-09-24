@@ -30,10 +30,53 @@ import threading
 import re
 import pytest
 from decimal import Decimal
+import time
+import jwt
+from cryptography.hazmat.primitives.asymmetric import ec
 from httpx import AsyncClient, ASGITransport
 from app.main import app
+from app.config import settings
+from app.services.jwt_service import SupabaseJWTService
+from app.dependencies.auth import get_jwt_service
 from app.services.db import get_prisma, connect_db, disconnect_db
 from app.services.procurement_service import ProcurementService, db
+
+
+# Deterministic auth fixtures for API integration test (HD-02, HD-12, TASK-005 RBAC)
+_AUTH_KID = "test-po-key-id-2026"
+_AUTH_PRIVATE_KEY = ec.generate_private_key(ec.SECP256R1())
+_AUTH_PUBLIC_KEY = _AUTH_PRIVATE_KEY.public_key()
+_SUB_PROCUREMENT = "11111111-0000-0000-0000-000000000005"
+_EMAIL_PROCUREMENT = "procurement@company.com"
+
+
+class _MockSigningKey:
+    def __init__(self, key, key_id: str = _AUTH_KID):
+        self.key = key
+        self.key_id = key_id
+
+
+class _MockJWKSClient:
+    def __init__(self, key=_AUTH_PUBLIC_KEY):
+        self._key = key
+
+    def get_signing_key_from_jwt(self, token: str):
+        return _MockSigningKey(self._key)
+
+
+def _create_procurement_token() -> str:
+    now = int(time.time())
+    payload = {
+        "sub": _SUB_PROCUREMENT,
+        "email": _EMAIL_PROCUREMENT,
+        "iss": settings.JWT_ISSUER,
+        "aud": settings.JWT_AUDIENCE,
+        "exp": now + 3600,
+        "iat": now,
+        "nbf": now,
+    }
+    headers = {"kid": _AUTH_KID, "alg": "ES256"}
+    return jwt.encode(payload, _AUTH_PRIVATE_KEY, algorithm="ES256", headers=headers)
 
 
 class AsyncTestRunner:
@@ -245,26 +288,51 @@ def test_tc_po_004_quotation_belongs_to_another_pr_rejected():
 # ==============================================================================
 def test_tc_po_005_client_total_amount_tampering_ignored():
     async def run():
-        pr = await helper_create_approved_pr("TC-PO-005")
-        quote = await helper_create_quotation(pr["id"], total_amount=18_000_000, quantity=3)
+        prisma = get_prisma()
+        # 1. Bind authUserId to procurement user in PostgreSQL (HD-12)
+        await prisma.user.update(
+            where={"email": _EMAIL_PROCUREMENT},
+            data={"authUserId": _SUB_PROCUREMENT},
+        )
 
-        # Client maliciously sends totalAmount = 1000.0 VND via API
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
-            response = await ac.post(
-                "/api/po",
-                json={
-                    "purchaseRequestId": pr["id"],
-                    "quotationId": quote["id"],
-                    "totalAmount": 1000.0,
-                    "quotation": {"totalAmount": 1000.0}
-                }
+        # 2. Configure mock JWT verifier for FastAPI dependency injection
+        mock_verifier = SupabaseJWTService(
+            jwks_url=settings.SUPABASE_JWKS_URL,
+            issuer=settings.JWT_ISSUER,
+            audience=settings.JWT_AUDIENCE,
+            jwks_client=_MockJWKSClient(key=_AUTH_PUBLIC_KEY),
+        )
+        app.dependency_overrides[get_jwt_service] = lambda: mock_verifier
+        token = _create_procurement_token()
+
+        try:
+            pr = await helper_create_approved_pr("TC-PO-005")
+            quote = await helper_create_quotation(pr["id"], total_amount=18_000_000, quantity=3)
+
+            # Client maliciously sends totalAmount = 1000.0 VND via API
+            async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+                response = await ac.post(
+                    "/api/po",
+                    json={
+                        "purchaseRequestId": pr["id"],
+                        "quotationId": quote["id"],
+                        "totalAmount": 1000.0,
+                        "quotation": {"totalAmount": 1000.0}
+                    },
+                    headers={"Authorization": f"Bearer {token}"},
+                )
+            assert response.status_code == 200
+            data = response.json()
+
+            # Server MUST lock to the database quotation amount (18,000,000), ignoring client 1000.0
+            assert data["totalAmount"] == 18_000_000.0
+            assert data["totalAmount"] != 1000.0
+        finally:
+            app.dependency_overrides.pop(get_jwt_service, None)
+            await prisma.user.update(
+                where={"email": _EMAIL_PROCUREMENT},
+                data={"authUserId": None},
             )
-        assert response.status_code == 200
-        data = response.json()
-
-        # Server MUST lock to the database quotation amount (18,000,000), ignoring client 1000.0
-        assert data["totalAmount"] == 18_000_000.0
-        assert data["totalAmount"] != 1000.0
     run_async(run())
 
 
@@ -273,27 +341,52 @@ def test_tc_po_005_client_total_amount_tampering_ignored():
 # ==============================================================================
 def test_tc_po_006_client_quantity_tampering_ignored():
     async def run():
-        pr = await helper_create_approved_pr("TC-PO-006")
-        quote = await helper_create_quotation(pr["id"], total_amount=21_000_000, quantity=3)
+        prisma = get_prisma()
+        # 1. Bind authUserId to procurement user in PostgreSQL (HD-12)
+        await prisma.user.update(
+            where={"email": _EMAIL_PROCUREMENT},
+            data={"authUserId": _SUB_PROCUREMENT},
+        )
 
-        # Client maliciously sends quantity = 9999 and totalAmount = 500.0
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
-            response = await ac.post(
-                "/api/po",
-                json={
-                    "purchaseRequestId": pr["id"],
-                    "quotationId": quote["id"],
-                    "quantity": 9999,
-                    "totalAmount": 500.0
-                }
+        # 2. Configure mock JWT verifier for FastAPI dependency injection
+        mock_verifier = SupabaseJWTService(
+            jwks_url=settings.SUPABASE_JWKS_URL,
+            issuer=settings.JWT_ISSUER,
+            audience=settings.JWT_AUDIENCE,
+            jwks_client=_MockJWKSClient(key=_AUTH_PUBLIC_KEY),
+        )
+        app.dependency_overrides[get_jwt_service] = lambda: mock_verifier
+        token = _create_procurement_token()
+
+        try:
+            pr = await helper_create_approved_pr("TC-PO-006")
+            quote = await helper_create_quotation(pr["id"], total_amount=21_000_000, quantity=3)
+
+            # Client maliciously sends quantity = 9999 and totalAmount = 500.0
+            async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+                response = await ac.post(
+                    "/api/po",
+                    json={
+                        "purchaseRequestId": pr["id"],
+                        "quotationId": quote["id"],
+                        "quantity": 9999,
+                        "totalAmount": 500.0
+                    },
+                    headers={"Authorization": f"Bearer {token}"},
+                )
+            assert response.status_code == 200
+            data = response.json()
+
+            # Server MUST lock quantity to 3 and totalAmount to 21,000,000
+            assert data["quantity"] == 3
+            assert data["quantity"] != 9999
+            assert data["totalAmount"] == 21_000_000.0
+        finally:
+            app.dependency_overrides.pop(get_jwt_service, None)
+            await prisma.user.update(
+                where={"email": _EMAIL_PROCUREMENT},
+                data={"authUserId": None},
             )
-        assert response.status_code == 200
-        data = response.json()
-
-        # Server MUST lock quantity to 3 and totalAmount to 21,000,000
-        assert data["quantity"] == 3
-        assert data["quantity"] != 9999
-        assert data["totalAmount"] == 21_000_000.0
     run_async(run())
 
 
@@ -543,32 +636,56 @@ def test_tc_po_016_concurrent_create_attempts_single_po():
 # ==============================================================================
 def test_tc_po_017_quotation_mismatch_with_client_tampering_rejected():
     async def run():
-        pr1 = await helper_create_approved_pr("TC-PO-017-PR1")
-        pr2 = await helper_create_approved_pr("TC-PO-017-PR2")
-
-        quote2 = await helper_create_quotation(pr2["id"], total_amount=30_000_000, quantity=5)
-
-        # Client sends PR1 ID with quote2 ID, attempting to tamper price and supplier
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
-            response = await ac.post(
-                "/api/po",
-                json={
-                    "purchaseRequestId": pr1["id"],
-                    "quotationId": quote2["id"],
-                    "totalAmount": 1000.0,
-                    "quantity": 1,
-                    "supplierName": "Hacked Supplier"
-                }
-            )
-        assert response.status_code == 400
-        assert "không thuộc về Purchase Request" in response.json()["detail"]
-
-        # Verify PR1 remains APPROVED and no PO was created
         prisma = get_prisma()
-        db_pr = await prisma.purchaserequest.find_unique(where={"id": pr1["id"]})
-        assert db_pr.status == "APPROVED"
-        po_count = await prisma.purchaseorder.count(where={"purchaseRequestId": pr1["id"]})
-        assert po_count == 0
+        # 1. Bind authUserId to procurement user in PostgreSQL (HD-12)
+        await prisma.user.update(
+            where={"email": _EMAIL_PROCUREMENT},
+            data={"authUserId": _SUB_PROCUREMENT},
+        )
+
+        # 2. Configure mock JWT verifier for FastAPI dependency injection
+        mock_verifier = SupabaseJWTService(
+            jwks_url=settings.SUPABASE_JWKS_URL,
+            issuer=settings.JWT_ISSUER,
+            audience=settings.JWT_AUDIENCE,
+            jwks_client=_MockJWKSClient(key=_AUTH_PUBLIC_KEY),
+        )
+        app.dependency_overrides[get_jwt_service] = lambda: mock_verifier
+        token = _create_procurement_token()
+
+        try:
+            pr1 = await helper_create_approved_pr("TC-PO-017-PR1")
+            pr2 = await helper_create_approved_pr("TC-PO-017-PR2")
+
+            quote2 = await helper_create_quotation(pr2["id"], total_amount=30_000_000, quantity=5)
+
+            # Client sends PR1 ID with quote2 ID, attempting to tamper price and supplier
+            async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+                response = await ac.post(
+                    "/api/po",
+                    json={
+                        "purchaseRequestId": pr1["id"],
+                        "quotationId": quote2["id"],
+                        "totalAmount": 1000.0,
+                        "quantity": 1,
+                        "supplierName": "Hacked Supplier"
+                    },
+                    headers={"Authorization": f"Bearer {token}"},
+                )
+            assert response.status_code == 400
+            assert "không thuộc về Purchase Request" in response.json()["detail"]
+
+            # Verify PR1 remains APPROVED and no PO was created
+            db_pr = await prisma.purchaserequest.find_unique(where={"id": pr1["id"]})
+            assert db_pr.status == "APPROVED"
+            po_count = await prisma.purchaseorder.count(where={"purchaseRequestId": pr1["id"]})
+            assert po_count == 0
+        finally:
+            app.dependency_overrides.pop(get_jwt_service, None)
+            await prisma.user.update(
+                where={"email": _EMAIL_PROCUREMENT},
+                data={"authUserId": None},
+            )
     run_async(run())
 
 
@@ -577,35 +694,59 @@ def test_tc_po_017_quotation_mismatch_with_client_tampering_rejected():
 # ==============================================================================
 def test_tc_po_018_api_runtime_persists_to_postgresql():
     async def run():
-        pr = await helper_create_approved_pr("TC-PO-018")
-        quote = await helper_create_quotation(pr["id"], total_amount=9_900_000, quantity=3)
-
-        # Reset MockDB pos to verify zero dual-write
-        db.pos.clear()
-
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
-            response = await ac.post(
-                "/api/po",
-                json={
-                    "purchaseRequestId": pr["id"],
-                    "quotationId": quote["id"],
-                    "creatorId": "procurement@company.com"
-                }
-            )
-        assert response.status_code == 200
-        data = response.json()
-        po_id = data["id"]
-
-        # Verify PO exists in real PostgreSQL database
         prisma = get_prisma()
-        db_po = await prisma.purchaseorder.find_unique(where={"id": po_id})
-        assert db_po is not None
-        assert db_po.purchaseRequestId == pr["id"]
-        assert db_po.quotationId == quote["id"]
-        assert float(db_po.totalAmount) == 9_900_000.0
-        assert db_po.quantity == 3
-        assert db_po.status == "SENT"
+        # 1. Bind authUserId to procurement user in PostgreSQL (HD-12)
+        await prisma.user.update(
+            where={"email": _EMAIL_PROCUREMENT},
+            data={"authUserId": _SUB_PROCUREMENT},
+        )
 
-        # Verify zero dual-write in MockDB
-        assert po_id not in db.pos
+        # 2. Configure mock JWT verifier for FastAPI dependency injection
+        mock_verifier = SupabaseJWTService(
+            jwks_url=settings.SUPABASE_JWKS_URL,
+            issuer=settings.JWT_ISSUER,
+            audience=settings.JWT_AUDIENCE,
+            jwks_client=_MockJWKSClient(key=_AUTH_PUBLIC_KEY),
+        )
+        app.dependency_overrides[get_jwt_service] = lambda: mock_verifier
+        token = _create_procurement_token()
+
+        try:
+            pr = await helper_create_approved_pr("TC-PO-018")
+            quote = await helper_create_quotation(pr["id"], total_amount=9_900_000, quantity=3)
+
+            # Reset MockDB pos to verify zero dual-write
+            db.pos.clear()
+
+            async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+                response = await ac.post(
+                    "/api/po",
+                    json={
+                        "purchaseRequestId": pr["id"],
+                        "quotationId": quote["id"],
+                        "creatorId": "procurement@company.com"
+                    },
+                    headers={"Authorization": f"Bearer {token}"},
+                )
+            assert response.status_code == 200
+            data = response.json()
+            po_id = data["id"]
+
+            # Verify PO exists in real PostgreSQL database
+            db_po = await prisma.purchaseorder.find_unique(where={"id": po_id})
+            assert db_po is not None
+            assert db_po.purchaseRequestId == pr["id"]
+            assert db_po.quotationId == quote["id"]
+            assert float(db_po.totalAmount) == 9_900_000.0
+            assert db_po.quantity == 3
+            assert db_po.status == "SENT"
+
+            # Verify zero dual-write in MockDB
+            assert po_id not in db.pos
+        finally:
+            app.dependency_overrides.pop(get_jwt_service, None)
+            await prisma.user.update(
+                where={"email": _EMAIL_PROCUREMENT},
+                data={"authUserId": None},
+            )
     run_async(run())

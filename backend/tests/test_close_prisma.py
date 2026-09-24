@@ -25,10 +25,53 @@ import asyncio
 import threading
 import pytest
 from decimal import Decimal
+import time
+import jwt
+from cryptography.hazmat.primitives.asymmetric import ec
 from httpx import AsyncClient, ASGITransport
 from app.main import app
+from app.config import settings
+from app.services.jwt_service import SupabaseJWTService
+from app.dependencies.auth import get_jwt_service
 from app.services.db import get_prisma, connect_db, disconnect_db
 from app.services.procurement_service import ProcurementService, db
+
+
+# Deterministic auth fixtures for API integration test (HD-02, HD-12, TASK-005 RBAC)
+_AUTH_KID = "test-close-key-id-2026"
+_AUTH_PRIVATE_KEY = ec.generate_private_key(ec.SECP256R1())
+_AUTH_PUBLIC_KEY = _AUTH_PRIVATE_KEY.public_key()
+_SUB_FINANCE = "11111111-0000-0000-0000-000000000003"
+_EMAIL_FINANCE = "finance@company.com"
+
+
+class _MockSigningKey:
+    def __init__(self, key, key_id: str = _AUTH_KID):
+        self.key = key
+        self.key_id = key_id
+
+
+class _MockJWKSClient:
+    def __init__(self, key=_AUTH_PUBLIC_KEY):
+        self._key = key
+
+    def get_signing_key_from_jwt(self, token: str):
+        return _MockSigningKey(self._key)
+
+
+def _create_finance_token() -> str:
+    now = int(time.time())
+    payload = {
+        "sub": _SUB_FINANCE,
+        "email": _EMAIL_FINANCE,
+        "iss": settings.JWT_ISSUER,
+        "aud": settings.JWT_AUDIENCE,
+        "exp": now + 3600,
+        "iat": now,
+        "nbf": now,
+    }
+    headers = {"kid": _AUTH_KID, "alg": "ES256"}
+    return jwt.encode(payload, _AUTH_PRIVATE_KEY, algorithm="ES256", headers=headers)
 
 
 class AsyncTestRunner:
@@ -389,21 +432,47 @@ def test_tc_close_012_concurrent_close_attempts():
 # ==============================================================================
 def test_tc_close_013_api_post_close_pr_endpoint():
     async def run():
-        pr, po = await helper_setup_pr_po("TC-013", quantity=2)
-        await ProcurementService.receive_goods_prisma(po["id"], 2, "receipts/done.pdf")
+        prisma = get_prisma()
+        # 1. Bind authUserId to finance user in PostgreSQL (HD-12)
+        await prisma.user.update(
+            where={"email": _EMAIL_FINANCE},
+            data={"authUserId": _SUB_FINANCE},
+        )
 
-        transport = ASGITransport(app=app)
-        async with AsyncClient(transport=transport, base_url="http://test") as client:
-            res = await client.post(f"/api/pr/{pr['id']}/close")
-            assert res.status_code == 200, res.text
-            data = res.json()
-            assert data["id"] == pr["id"]
-            assert data["status"] == "CLOSED"
+        # 2. Configure mock JWT verifier for FastAPI dependency injection
+        mock_verifier = SupabaseJWTService(
+            jwks_url=settings.SUPABASE_JWKS_URL,
+            issuer=settings.JWT_ISSUER,
+            audience=settings.JWT_AUDIENCE,
+            jwks_client=_MockJWKSClient(key=_AUTH_PUBLIC_KEY),
+        )
+        app.dependency_overrides[get_jwt_service] = lambda: mock_verifier
+        token = _create_finance_token()
 
-            # Verify in PostgreSQL
-            prisma = get_prisma()
-            db_pr = await prisma.purchaserequest.find_unique(where={"id": pr["id"]})
-            assert db_pr.status == "CLOSED"
+        try:
+            pr, po = await helper_setup_pr_po("TC-013", quantity=2)
+            await ProcurementService.receive_goods_prisma(po["id"], 2, "receipts/done.pdf")
+
+            transport = ASGITransport(app=app)
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                res = await client.post(
+                    f"/api/pr/{pr['id']}/close",
+                    headers={"Authorization": f"Bearer {token}"},
+                )
+                assert res.status_code == 200, res.text
+                data = res.json()
+                assert data["id"] == pr["id"]
+                assert data["status"] == "CLOSED"
+
+                # Verify in PostgreSQL
+                db_pr = await prisma.purchaserequest.find_unique(where={"id": pr["id"]})
+                assert db_pr.status == "CLOSED"
+        finally:
+            app.dependency_overrides.pop(get_jwt_service, None)
+            await prisma.user.update(
+                where={"email": _EMAIL_FINANCE},
+                data={"authUserId": None},
+            )
     run_async(run())
 
 
