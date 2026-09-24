@@ -428,9 +428,12 @@ Tài liệu này là bản kế hoạch triển khai chính thức (Implementati
 - **Dependency:** TASK-003
 - **Deliverable:** Guard bắt buộc kiểm tra `pr.status == "APPROVED"` trước khi tạo Purchase Order trong `create_po()`.
 - **Test / Evidence:** Pytest log kiểm thử HD-04 PASS (chặn tạo PO khi PR ở trạng thái DRAFT hoặc REJECTED).
-- **Status:** PLANNED
+- **Status:** COMPLETED (ALREADY IMPLEMENTED)
 
-**Current State:** Lỗi nghiêm trọng BUG-001: Hàm `create_po()` trong `procurement_service.py` không kiểm tra trạng thái của Purchase Request, cho phép tạo PO ngay cả khi PR đang là DRAFT hoặc đã bị REJECTED.  
+**Current State:** **ALREADY IMPLEMENTED**. Khảo sát và Final Audit độc lập (2026-09-24) xác nhận logic guard REQ-BR-10 / HD-04 (BUG-001) đã được triển khai hoàn chỉnh từ trước:
+- Implementation đã tồn tại trước khi TASK-006 được audit/đóng: trong hàm MockDB `create_po()` (từ US-09, entry AI-026) và trong hàm production PostgreSQL `create_po_prisma()` (từ TASK-003 Step 3B.5, entry AI-051).
+- Production path thực tế được xác nhận là `create_po_prisma()` được gọi bởi router `POST /api/po`, nằm trong transaction với khóa dòng `SELECT ... FOR UPDATE`, và được bảo vệ bởi Server-Side RBAC (`RoleChecker(["PROCUREMENT", "ADMIN"])`).
+- Không thực hiện code change mới trong TASK-006; toàn bộ verification và evidence được hoàn thiện trong Final Delivery (xem `docs/evidence/TASK-006-BUG-001-PO-GUARD.md`).
 **Target State:** Thực hiện đúng quyết định bắt buộc HD-04 / REQ-BR-10: `create_po()` kiểm tra trạng thái PR; nếu `pr.status != "APPROVED"`, lập tức raise `ValueError("Purchase Request must be APPROVED before creating a Purchase Order")`.
 
 **Dependencies:** TASK-003  
