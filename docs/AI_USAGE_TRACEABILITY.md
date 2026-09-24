@@ -60,13 +60,16 @@ $$\text{AI Activity} \longrightarrow \text{Artifact} \longrightarrow \text{User 
 | **AI-051** | Purchase Order Migration | Nguyễn Thị Thùy Dung (Backend) | **US-08** (Tạo PO) | T-26..T-29 | **TASK-003 (Step 3B.5)** | `po.py`, `procurement_service.py` | `test_po_prisma.py` (15/15 PASS) | 1-1 PR-PO, Price/Qty lock, Option A poNumber | `5584d68` |
 | **AI-052** | Goods Receiving Migration | Nguyễn Thị Thùy Dung (Backend) | **US-09** (Receiving) | T-30..T-33 | **TASK-003 (Step 3B.6)** | `receiving.py`, `procurement_service.py` | `test_receiving_prisma.py` (14/14 PASS) | Cumulative receiving $\le$ PO.quantity, Partial | `b5d00a3` |
 | **AI-053** | Close PR & Budget Settlement Migration | Trần Thị Thu Hà (QA/Tester) | **US-10** (Close PR) | T-34..T-36 | **TASK-003 (Step 3B.7)** | `pr.py`, `procurement_service.py` | `test_close_prisma.py` (14/14 PASS) | HD-07 Guard, Budget settlement Decimal | `dfdd7e5` |
-| **AI-054** | Schema Identity Binding (authUserId) | Nguyễn Thị Thùy Dung & Nguyễn Trương Thùy Dương | All Stories (Auth) | N/A (Security Infra) | **TASK-004 (Step 3A)** | `schema.prisma` (User.authUserId) | `prisma db push`, `verify_step3a.py` | `authUserId String? @unique` sync CSDL | `[Uncommitted]` |
+| **AI-054** | Schema Identity Binding (authUserId) | Nguyễn Thị Thùy Dung & Nguyễn Trương Thùy Dương | All Stories (Auth) | N/A (Security Infra) | **TASK-004 (Step 3A)** | `schema.prisma` (User.authUserId) | `prisma db push`, `verify_step3a.py` | `authUserId String? @unique` sync CSDL | `6117d39` |
+| **AI-055** | JWT/JWKS Authentication Verification | Nguyễn Thị Thùy Dung & Trần Thị Thu Hà | All Stories (Auth) | N/A (Security Infra) | **TASK-004 (Step 3B)** | `jwt_service.py`, `dependencies/auth.py`, `routers/auth.py` | `test_jwt_auth.py` (12/12 PASS) | Supabase JWT, ES256, JWKS, sub->User.authUserId | `[Uncommitted]` |
+| **AI-056** | JWKS Timeout Hardening (timeout=5.0s) | Nguyễn Thị Thùy Dung & Trần Thị Thu Hà | All Stories (Auth) | N/A (Security Infra) | **TASK-004 (Step 3B Gap Fix)** | `jwt_service.py` | `test_jwt_auth.py` (12/12 PASS), targeted (23/23 PASS) | Explicit timeout=5.0s on PyJWKClient | `[Uncommitted]` |
+
 
 ---
 
 ## 3. Rà soát khoảng trống bằng chứng (Evidence Gaps & Traceability Integrity)
 
-1. **Authentication (TASK-004):** `PARTIAL EVIDENCE / IN PROGRESS` — Đã hoàn tất thiết kế HD-12 và Step 3A Schema Identity Binding (`authUserId String? @unique` trên Supabase PostgreSQL, evidence tại `docs/evidence/TASK-004-STEP-3A-SCHEMA.md`). Đang chuẩn bị các bước tiếp theo cho JWT verification middleware.
+1. **Authentication (TASK-004):** `VERIFIED (STEP 3A & 3B)` — Đã hoàn tất thiết kế HD-12, Step 3A Schema Identity Binding (`authUserId String? @unique` trên Supabase PostgreSQL, evidence tại `docs/evidence/TASK-004-STEP-3A-SCHEMA.md`), và Step 3B JWT/JWKS Authentication Verification (PyJWT + ES256 + JWKS + `sub -> User.authUserId`, evidence tại `docs/evidence/TASK-004-STEP-3B-JWT.md`, 12/12 security test cases PASS). Sẵn sàng cung cấp verified identity cho TASK-005 (RBAC).
 2. **RBAC Server-side Middleware (TASK-005):** `MISSING EVIDENCE` — Chưa có middleware chặn theo role ở tầng HTTP (đang chặn bằng guard bên trong service).
 3. **Real LLM Integration (TASK-009):** `MISSING EVIDENCE` — Chưa gọi API ngoài (Gemini/OpenAI); hiện đang dùng so sánh deterministic.
 4. **Frontend Architecture Refactor (TASK-006):** `MISSING EVIDENCE` — Frontend vẫn là file đơn khối `App.tsx`, chưa tách trang theo React Router.
