@@ -533,46 +533,51 @@ Tài liệu này là bản kế hoạch triển khai chính thức (Implementati
 - **Responsible Owner:** Nguyễn Trương Thùy Dương (Phụ trách US-04, US-05, US-06)
 - **Collaborators / Assigned:** Nguyễn Trương Thùy Dương, Nguyễn Thị Thùy Dung (Backend API), Trần Thị Kiều Giang (Frontend UI)
 - **Dependency:** TASK-003, TASK-005
-- **Deliverable:** Trọn bộ RESTful API quản lý Supplier CRUD, tải lên và liên kết Quotation với PR, truy xuất bảng so sánh Quotation.
-- **Test / Evidence:** Pytest & API integration logs kiểm tra CRUD Supplier và Quotation linking.
-- **Status:** PLANNED
+- **Deliverable:** Trọn bộ RESTful API quản lý Supplier management API (HD-15 scope: Create, List, Detail), tải lên và liên kết Quotation với PR, truy xuất bảng so sánh Quotation.
+- **Test / Evidence:** Pytest & API integration logs kiểm tra Supplier management và Quotation linking.
+- **Status:** COMPLETED (ALREADY IMPLEMENTED)
 
-**Current State:** Backend hiện tại chỉ có các mock functions cơ bản; chưa có REST endpoints đầy đủ cho Supplier và Quotation, chưa lưu trữ báo giá đa nhà cung cấp bền vững vào DB.  
+**Current State:** Toàn bộ RESTful API cho Supplier (`POST`, `GET`, `GET /{id}` theo HD-15) và Quotation (`POST`, `GET`, `GET /{id}`, `GET /api/purchase-requests/{id}/quotations`, `POST /compare`) đã được hiện thực hóa hoàn chỉnh bằng Prisma Client kết nối Supabase PostgreSQL từ TASK-003 Step 3B.4 (`AI-049`) và bảo vệ bởi Server-Side RBAC trong TASK-005 (`AI-057`). File lưu trữ dạng `fileUrl` metadata theo HD-14 (HRD-03 Option A). Toàn bộ 24/24 test cases liên quan Supplier & Quotation đạt 100% GREEN.
 **Target State:** Cung cấp đầy đủ API cho Procurement Officer:
-- `GET /api/suppliers`, `POST /api/suppliers` (CRUD nhà cung cấp).
+- `GET /api/suppliers`, `POST /api/suppliers`, `GET /api/suppliers/{id}` (Supplier management API theo HD-15).
 - `POST /api/quotations` (tạo và liên kết báo giá với PR đã Approved).
 - `GET /api/purchase-requests/{id}/quotations` (lấy danh sách các báo giá của PR để lập bảng so sánh).
 
-**Dependencies:** TASK-003, TASK-005  
-**Potential Blockers:** Quyết định HRD-03 (nơi lưu trữ file đính kèm báo giá nếu cần).
+**Dependencies:** TASK-003, TASK-005
+**Resolved Decisions:** HRD-03 / HD-14 (Option A — URL Metadata Only), HD-15 (Option A — Supplier Management Scope: Create, List, Detail; Update/Delete không thuộc Final Delivery scope). Blockers: 0.
 
-**Files / Modules Expected to Change:**
-- `backend/app/routers/supplier.py` (tạo mới router Supplier)
-- `backend/app/routers/quotation.py` (tạo mới router Quotation)
-- `backend/app/services/procurement_service.py` (bổ sung service logic)
+**Files / Modules Verified:**
+- `backend/app/routers/suppliers.py` (3 endpoints với RBAC)
+- `backend/app/routers/quotations.py` (5 endpoints với RBAC)
+- `backend/app/services/procurement_service.py` (8 hàm Prisma methods)
+- `backend/tests/test_supplier_quotation_prisma.py` (15/15 PASS)
+- `backend/tests/test_quotation.py` (6/6 PASS sau khi đồng bộ JWT/Prisma)
+- `backend/tests/test_rbac.py` (3/3 PASS cho supplier/quotation)
 
-**Implementation Work:**
-1. Tạo schema Pydantic cho `SupplierCreate`, `SupplierResponse`, `QuotationCreate`, `QuotationResponse`.
-2. Cài đặt các endpoints trong `routers/supplier.py`.
-3. Cài đặt endpoint tạo Quotation: kiểm tra điều kiện PR phải ở trạng thái `APPROVED` trước khi nhận quotation.
-4. Cài đặt endpoint truy xuất danh sách quotation của một PR phục vụ màn hình so sánh (US-06).
+**Implementation Work Verified:**
+1. Schema Pydantic cho `SupplierCreateSchema`, `SupplierResponseSchema`, `QuotationCreateSchema`, `CompareRequest` đã hoàn thiện.
+2. Cài đặt các endpoints trong `routers/suppliers.py` với `RoleChecker` và `get_current_identity`.
+3. Cài đặt endpoint tạo Quotation: kiểm tra điều kiện PR phải ở trạng thái `APPROVED` với row lock `SELECT ... FOR UPDATE` trước khi nhận quotation.
+4. Cài đặt endpoint truy xuất danh sách quotation và so sánh báo giá đọc trực tiếp từ PostgreSQL, tính đơn giá Derived Decimal `unitPrice` và cắm cờ anomaly $\ge 20\%$ tiền định (US-06).
 
-**Tests Required:**
-- Integration Test: Thêm nhà cung cấp mới → kiểm tra lưu thành công vào Supabase.
-- Integration Test: Thêm quotation vào PR chưa Approved → nhận lỗi 400 Bad Request.
-- Integration Test: Thêm 3 quotation vào 1 PR Approved → query danh sách nhận đủ 3 quotation.
+**Tests Verified:**
+- Integration Test: Thêm nhà cung cấp mới → lưu thành công vào Supabase PostgreSQL (`TC-SQ-001`).
+- Integration Test: Thêm quotation vào PR chưa Approved → nhận lỗi 400 Bad Request (`TC-SQ-008`).
+- Integration Test: Thêm nhiều quotation vào 1 PR Approved → query danh sách nhận đủ và so sánh tiền định (`TC-SQ-006`, `TC-SQ-012`, `TC-SQ-013`).
+- Security Test: Chặn Employee tạo Supplier/Quotation, cho phép Procurement/Admin (`RBAC-019`, `RBAC-025`, `RBAC-026`).
+- Legacy Sync Test: Đưa toàn bộ 6 test cases trong `test_quotation.py` lên chuẩn JWT ES256 và Prisma runtime (6/6 PASS).
 
-**Evidence Required:**
-- API response logs và screenshot truy vấn dữ liệu từ Supabase.
+**Evidence:**
+- Tài liệu nghiệm thu chi tiết: `docs/evidence/TASK-008-SUPPLIER-QUOTATION.md`.
 
 **Acceptance Criteria:**
-- [ ] Supplier CRUD hoạt động hoàn chỉnh.
-- [ ] Quotation chỉ liên kết được vào PR đã `APPROVED`.
-- [ ] Trả về đầy đủ dữ liệu so sánh cho frontend.
+- [x] Supplier management API (HD-15 scope = Create, List, Detail; Update/Delete không thuộc Final Delivery scope) hoạt động hoàn chỉnh trên Supabase PostgreSQL.
+- [x] Quotation chỉ liên kết được vào PR đã `APPROVED` (Guard T-052 / REQ-BR-06 với row lock SELECT FOR UPDATE).
+- [x] Trả về đầy đủ dữ liệu so sánh cho frontend kèm cảnh báo anomaly 20% tiền định và tính toán đơn giá Decimal chính xác.
 
 **Definition of Done:**
-- [ ] API endpoints sẵn sàng cho frontend kết nối.
-- [ ] Test cases PASS.
+- [x] API endpoints sẵn sàng cho frontend kết nối.
+- [x] Test cases PASS (24/24 tests PASS: `test_supplier_quotation_prisma.py` 15/15, `test_rbac.py` 3/3, `test_quotation.py` 6/6).
 
 ---
 
@@ -1347,7 +1352,7 @@ docs(release): package evidence, qa report and compliance matrix [TASK-018]
 |---|---|---|---|
 | **HRD-01** (AI Provider & API Key) | TASK-009 (LLM Integration), TASK-010 (AI Eval) | **No** (Chỉ chặn module AI; Database, Auth, RBAC, Business Rules vẫn code bình thường) | Nhóm thống nhất chọn Gemini hoặc OpenAI và cung cấp API Key thật vào `backend/.env`. |
 | **HRD-02** (Cloud Hosting Platform) | TASK-017 (Deployment Live URL) | **No** (Chỉ chặn bước deploy production cuối cùng; phát triển và test local chạy độc lập) | Nhóm chốt chọn Vercel/Render trước khi bước vào Phase 11. |
-| **HRD-03** (Quotation File Storage) | TASK-008 (Phần upload file đính kèm) | **No** (Chỉ chặn phần đính kèm file quotation; API CRUD Supplier và liên kết quotation vẫn làm bình thường) | Thống nhất sử dụng Supabase Storage bucket hoặc lưu URL văn bản đơn giản. |
+| **HRD-03** (Quotation File Storage) | TASK-008 (Phần upload file đính kèm) | **No** | **DECIDED (HD-14 Option A):** Sử dụng lưu `fileUrl: String` (URL/path metadata), không triển khai binary upload trong Final Delivery. |
 | **HRD-04a** (Figma Public URL) | TASK-011, TASK-012, OUT-2.3 | **No** (Giao diện vẫn có thể code theo đặc tả hiện hữu; URL công khai chỉ phục vụ nghiệm thu OUT-2.3) | Cung cấp link chia sẻ công khai (Public View URL) của file Figma. |
 | **HRD-04b** (Taiga Public URL) | OUT-2.6 (Taiga Backlog) | **No** (Không ảnh hưởng đến code hệ thống; chỉ phục vụ chấm điểm deliverable OUT-2.6) | Cung cấp link công khai của dự án Taiga Backlog. |
 | **HRD-04c** (Usability Test Execution) | OUT-2.4 (Usability Testing Report) | **No** (Không chặn code; là hoạt động kiểm thử người dùng độc lập sau khi có giao diện) | Lên lịch test với 3+ người dùng sau khi hoàn thành giao diện chính. |

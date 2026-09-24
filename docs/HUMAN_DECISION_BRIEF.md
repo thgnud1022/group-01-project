@@ -33,6 +33,8 @@ Mỗi decision được trình bày trung lập với đầy đủ evidence. Tà
 | HD-REQ-08 | Active Budget Period 2026 Q1 | **APPROVED** | No |
 | HD-REQ-09 | Approver Email Bắt Buộc | **APPROVED (Option B)** | No |
 | HD-REQ-10 | Approval Status Guard | **APPROVED** | No |
+| HD-14 / HRD-03 | Quotation File Storage | **APPROVED (Option A — URL Metadata)** | No |
+| HD-15 | Supplier Management Scope | **APPROVED (Option A — Create/List/Detail)** | No |
 
 ---
 
@@ -495,6 +497,32 @@ Có cho phép thực thi `approve_pr` trên PR đã duyệt hoặc không ở tr
    - `PENDING_MANAGER_APPROVAL` hoặc `PENDING_FINANCE_APPROVAL`.
 2. Nếu PR ở bất kỳ trạng thái nào khác (`APPROVED`, `REJECTED`, `PO_CREATED`, `CLOSED`), request approve bắt buộc bị reject (báo lỗi).
 3. Không thay đổi quy định REQ-BR-02 (ngưỡng > 50M VND, Manager duyệt bước 1, Finance duyệt bước 2).
+
+---
+
+## HD-14 (HRD-03) — Quotation File Storage Architecture
+
+### Decision Question
+Phương thức tiếp nhận và lưu trữ file đính kèm Quotation (PDF/Doc) cho hệ thống trong phạm vi Final Delivery được chốt theo phương án nào?
+
+### Human Decision (2026-09-24)
+**APPROVED — OPTION A: URL METADATA PERSISTENCE**
+1. Duy trì trường `fileUrl: String` trong model `Quotation` (PostgreSQL) và nhận chuỗi đường dẫn/URL metadata từ client (ví dụ: `"quotes/default.pdf"`).
+2. Không triển khai multipart binary upload lên Supabase Storage bucket trong phạm vi Final Delivery để tránh phụ thuộc vào cloud credentials và rủi ro mạng khi kiểm thử / đánh giá đồ án.
+3. Toàn bộ luồng tạo báo giá, so sánh báo giá, tạo PO, nhận hàng và đóng PR tiếp tục vận hành bền vững trên PostgreSQL qua Prisma Client.
+
+---
+
+## HD-15 — Supplier Management Scope for Procurement Flow (CLD)
+
+### Decision Question
+Endpoint Supplier có cần mở rộng đầy đủ `PUT` (Update) và `DELETE` (Xóa) hay giữ nguyên phạm vi Create, List, Detail?
+
+### Human Decision (2026-09-24)
+**APPROVED — OPTION A: SCOPE CREATE, LIST, DETAIL (CLD)**
+1. Phạm vi quản lý Supplier tại backend API gồm 3 endpoints: `POST /api/suppliers`, `GET /api/suppliers`, và `GET /api/suppliers/{id}`. HD-15 scope = Create + List + Detail (CLD); Update/Delete không thuộc Final Delivery scope.
+2. Không triển khai `PUT` và `DELETE` để bảo vệ tính toàn vẹn khóa ngoại (Foreign Key Integrity) với các bảng `Quotation` và `PurchaseOrder`, ngăn ngừa việc xóa nhà cung cấp đã có giao dịch mua sắm liên kết.
+3. RBAC giữ nguyên: `POST` cho `PROCUREMENT` và `ADMIN`; `GET` cho mọi người dùng đã xác thực (theo HD-13 K-1).
 
 ---
 

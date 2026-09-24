@@ -462,3 +462,54 @@ This log records the authoritative architectural and business decisions for the 
 - **Verification/evidence required:** 28/28 RBAC integration tests PASSED (`backend/tests/test_rbac.py`); Evidence tại `docs/evidence/TASK-005-RBAC.md`.
 - **Date:** 2026-09-24
 - **Owner:** Group 01
+
+---
+
+## HD-14: Quotation File Storage Architecture (HRD-03)
+
+- **ID:** HD-14 / HRD-03
+- **Title:** Quotation File Storage Architecture — URL Metadata Persistence
+- **Status:** **DECIDED (Option A — URL Metadata Only)**
+- **Decision:** Human has formally selected **Option A — URL Metadata Only**. Hệ thống duy trì trường `fileUrl: String` trong model `Quotation` (PostgreSQL) và lưu trữ chuỗi đường dẫn/URL metadata được cung cấp từ client (ví dụ: `"quotes/default.pdf"`). Hệ thống KHÔNG triển khai binary upload multipart/form-data lên Supabase Storage bucket trong phạm vi Final Delivery.
+- **Decision type:** Architecture / Storage
+- **Requirement/source:** HRD-03, REQ-FR-10, US-06 (Thu thập & Liên kết Quotations), T-18 (Upload/lưu Quotation), `docs/IMPLEMENTATION_PLAN.md` Section 16.
+- **Reason:**
+  1. Loại bỏ hoàn toàn sự phụ thuộc vào cloud credentials (`SUPABASE_SERVICE_ROLE_KEY`) và external storage network latency trong quá trình kiểm thử tự động, CI/CD và chấm điểm đồ án (Viva defense).
+  2. Database schema `schema.prisma` và migration trên Supabase PostgreSQL đã có sẵn trường `fileUrl String` hoạt động ổn định và nhất quán từ TASK-003 Step 3B.4.
+  3. Không làm gián đoạn chuỗi quy trình mua sắm E2E: PR APPROVED → Quotation creation → Comparison & anomaly detection → PO creation → Receiving → Close PR.
+- **Alternatives considered:**
+  - *Option B (Supabase Storage Bucket)*: Bị loại bỏ do yêu cầu cấu hình bucket, cấp quyền service role key, tăng độ phức tạp mạng và rủi ro gián đoạn kiểm thử khi môi trường mạng không ổn định.
+  - *Option C (Local Disk Upload)*: Bị loại bỏ do không phù hợp với kiến trúc serverless / container hóa và tạo rủi ro bảo mật path traversal.
+- **Consequences:**
+  - Không cần sửa đổi `backend/prisma/schema.prisma`.
+  - Schema Pydantic `QuotationCreateSchema.fileUrl: str = "quotes/default.pdf"` tiếp tục được sử dụng.
+  - Không yêu cầu endpoint mới cho multipart binary upload.
+- **Implementation implications:** Đã được hiện thực hóa và kiểm chứng an toàn trong `ProcurementService.create_quotation_prisma()`.
+- **Verification/evidence required:** 15/15 tests trong `test_supplier_quotation_prisma.py` PASS; trường `fileUrl` được lưu và truy vấn chính xác từ Supabase PostgreSQL.
+- **Date:** 2026-09-24
+- **Owner:** Group 01
+
+---
+
+## HD-15: Supplier Management Scope for Procurement Flow (CLD)
+
+- **ID:** HD-15
+- **Title:** Supplier Management Scope — Create, List, and Detail (CLD)
+- **Status:** **DECIDED (Option A — Create, List, Detail)**
+- **Decision:** Human has formally selected **Option A — Scope Create, List, Detail (CLD)**. Phạm vi quản lý Supplier tại backend API bao gồm 3 endpoints: `POST /api/suppliers` (tạo mới), `GET /api/suppliers` (danh sách), và `GET /api/suppliers/{supplier_id}` (chi tiết). HD-15 scope = Create + List + Detail (CLD); Update/Delete không thuộc Final Delivery scope.
+- **Decision type:** Business Scope / API Architecture
+- **Requirement/source:** REQ-FR-10 (Procurement quản lý Supplier), US-06 (T-17 Quản lý Supplier), Taiga Backlog E-03.
+- **Reason:**
+  1. Nghiệp vụ cốt lõi của US-06 / T-17 là tạo nhà cung cấp và truy xuất danh sách để liên kết báo giá vào Purchase Request đã được duyệt.
+  2. Loại bỏ thao tác xóa (`DELETE`) giúp bảo vệ tuyệt đối tính toàn vẹn tham chiếu (Foreign Key Integrity) trong PostgreSQL: tránh việc xóa nhà cung cấp đã có liên kết với `Quotation` và `PurchaseOrder`, ngăn ngừa lỗi `ForeignKeyViolationError` và vi phạm quy tắc lưu vết mua sắm.
+  3. Phạm vi hiện tại đã đáp ứng 100% nhu cầu nghiệp vụ của Procurement Officer và hoàn toàn đồng bộ với Server-Side RBAC (`POST` cho PROCUREMENT/ADMIN, `GET` cho authenticated users).
+- **Alternatives considered:**
+  - *Option B (Full CRUD with Update & Delete)*: Bị loại bỏ vì phát sinh độ phức tạp kiểm soát ràng buộc khóa ngoại (on delete cascade hoặc soft delete) không nằm trong yêu cầu của User Story, tiềm ẩn rủi ro phá vỡ dữ liệu kiểm thử.
+- **Consequences:**
+  - Giữ nguyên router [`backend/app/routers/suppliers.py`](file:///d:/LTUD/group-01-project-main/backend/app/routers/suppliers.py) hiện tại gồm 3 endpoints.
+  - Giữ nguyên các hàm service trong `ProcurementService` (`create_supplier_prisma`, `list_suppliers_prisma`, `get_supplier_prisma`).
+  - Không cần sửa đổi backend production code.
+- **Implementation implications:** Đã được hiện thực hóa và kiểm chứng an toàn qua 15 integration tests trong `test_supplier_quotation_prisma.py` và 3 security tests trong `test_rbac.py`.
+- **Verification/evidence required:** `POST /api/suppliers` lưu thành công vào PostgreSQL, `GET /api/suppliers` trả về đúng danh sách và chi tiết, RBAC phân quyền chính xác.
+- **Date:** 2026-09-24
+- **Owner:** Group 01
