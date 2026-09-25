@@ -681,7 +681,7 @@ Tài liệu này là bản kế hoạch triển khai chính thức (Implementati
 - [x] Báo cáo kết quả rõ ràng, minh bạch.
 
 **Definition of Done:**
-- [ ] Dữ liệu test và script được commit vào repository (Đã kiểm thử & staged, sẵn sàng cho commit).
+- [x] Dữ liệu test và script được commit vào repository.
 - [x] Báo cáo đánh giá được lưu trữ trong thư mục evidence (`docs/evidence/TASK-010-AI-EVALUATION.md`).
 
 ---
