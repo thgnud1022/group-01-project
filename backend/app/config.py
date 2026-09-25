@@ -23,8 +23,10 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "ES256"
 
     JWT_SECRET: str = os.getenv("JWT_SECRET", "super-secret-key-for-ai-procurement-system-2026")
-    AI_PROVIDER: str = os.getenv("AI_PROVIDER", "mock")
+    AI_PROVIDER: str = os.getenv("AI_PROVIDER", "gemini")
     LLM_API_KEY: str = os.getenv("LLM_API_KEY", "")
+    LLM_MODEL: str = os.getenv("LLM_MODEL", "gemini-3.8-flash")
+    LLM_TIMEOUT: float = float(os.getenv("LLM_TIMEOUT", "10.0"))
 
     class Config:
         env_file = ".env"
