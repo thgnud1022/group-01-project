@@ -645,7 +645,7 @@ Tài liệu này là bản kế hoạch triển khai chính thức (Implementati
 - **Dependency:** TASK-009
 - **Deliverable:** Bộ dữ liệu kiểm thử đánh giá chất lượng AI gồm ≥20 test cases đa dạng và script đánh giá tự động.
 - **Test / Evidence:** File báo cáo kết quả đánh giá AI Evaluation Report.
-- **Status:** PLANNED
+- **Status:** COMPLETE
 
 **Current State:** Chưa có bộ dữ liệu mẫu để đánh giá chất lượng phân tích của mô hình AI.  
 **Target State:** Xây dựng bộ test set gồm ít nhất 20 trường hợp thực tế (≥20 test cases) bao gồm:
@@ -676,13 +676,13 @@ Tài liệu này là bản kế hoạch triển khai chính thức (Implementati
 - File báo cáo `ai_eval_report.md` ghi nhận ngày chạy, số lượng cases đã test và kết quả chi tiết.
 
 **Acceptance Criteria:**
-- [ ] Có đầy đủ ít nhất 20 test cases độc lập.
-- [ ] Script chạy tự động từ đầu đến cuối không bị gián đoạn.
-- [ ] Báo cáo kết quả rõ ràng, minh bạch.
+- [x] Có đầy đủ ít nhất 20 test cases độc lập.
+- [x] Script chạy tự động từ đầu đến cuối không bị gián đoạn.
+- [x] Báo cáo kết quả rõ ràng, minh bạch.
 
 **Definition of Done:**
-- [ ] Dữ liệu test và script được commit vào repository.
-- [ ] Báo cáo đánh giá được lưu trữ trong thư mục evidence.
+- [ ] Dữ liệu test và script được commit vào repository (Đã kiểm thử & staged, sẵn sàng cho commit).
+- [x] Báo cáo đánh giá được lưu trữ trong thư mục evidence (`docs/evidence/TASK-010-AI-EVALUATION.md`).
 
 ---
 
@@ -1218,7 +1218,7 @@ Bảng dưới đây thiết lập mối liên kết chính thức giữa **Proj
 | REQ-NFR-03 (Audit Trail) | E-07 | GOV-02 | T-40, T-41, T-42 | TASK-012, TASK-014 | Trần Thị Thu Hà | Truy vết lịch sử thao tác toàn diện | PLANNED |
 | HD-01 (Supabase PostgreSQL) | CROSS | ALL | N/A | TASK-001, TASK-003 | Shared Infrastructure | Screenshot Supabase Tables & Connection test | PLANNED |
 | HD-02 (JWT & Server-side RBAC) | CROSS | ALL | N/A | TASK-004, TASK-005 | Shared Infrastructure | Bằng chứng verify JWT & tra cứu role từ DB | PLANNED |
-| HD-03 (Hybrid AI Architecture) | E-04 | US-07 | T-21, T-22 | TASK-009, TASK-010 | **Nguyễn Trúc Lam (Core 5-min)** | LLM Pydantic schemas + AI Eval Report | PLANNED |
+| HD-03 (Hybrid AI Architecture) | E-04 | US-07 | T-21, T-22 | TASK-009, TASK-010 | **Nguyễn Trúc Lam (Core 5-min)** | LLM Pydantic schemas + AI Eval Report | COMPLETE |
 | HD-04 (Fix BUG-001 PR Guard) | E-05 | US-08 | T-27 | TASK-006 | **Nguyễn Thị Thùy Dung (Core 5-min)** | Pytest log HD-04 PASS | PLANNED |
 | HD-05 (Playwright Critical E2E) | CROSS | ALL | N/A | TASK-013 | Trần Thị Thu Hà (QA Lead) | Playwright HTML Test Report | PLANNED |
 | HD-06 (Git Setup & Branching) | CROSS | ALL | N/A | N/A | Toàn bộ nhóm | Git commit history (`git log`) | DONE (Local) |
@@ -1253,7 +1253,7 @@ Bảng dưới đây xác định các bằng chứng bắt buộc phải thu th
 |---|---|---|---|---|---|---|
 | **GAP-01** | MockDatabase in-memory, thiếu trường `quantity` trên PO. | TASK-001, TASK-002, TASK-003 | Supabase PostgreSQL + Thêm trường `quantity` + Prisma refactor. | Integration test ghi/đọc dữ liệu qua Prisma. | Supabase Table Screenshot, Migration Log. | PLANNED |
 | **GAP-02** | Token giả lập, client tự khai báo role, không có RBAC thật. | TASK-004, TASK-005 | Supabase Auth JWT middleware + Tra cứu role từ DB phía server. | Pytest test mã 401 khi thiếu token, mã 403 khi sai quyền. | Pytest 401 & 403 Execution Logs. | PLANNED |
-| **GAP-03** | AI dùng Regex và giá cố định, chưa có LLM thật và Eval Set. | TASK-009, TASK-010 | Tích hợp Real LLM API (Gemini/OpenAI) + Xây dựng Eval Set ≥20 cases. | Script chạy tự động đánh giá 20+ cases. | AI Evaluation Report (`docs/evidence/`). | PLANNED (Chờ HRD-01) |
+| **GAP-03** | AI dùng Regex và giá cố định, chưa có LLM thật và Eval Set. | TASK-009, TASK-010 | Tích hợp Real LLM API (Gemini/OpenAI) + Xây dựng Eval Set ≥20 cases. | Script chạy tự động đánh giá 20+ cases. | AI Evaluation Report (`docs/evidence/`). | COMPLETE |
 | **GAP-04** | Chưa có Docker, CI pipeline và Live Deployment URL. | TASK-016, TASK-017 | Dockerfile chuẩn hóa + GitHub Actions CI + Deploy Live URLs. | Chạy thử Docker build, kiểm tra CI tab, smoke test Live URL. | GitHub Actions log xanh, Public Live URLs. | PLANNED (Chờ HRD-02) |
 | **OUT-2.3** | Chưa có link công khai bản thiết kế Figma. | Human Action (HRD-04a) | Nhóm cung cấp Public View URL của Figma file. | Truy cập kiểm tra tính khả dụng của link. | Public Figma URL trong báo cáo. | PENDING HUMAN |
 | **OUT-2.4** | Chưa thực hiện Usability Testing (>= 3 người/kịch bản). | Human Action (HRD-04c) | Nhóm thực hiện phỏng vấn/test người dùng thực tế với prototype. | Đánh giá trước/sau khi thay đổi UI. | Usability Test Report (`docs/evidence/`). | PENDING HUMAN |

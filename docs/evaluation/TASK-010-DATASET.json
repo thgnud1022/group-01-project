@@ -1,0 +1,813 @@
+{
+  "metadata": {
+    "title": "TASK-010 AI Evaluation Benchmark Dataset",
+    "version": "1.0.0",
+    "total_cases": 24,
+    "created_at": "2026-09-25",
+    "author": "QA & AI Evaluation Engineering Group 01",
+    "categories_distribution": {
+      "standardize_pr": 12,
+      "recommend_quotations": 12
+    }
+  },
+  "cases": [
+    {
+      "case_id": "EVAL-STD-001",
+      "task_type": "standardize_pr",
+      "category": "happy_path_single_item",
+      "description": "Yêu cầu mua sắm chuẩn: 2 laptop Dell với đơn giá 25 triệu",
+      "traceability": {
+        "user_story": "US-01",
+        "requirement": "REQ-FR-01",
+        "epic": "EPIC-01"
+      },
+      "input": {
+        "raw_text": "Cần mua 2 máy tính laptop Dell cho lập trình viên mới, giá khoảng 25 triệu mỗi máy"
+      },
+      "expected_output": {
+        "item_keyword": "Laptop",
+        "expected_quantity": 2,
+        "expected_unit_price": 25000000.0,
+        "expected_total": 50000000.0
+      },
+      "evaluation_criteria": [
+        "Trích xuất chính xác số lượng = 2",
+        "Trích xuất hoặc quy đổi đơn giá = 25.000.000 VND",
+        "Tổng giá trị ước tính = 50.000.000 VND",
+        "Định dạng Pydantic StandardizeResponseSchema hợp lệ"
+      ]
+    },
+    {
+      "case_id": "EVAL-STD-002",
+      "task_type": "standardize_pr",
+      "category": "happy_path_printer",
+      "description": "Yêu cầu mua sắm máy in văn phòng có số lượng 3 chiếc",
+      "traceability": {
+        "user_story": "US-01",
+        "requirement": "REQ-FR-01",
+        "epic": "EPIC-01"
+      },
+      "input": {
+        "raw_text": "Phòng kế toán cần trang bị 3 máy in HP đa năng để in hóa đơn chứng từ"
+      },
+      "expected_output": {
+        "item_keyword": "Máy in",
+        "expected_quantity": 3,
+        "expected_unit_price": 8500000.0,
+        "expected_total": 25500000.0
+      },
+      "evaluation_criteria": [
+        "Nhận diện danh mục máy in",
+        "Trích xuất số lượng = 3",
+        "Đơn giá khớp giá thị trường hoặc chuẩn danh mục (8.5M)",
+        "Không gây crash"
+      ]
+    },
+    {
+      "case_id": "EVAL-STD-003",
+      "task_type": "standardize_pr",
+      "category": "happy_path_furniture",
+      "description": "Yêu cầu mua bàn ghế công thái học số lượng 4 bộ",
+      "traceability": {
+        "user_story": "US-01",
+        "requirement": "REQ-FR-01",
+        "epic": "EPIC-01"
+      },
+      "input": {
+        "raw_text": "Trang bị 4 bộ bàn ghế công thái học Ergonomic cho văn phòng dự án tầng 3"
+      },
+      "expected_output": {
+        "item_keyword": "Bàn ghế",
+        "expected_quantity": 4,
+        "expected_unit_price": 4500000.0,
+        "expected_total": 18000000.0
+      },
+      "evaluation_criteria": [
+        "Trích xuất đúng đơn vị 'bộ' và số lượng = 4",
+        "Nhận diện danh mục bàn ghế nội thất",
+        "Đơn giá danh mục 4.5M",
+        "Tính toán tổng giá trị chính xác"
+      ]
+    },
+    {
+      "case_id": "EVAL-STD-004",
+      "task_type": "standardize_pr",
+      "category": "ambiguous_wording",
+      "description": "Mô tả ngôn ngữ thông tục mơ hồ không có số lượng cụ thể",
+      "traceability": {
+        "user_story": "US-01",
+        "requirement": "REQ-FR-02",
+        "epic": "EPIC-01"
+      },
+      "input": {
+        "raw_text": "Phòng mình cần xin mua mấy cái máy tính xịn để làm đồ họa AI"
+      },
+      "expected_output": {
+        "item_keyword": "Laptop",
+        "expected_quantity": 1,
+        "fallback_handling": true
+      },
+      "evaluation_criteria": [
+        "Từ mơ hồ 'mấy cái' được quy về số lượng an toàn tối thiểu (>= 1)",
+        "Nhận diện thiết bị đồ họa/máy tính",
+        "Xử lý mượt mà không văng lỗi"
+      ]
+    },
+    {
+      "case_id": "EVAL-STD-005",
+      "task_type": "standardize_pr",
+      "category": "missing_quantity",
+      "description": "Yêu cầu chỉ nêu tên sản phẩm không có số lượng",
+      "traceability": {
+        "user_story": "US-01",
+        "requirement": "REQ-FR-01",
+        "epic": "EPIC-01"
+      },
+      "input": {
+        "raw_text": "Đề xuất mua máy in màu phục vụ in ấn tài liệu hội thảo"
+      },
+      "expected_output": {
+        "item_keyword": "Máy in",
+        "expected_quantity": 1
+      },
+      "evaluation_criteria": [
+        "Khi thiếu số lượng, gán mặc định quantity = 1",
+        "Nhận diện danh mục máy in"
+      ]
+    },
+    {
+      "case_id": "EVAL-STD-006",
+      "task_type": "standardize_pr",
+      "category": "missing_price",
+      "description": "Yêu cầu có số lượng nhưng không đề cập giá trị",
+      "traceability": {
+        "user_story": "US-01",
+        "requirement": "REQ-FR-01",
+        "epic": "EPIC-01"
+      },
+      "input": {
+        "raw_text": "Cần bổ sung gấp 5 chiếc laptop cho đội tester"
+      },
+      "expected_output": {
+        "item_keyword": "Laptop",
+        "expected_quantity": 5,
+        "has_positive_price": true
+      },
+      "evaluation_criteria": [
+        "Trích xuất số lượng = 5",
+        "Tự động điền đơn giá tham chiếu dương (> 0) từ catalog chuẩn"
+      ]
+    },
+    {
+      "case_id": "EVAL-STD-007",
+      "task_type": "standardize_pr",
+      "category": "noisy_conversational_text",
+      "description": "Văn bản chứa lời chào, chữ ký và hội thoại rườm rà",
+      "traceability": {
+        "user_story": "US-01",
+        "requirement": "REQ-FR-01",
+        "epic": "EPIC-01"
+      },
+      "input": {
+        "raw_text": "Kính gửi ban giám đốc, em là Nam bên phòng IT. Hiện tại bên em đang thiếu thiết bị, xin phép sếp duyệt mua 3 laptop Dell 20 triệu giúp em với ạ. Em xin cảm ơn!"
+      },
+      "expected_output": {
+        "item_keyword": "Laptop",
+        "expected_quantity": 3,
+        "expected_unit_price": 20000000.0
+      },
+      "evaluation_criteria": [
+        "Bỏ qua nhiễu hội thoại, lọc đúng cốt lõi 3 laptop Dell 20 triệu",
+        "Tính tổng 60.000.000 VND"
+      ]
+    },
+    {
+      "case_id": "EVAL-STD-008",
+      "task_type": "standardize_pr",
+      "category": "diverse_units",
+      "description": "Sử dụng các đơn vị đo lường khác nhau: hộp, chiếc, cái, bộ",
+      "traceability": {
+        "user_story": "US-01",
+        "requirement": "REQ-FR-01",
+        "epic": "EPIC-01"
+      },
+      "input": {
+        "raw_text": "Mua 10 hộp mực máy in HP laser"
+      },
+      "expected_output": {
+        "item_keyword": "Máy in",
+        "expected_quantity": 10
+      },
+      "evaluation_criteria": [
+        "Nhận diện đúng số lượng 10 đi kèm đơn vị hộp",
+        "Nhận diện danh mục in ấn/thiết bị văn phòng"
+      ]
+    },
+    {
+      "case_id": "EVAL-STD-009",
+      "task_type": "standardize_pr",
+      "category": "long_justification_input",
+      "description": "Đoạn văn bản dài mô tả chi tiết dự án và cấu hình máy",
+      "traceability": {
+        "user_story": "US-01",
+        "requirement": "REQ-FR-01",
+        "epic": "EPIC-01"
+      },
+      "input": {
+        "raw_text": "Dự án chuyển đổi số ngân hàng VietBank bước vào giai đoạn kiểm thử tải cao, phòng công nghệ thông tin đề xuất phê duyệt ngân sách mua sắm 2 máy tính trạm workstation phục vụ cấu hình server nội bộ và mô phỏng giao dịch, tổng mức đầu tư dự kiến khoảng 30 triệu mỗi chiếc."
+      },
+      "expected_output": {
+        "item_keyword": "Laptop",
+        "expected_quantity": 2,
+        "expected_unit_price": 30000000.0
+      },
+      "evaluation_criteria": [
+        "Xử lý văn bản dài (>50 từ) không bị mất ngữ cảnh",
+        "Trích xuất số lượng = 2 và đơn giá 30 triệu"
+      ]
+    },
+    {
+      "case_id": "EVAL-STD-010",
+      "task_type": "standardize_pr",
+      "category": "minimal_short_input",
+      "description": "Văn bản cực ngắn chỉ gồm 2 từ khóa",
+      "traceability": {
+        "user_story": "US-01",
+        "requirement": "REQ-FR-01",
+        "epic": "EPIC-01"
+      },
+      "input": {
+        "raw_text": "laptop dell"
+      },
+      "expected_output": {
+        "item_keyword": "Laptop",
+        "expected_quantity": 1,
+        "has_title": true
+      },
+      "evaluation_criteria": [
+        "Nhận diện danh mục laptop từ input tối giản",
+        "Tạo tiêu đề chuẩn hóa hợp lệ"
+      ]
+    },
+    {
+      "case_id": "EVAL-STD-011",
+      "task_type": "standardize_pr",
+      "category": "slang_and_abbreviations",
+      "description": "Tiếng Việt viết tắt và tiếng lóng: 'lap top', 'tr'",
+      "traceability": {
+        "user_story": "US-01",
+        "requirement": "REQ-FR-01",
+        "epic": "EPIC-01"
+      },
+      "input": {
+        "raw_text": "mua 5 chiec lap top gia 22 tr"
+      },
+      "expected_output": {
+        "item_keyword": "Laptop",
+        "expected_quantity": 5,
+        "expected_unit_price": 22000000.0
+      },
+      "evaluation_criteria": [
+        "Nhận diện số lượng 5 và đơn vị chiếc",
+        "Hiểu từ viết tắt 'tr' là triệu đồng (22.000.000 VND)"
+      ]
+    },
+    {
+      "case_id": "EVAL-STD-012",
+      "task_type": "standardize_pr",
+      "category": "empty_edge_case",
+      "description": "Xử lý input rỗng hoặc chỉ có khoảng trắng",
+      "traceability": {
+        "user_story": "US-01",
+        "requirement": "REQ-FR-01",
+        "epic": "EPIC-01"
+      },
+      "input": {
+        "raw_text": "   "
+      },
+      "expected_output": {
+        "is_safe_handled": true
+      },
+      "evaluation_criteria": [
+        "Hệ thống không crash, trả fallback hoặc từ chối có kiểm soát"
+      ]
+    },
+    {
+      "case_id": "EVAL-REC-001",
+      "task_type": "recommend_quotations",
+      "category": "happy_path_clear_winner",
+      "description": "Báo giá 3 nhà cung cấp với một bên vượt trội rõ về giá và tiến độ",
+      "traceability": {
+        "user_story": "US-07",
+        "requirement": "REQ-FR-14",
+        "epic": "EPIC-04"
+      },
+      "input": {
+        "purchase_request_id": "PR-2026-001",
+        "pr_title": "Mua sắm máy tính trạm đồ họa",
+        "quotations": [
+          {
+            "quotation_id": "QT-01",
+            "supplier_name": "Công ty Tin Học Phong Vũ",
+            "total_amount": 48000000.0,
+            "unit_price": 24000000.0,
+            "quantity": 2,
+            "delivery_days": 2,
+            "warranty_terms": "36 tháng chính hãng",
+            "is_anomaly": false
+          },
+          {
+            "quotation_id": "QT-02",
+            "supplier_name": "Công ty Trần Anh",
+            "total_amount": 54000000.0,
+            "unit_price": 27000000.0,
+            "quantity": 2,
+            "delivery_days": 5,
+            "warranty_terms": "24 tháng",
+            "is_anomaly": false
+          },
+          {
+            "quotation_id": "QT-03",
+            "supplier_name": "Công ty FPT Computer",
+            "total_amount": 52000000.0,
+            "unit_price": 26000000.0,
+            "quantity": 2,
+            "delivery_days": 4,
+            "warranty_terms": "24 tháng",
+            "is_anomaly": false
+          }
+        ]
+      },
+      "expected_output": {
+        "recommended_quotation_id": "QT-01",
+        "recommended_supplier_name": "Công ty Tin Học Phong Vũ",
+        "rank_1_quotation_id": "QT-01"
+      },
+      "evaluation_criteria": [
+        "Đề xuất QT-01 là lựa chọn tốt nhất (rank 1)",
+        "Không có hiện tượng ảo giác thông tin",
+        "Lý do giải thích nêu bật ưu thế giá 48M và giao hàng 2 ngày"
+      ]
+    },
+    {
+      "case_id": "EVAL-REC-002",
+      "task_type": "recommend_quotations",
+      "category": "anomaly_price_detection",
+      "description": "Một nhà cung cấp có đơn giá bất thường (chênh lệch >= 20%)",
+      "traceability": {
+        "user_story": "US-07",
+        "requirement": "REQ-FR-15",
+        "epic": "EPIC-04"
+      },
+      "input": {
+        "purchase_request_id": "PR-2026-002",
+        "pr_title": "Mua 3 máy in HP Laser",
+        "quotations": [
+          {
+            "quotation_id": "QT-NORMAL",
+            "supplier_name": "Công ty Thiết Bị Văn Phòng Chuẩn",
+            "total_amount": 25500000.0,
+            "unit_price": 8500000.0,
+            "quantity": 3,
+            "delivery_days": 3,
+            "warranty_terms": "24 tháng",
+            "is_anomaly": false
+          },
+          {
+            "quotation_id": "QT-ANOMALY",
+            "supplier_name": "Nhà Cung Cấp Đắt Bất Thường",
+            "total_amount": 36000000.0,
+            "unit_price": 12000000.0,
+            "quantity": 3,
+            "delivery_days": 2,
+            "warranty_terms": "12 tháng",
+            "is_anomaly": true
+          }
+        ]
+      },
+      "expected_output": {
+        "recommended_quotation_id": "QT-NORMAL",
+        "worst_rank_quotation_id": "QT-ANOMALY"
+      },
+      "evaluation_criteria": [
+        "Không khuyến nghị QT-ANOMALY ở vị trí số 1",
+        "Có cảnh báo rủi ro đơn giá vượt 20% trong nhược điểm (cons)",
+        "Đề xuất lựa chọn hợp lệ QT-NORMAL"
+      ]
+    },
+    {
+      "case_id": "EVAL-REC-003",
+      "task_type": "recommend_quotations",
+      "category": "tradeoff_price_vs_delivery",
+      "description": "Đánh đổi: Nhà cung cấp A rẻ hơn nhưng giao 7 ngày, B đắt hơn chút nhưng giao 2 ngày",
+      "traceability": {
+        "user_story": "US-07",
+        "requirement": "REQ-FR-14",
+        "epic": "EPIC-04"
+      },
+      "input": {
+        "purchase_request_id": "PR-2026-003",
+        "pr_title": "Trang bị thiết bị mạng Router",
+        "quotations": [
+          {
+            "quotation_id": "QT-CHEAP-SLOW",
+            "supplier_name": "Công ty Viễn Thông Giá Rẻ",
+            "total_amount": 18000000.0,
+            "unit_price": 9000000.0,
+            "quantity": 2,
+            "delivery_days": 7,
+            "warranty_terms": "12 tháng",
+            "is_anomaly": false
+          },
+          {
+            "quotation_id": "QT-FASTER",
+            "supplier_name": "Công ty Viễn Thông Tốc Hành",
+            "total_amount": 19500000.0,
+            "unit_price": 9750000.0,
+            "quantity": 2,
+            "delivery_days": 2,
+            "warranty_terms": "24 tháng",
+            "is_anomaly": false
+          }
+        ]
+      },
+      "expected_output": {
+        "cons_contain_delivery_warning": true
+      },
+      "evaluation_criteria": [
+        "Phân tích rõ ưu nhược điểm của cả hai phương án",
+        "Ghi nhận nhược điểm giao hàng dài ngày (7 ngày)"
+      ]
+    },
+    {
+      "case_id": "EVAL-REC-004",
+      "task_type": "recommend_quotations",
+      "category": "warranty_tradeoff",
+      "description": "Đánh đổi điều khoản bảo hành: 36 tháng so với 12 tháng",
+      "traceability": {
+        "user_story": "US-07",
+        "requirement": "REQ-FR-14",
+        "epic": "EPIC-04"
+      },
+      "input": {
+        "purchase_request_id": "PR-2026-004",
+        "pr_title": "Máy chủ Server nội bộ",
+        "quotations": [
+          {
+            "quotation_id": "QT-WAR-LONG",
+            "supplier_name": "Công ty Server Pro",
+            "total_amount": 105000000.0,
+            "unit_price": 105000000.0,
+            "quantity": 1,
+            "delivery_days": 4,
+            "warranty_terms": "36 tháng chính hãng tận nơi",
+            "is_anomaly": false
+          },
+          {
+            "quotation_id": "QT-WAR-SHORT",
+            "supplier_name": "Công ty Server Giá Rẻ",
+            "total_amount": 100000000.0,
+            "unit_price": 100000000.0,
+            "quantity": 1,
+            "delivery_days": 4,
+            "warranty_terms": "12 tháng mang đến",
+            "is_anomaly": false
+          }
+        ]
+      },
+      "expected_output": {
+        "pros_contain_warranty": true
+      },
+      "evaluation_criteria": [
+        "Ghi nhận ưu điểm bảo hành 36 tháng dài hạn",
+        "So sánh công bằng giữa chi phí và rủi ro bảo hành"
+      ]
+    },
+    {
+      "case_id": "EVAL-REC-005",
+      "task_type": "recommend_quotations",
+      "category": "tie_breaking_identical_price",
+      "description": "Hai nhà cung cấp có mức giá hoàn toàn bằng nhau",
+      "traceability": {
+        "user_story": "US-07",
+        "requirement": "REQ-FR-14",
+        "epic": "EPIC-04"
+      },
+      "input": {
+        "purchase_request_id": "PR-2026-005",
+        "pr_title": "Bộ lưu điện UPS",
+        "quotations": [
+          {
+            "quotation_id": "QT-TIE-A",
+            "supplier_name": "Công ty Năng Lượng Xanh",
+            "total_amount": 30000000.0,
+            "unit_price": 15000000.0,
+            "quantity": 2,
+            "delivery_days": 5,
+            "warranty_terms": "24 tháng",
+            "is_anomaly": false
+          },
+          {
+            "quotation_id": "QT-TIE-B",
+            "supplier_name": "Công ty Điện Tử Á Châu",
+            "total_amount": 30000000.0,
+            "unit_price": 15000000.0,
+            "quantity": 2,
+            "delivery_days": 2,
+            "warranty_terms": "24 tháng",
+            "is_anomaly": false
+          }
+        ]
+      },
+      "expected_output": {
+        "recommended_quotation_id": "QT-TIE-B"
+      },
+      "evaluation_criteria": [
+        "Khi giá bằng nhau, ưu tiên bên giao hàng nhanh hơn (2 ngày so với 5 ngày)",
+        "Đề xuất QT-TIE-B ở vị trí số 1"
+      ]
+    },
+    {
+      "case_id": "EVAL-REC-006",
+      "task_type": "recommend_quotations",
+      "category": "all_anomalies_high_risk",
+      "description": "Tất cả các báo giá đều bị đánh dấu Anomaly đơn giá cao >= 20%",
+      "traceability": {
+        "user_story": "US-07",
+        "requirement": "REQ-FR-15",
+        "epic": "EPIC-04"
+      },
+      "input": {
+        "purchase_request_id": "PR-2026-006",
+        "pr_title": "Chip đồ họa GPU chuyên dụng",
+        "quotations": [
+          {
+            "quotation_id": "QT-ANOM-1",
+            "supplier_name": "Nhà Phân Phối GPU 1",
+            "total_amount": 80000000.0,
+            "unit_price": 40000000.0,
+            "quantity": 2,
+            "delivery_days": 3,
+            "warranty_terms": "12 tháng",
+            "is_anomaly": true
+          },
+          {
+            "quotation_id": "QT-ANOM-2",
+            "supplier_name": "Nhà Phân Phối GPU 2",
+            "total_amount": 85000000.0,
+            "unit_price": 42500000.0,
+            "quantity": 2,
+            "delivery_days": 5,
+            "warranty_terms": "12 tháng",
+            "is_anomaly": true
+          }
+        ]
+      },
+      "expected_output": {
+        "has_risk_warnings": true
+      },
+      "evaluation_criteria": [
+        "Hệ thống ghi nhận cảnh báo chênh lệch giá cho toàn bộ các lựa chọn",
+        "Vẫn đưa ra ranking tương đối dựa trên mức giá thấp hơn (QT-ANOM-1)"
+      ]
+    },
+    {
+      "case_id": "EVAL-REC-007",
+      "task_type": "recommend_quotations",
+      "category": "bulk_volume_purchase",
+      "description": "Báo giá quy mô lớn số lượng 50 chiếc màn hình",
+      "traceability": {
+        "user_story": "US-07",
+        "requirement": "REQ-FR-14",
+        "epic": "EPIC-04"
+      },
+      "input": {
+        "purchase_request_id": "PR-2026-007",
+        "pr_title": "Mua màn hình cho toàn bộ trung tâm dữ liệu",
+        "quotations": [
+          {
+            "quotation_id": "QT-BULK-A",
+            "supplier_name": "Tập Đoàn Thiết Bị Màn Hình",
+            "total_amount": 225000000.0,
+            "unit_price": 4500000.0,
+            "quantity": 50,
+            "delivery_days": 5,
+            "warranty_terms": "24 tháng",
+            "is_anomaly": false
+          },
+          {
+            "quotation_id": "QT-BULK-B",
+            "supplier_name": "Nhà Bán Buôn Tin Học",
+            "total_amount": 240000000.0,
+            "unit_price": 4800000.0,
+            "quantity": 50,
+            "delivery_days": 3,
+            "warranty_terms": "24 tháng",
+            "is_anomaly": false
+          }
+        ]
+      },
+      "expected_output": {
+        "recommended_quotation_id": "QT-BULK-A"
+      },
+      "evaluation_criteria": [
+        "Tính toán đúng quy mô giá trị lớn (225 triệu)",
+        "Đề xuất QT-BULK-A tiết kiệm 15 triệu chi phí"
+      ]
+    },
+    {
+      "case_id": "EVAL-REC-008",
+      "task_type": "recommend_quotations",
+      "category": "multi_quote_ranking_consistency",
+      "description": "Bảng so sánh 4 nhà cung cấp, kiểm tra tính nhất quán của thứ hạng 1 đến 4",
+      "traceability": {
+        "user_story": "US-07",
+        "requirement": "REQ-FR-14",
+        "epic": "EPIC-04"
+      },
+      "input": {
+        "purchase_request_id": "PR-2026-008",
+        "pr_title": "Mua máy photocopy đa chức năng",
+        "quotations": [
+          {
+            "quotation_id": "Q-01",
+            "supplier_name": "Nhà cung cấp 1",
+            "total_amount": 60000000.0,
+            "unit_price": 60000000.0,
+            "quantity": 1,
+            "delivery_days": 2,
+            "is_anomaly": false
+          },
+          {
+            "quotation_id": "Q-02",
+            "supplier_name": "Nhà cung cấp 2",
+            "total_amount": 65000000.0,
+            "unit_price": 65000000.0,
+            "quantity": 1,
+            "delivery_days": 3,
+            "is_anomaly": false
+          },
+          {
+            "quotation_id": "Q-03",
+            "supplier_name": "Nhà cung cấp 3",
+            "total_amount": 70000000.0,
+            "unit_price": 70000000.0,
+            "quantity": 1,
+            "delivery_days": 4,
+            "is_anomaly": false
+          },
+          {
+            "quotation_id": "Q-04",
+            "supplier_name": "Nhà cung cấp 4",
+            "total_amount": 80000000.0,
+            "unit_price": 80000000.0,
+            "quantity": 1,
+            "delivery_days": 5,
+            "is_anomaly": true
+          }
+        ]
+      },
+      "expected_output": {
+        "expected_order": ["Q-01", "Q-02", "Q-03", "Q-04"]
+      },
+      "evaluation_criteria": [
+        "Xếp hạng 4 báo giá theo đúng trật tự tối ưu giảm dần",
+        "Điểm số (score) giảm dần theo thứ hạng"
+      ]
+    },
+    {
+      "case_id": "EVAL-REC-009",
+      "task_type": "recommend_quotations",
+      "category": "missing_warranty_metadata",
+      "description": "Báo giá không có điều khoản bảo hành (warranty_terms = None)",
+      "traceability": {
+        "user_story": "US-07",
+        "requirement": "REQ-FR-14",
+        "epic": "EPIC-04"
+      },
+      "input": {
+        "purchase_request_id": "PR-2026-009",
+        "pr_title": "Cáp mạng bấm sẵn Cat6",
+        "quotations": [
+          {
+            "quotation_id": "QT-NO-WAR",
+            "supplier_name": "Kho Vật Tư Mạng",
+            "total_amount": 5000000.0,
+            "unit_price": 100000.0,
+            "quantity": 50,
+            "delivery_days": 1,
+            "warranty_terms": null,
+            "is_anomaly": false
+          }
+        ]
+      },
+      "expected_output": {
+        "recommended_quotation_id": "QT-NO-WAR"
+      },
+      "evaluation_criteria": [
+        "Không crash khi warranty_terms là null",
+        "Xử lý trơn tru thông tin đầu vào"
+      ]
+    },
+    {
+      "case_id": "EVAL-REC-010",
+      "task_type": "recommend_quotations",
+      "category": "special_character_supplier_name",
+      "description": "Tên nhà cung cấp chứa dấu ngoặc, ký tự tiếng Việt có dấu và gạch ngang",
+      "traceability": {
+        "user_story": "US-07",
+        "requirement": "REQ-FR-14",
+        "epic": "EPIC-04"
+      },
+      "input": {
+        "purchase_request_id": "PR-2026-010",
+        "pr_title": "Bảo trì máy lạnh văn phòng",
+        "quotations": [
+          {
+            "quotation_id": "QT-NAME-SPEC",
+            "supplier_name": "Công Ty Cổ Phần Kỹ Thuật Lạnh & Cơ Điện (REECorp - Chi Nhánh Miền Trung)",
+            "total_amount": 12000000.0,
+            "unit_price": 12000000.0,
+            "quantity": 1,
+            "delivery_days": 2,
+            "is_anomaly": false
+          }
+        ]
+      },
+      "expected_output": {
+        "recommended_quotation_id": "QT-NAME-SPEC",
+        "preserves_exact_name": true
+      },
+      "evaluation_criteria": [
+        "Giữ nguyên vẹn tên nhà cung cấp không bị cắt xén hay lỗi encoding"
+      ]
+    },
+    {
+      "case_id": "EVAL-REC-011",
+      "task_type": "recommend_quotations",
+      "category": "anti_hallucination_validation",
+      "description": "Kiểm tra chống ảo giác: đảm bảo không sinh thêm nhà cung cấp hoặc giá giả mạo",
+      "traceability": {
+        "user_story": "US-07",
+        "requirement": "REQ-FR-14",
+        "epic": "EPIC-04"
+      },
+      "input": {
+        "purchase_request_id": "PR-2026-011",
+        "pr_title": "Mua thiết bị chuyển mạch Switch",
+        "quotations": [
+          {
+            "quotation_id": "QT-REAL-ONLY",
+            "supplier_name": "Nhà Cung Cấp Độc Quyền Duy Nhất",
+            "total_amount": 15000000.0,
+            "unit_price": 15000000.0,
+            "quantity": 1,
+            "delivery_days": 3,
+            "is_anomaly": false
+          }
+        ]
+      },
+      "expected_output": {
+        "allowed_quotation_ids": ["QT-REAL-ONLY"],
+        "max_rankings_count": 1
+      },
+      "evaluation_criteria": [
+        "Danh sách ranking chỉ chứa duy nhất QT-REAL-ONLY",
+        "Tuyệt đối không bịa đặt thêm nhà cung cấp thứ hai"
+      ]
+    },
+    {
+      "case_id": "EVAL-REC-012",
+      "task_type": "recommend_quotations",
+      "category": "decision_support_boundary",
+      "description": "Kiểm tra ranh giới Decision Support: AI không được tự ý thực hiện phê duyệt hay ra lệnh mua",
+      "traceability": {
+        "user_story": "US-07",
+        "requirement": "REQ-FR-14",
+        "epic": "EPIC-04"
+      },
+      "input": {
+        "purchase_request_id": "PR-2026-012",
+        "pr_title": "Mua máy quét mã vạch",
+        "quotations": [
+          {
+            "quotation_id": "QT-DEC-01",
+            "supplier_name": "Công ty Tự Động Hóa Mã Vạch",
+            "total_amount": 8000000.0,
+            "unit_price": 4000000.0,
+            "quantity": 2,
+            "delivery_days": 1,
+            "is_anomaly": false
+          }
+        ]
+      },
+      "expected_output": {
+        "is_decision_support_only": true
+      },
+      "evaluation_criteria": [
+        "Kết quả trả về thuần túy là đề xuất (recommendation/reasoning)",
+        "Không chứa mutation database hoặc lệnh bypass quy trình phê duyệt"
+      ]
+    }
+  ]
+}
