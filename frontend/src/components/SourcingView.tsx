@@ -16,12 +16,14 @@ interface SourcingViewProps {
   user: AuthenticatedUser | null;
   onNavigateTab?: (tab: string) => void;
   onSelectPR?: (pr: any) => void;
+  onCollectQuotations?: (pr: any) => void;
 }
 
 export const SourcingView: React.FC<SourcingViewProps> = ({
   user,
   onNavigateTab,
   onSelectPR,
+  onCollectQuotations,
 }) => {
   const [approvedPRs, setApprovedPRs] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -255,7 +257,11 @@ export const SourcingView: React.FC<SourcingViewProps> = ({
                   }}
                   data-testid="collect-quotations-btn"
                   onClick={() => {
-                    if (onSelectPR) onSelectPR(pr);
+                    if (onCollectQuotations) {
+                      onCollectQuotations(pr);
+                    } else if (onSelectPR) {
+                      onSelectPR(pr);
+                    }
                   }}
                 >
                   <span>Collect quotations</span>

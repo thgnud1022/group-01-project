@@ -293,6 +293,14 @@ class ApiClient {
     return this.request<any[]>(url);
   }
 
+  public async getQuotation(quotationId: string) {
+    return this.request<any>(`/api/quotations/${encodeURIComponent(quotationId)}`);
+  }
+
+  public async listQuotationsForPR(prId: string) {
+    return this.request<any[]>(`/api/purchase-requests/${encodeURIComponent(prId)}/quotations`);
+  }
+
   public async createQuotation(data: {
     purchaseRequestId: string;
     supplierId: string;

@@ -12,6 +12,7 @@ import { EditAfterRevisionView } from './components/EditAfterRevisionView';
 import { EditLockedModal } from './components/EditLockedModal';
 import { SourcingView } from './components/SourcingView';
 import { SuppliersView } from './components/SuppliersView';
+import { CollectQuotationsView } from './components/CollectQuotationsView';
 import { 
   Sparkles, 
   Send, 
@@ -32,6 +33,7 @@ export default function App() {
   const [selectedPR, setSelectedPR] = useState<any | null>(null);
   const [editMode, setEditMode] = useState<boolean>(false);
   const [editAfterRevisionMode, setEditAfterRevisionMode] = useState<boolean>(false);
+  const [collectingQuotationsPR, setCollectingQuotationsPR] = useState<any | null>(null);
 
   // System message banner
   const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
@@ -104,6 +106,7 @@ export default function App() {
     setSelectedPR(null);
     setEditMode(false);
     setEditAfterRevisionMode(false);
+    setCollectingQuotationsPR(null);
     setCurrentTab('purchase-requests');
   };
 
@@ -534,16 +537,35 @@ export default function App() {
         )
       )}
 
-      {/* SCREEN 5: Sourcing & Quotations (Figma 9:4001) */}
+      {/* SCREEN 5: Sourcing (Figma 9:4001) / Collect Quotations (Figma 9:4163) */}
       {currentTab === 'sourcing' && (
-        <SourcingView
-          user={user}
-          onNavigateTab={(tab) => setCurrentTab(tab as NavItemKey)}
-          onSelectPR={(pr) => {
-            setSelectedPR(pr);
-            setCurrentTab('purchase-requests');
-          }}
-        />
+        collectingQuotationsPR ? (
+          <CollectQuotationsView
+            prId={collectingQuotationsPR.id}
+            prData={collectingQuotationsPR}
+            user={user}
+            onBack={() => setCollectingQuotationsPR(null)}
+            onNavigateTab={(tab) => {
+              setCollectingQuotationsPR(null);
+              setCurrentTab(tab as NavItemKey);
+            }}
+            onProceedToComparison={(_prId) => {
+              setMessage({ type: 'info', text: 'Chuyển sang bước so sánh báo giá (Comparison) — Phase 4C.' });
+            }}
+          />
+        ) : (
+          <SourcingView
+            user={user}
+            onNavigateTab={(tab) => setCurrentTab(tab as NavItemKey)}
+            onSelectPR={(pr) => {
+              setSelectedPR(pr);
+              setCurrentTab('purchase-requests');
+            }}
+            onCollectQuotations={(pr) => {
+              setCollectingQuotationsPR(pr);
+            }}
+          />
+        )
       )}
 
       {/* SCREEN 6: Suppliers (Figma 9:4479) */}
