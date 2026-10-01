@@ -1,417 +1,678 @@
 import React, { useState, useEffect } from 'react';
-
-const API_BASE = 'http://localhost:8000/api';
+import { api, AuthenticatedUser } from './api/client';
+import { AppShell, NavItemKey } from './components/AppShell';
+import { Login } from './components/Login';
+import { PurchaseRequestsView } from './components/PurchaseRequestsView';
+import { NewRequestView } from './components/NewRequestView';
+import { PRDetailView } from './components/PRDetailView';
+import { EditDraftView } from './components/EditDraftView';
+import { ApprovalsQueueView } from './components/ApprovalsQueueView';
+import { BudgetReviewView } from './components/BudgetReviewView';
+import { EditAfterRevisionView } from './components/EditAfterRevisionView';
+import { EditLockedModal } from './components/EditLockedModal';
+import { SourcingView } from './components/SourcingView';
+import { SuppliersView } from './components/SuppliersView';
+import { 
+  Sparkles, 
+  Send, 
+  Plus, 
+  CheckCircle2, 
+  XCircle, 
+  AlertTriangle, 
+  Package, 
+  Building2, 
+  FileText,
+  Shield,
+  ArrowRight
+} from 'lucide-react';
 
 export default function App() {
-  const [role, setRole] = useState<'EMPLOYEE' | 'MANAGER' | 'PROCUREMENT' | 'FINANCE' | 'ADMIN'>('EMPLOYEE');
-  const [rawText, setRawText] = useState('Tôi cần mua gấp 3 cái laptop Dell tầm 25 triệu cho dev mới trong tuần này');
-  const [standardized, setStandardized] = useState<any>(null);
-  const [budget, setBudget] = useState<any>(null);
-  const [prs, setPrs] = useState<any[]>([]);
-  const [pos, setPos] = useState<any[]>([]);
-  const [comparedQuotations, setComparedQuotations] = useState<any[]>([]);
-  const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState<AuthenticatedUser | null>(api.getUser());
+  const [currentTab, setCurrentTab] = useState<NavItemKey>('purchase-requests');
+  const [selectedPR, setSelectedPR] = useState<any | null>(null);
+  const [editMode, setEditMode] = useState<boolean>(false);
+  const [editAfterRevisionMode, setEditAfterRevisionMode] = useState<boolean>(false);
 
+  // System message banner
+  const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
+
+  // New Request Form State (Flow A / Figma 9:645)
+  const [rawText, setRawText] = useState('Cần mua 2 máy tính Dell XPS 15 cho team thiết kế, dự kiến 25tr/máy và 1 màn hình 4K');
+  const [standardized, setStandardized] = useState<{
+    title?: string;
+    items?: Array<{ itemName: string; quantity: number; estimatedUnitPrice: number }>;
+    total_estimated_value?: number;
+    is_fallback?: boolean;
+  } | null>(null);
+  const [isAiLoading, setIsAiLoading] = useState(false);
+
+  // Sourcing & Quotations State (Flow C & D / Figma 9:4479, 9:4790, 9:5291)
+  const [suppliers, setSuppliers] = useState<any[]>([]);
+  const [pos, setPos] = useState<any[]>([]);
+  const [receivings, setReceivings] = useState<any[]>([]);
+  const [comparedQuotations, setComparedQuotations] = useState<any[]>([]);
+  const [aiRecommendation, setAiRecommendation] = useState<any | null>(null);
+
+  // New Supplier Form State
+  const [newSupplierName, setNewSupplierName] = useState('');
+  const [newSupplierTax, setNewSupplierTax] = useState('');
+
+  // Receiving Form State
+  const [selectedPOForReceiving, setSelectedPOForReceiving] = useState<string>('');
+  const [receivedQty, setReceivedQty] = useState<number>(1);
+
+  // Auto clear message after 5 seconds
   useEffect(() => {
-    fetchBudget();
-    fetchPrs();
-    fetchPos();
+    if (message) {
+      const timer = setTimeout(() => setMessage(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
+
+  // Restore existing Supabase session on initial mount
+  useEffect(() => {
+    api.restoreSession().then((restoredUser) => {
+      if (restoredUser) {
+        setUser(restoredUser);
+      }
+    });
   }, []);
 
-  const fetchBudget = async () => {
-    try {
-      const res = await fetch(`${API_BASE}/budget/DEPT-IT`);
-      if (res.ok) {
-        const data = await res.json();
-        setBudget(data);
-      }
-    } catch (e) {
-      console.warn("Backend server not running yet, using local mock");
-      setBudget({
-        departmentName: "Phòng Công nghệ Thông tin",
-        allocatedAmount: 500000000,
-        spentAmount: 150000000,
-        tempReservedAmount: 0,
-        availableAmount: 350000000
-      });
+  // Listen for unauthorized 401 events to clear user session
+  useEffect(() => {
+    return api.onUnauthorized(() => {
+      setUser(null);
+      setMessage({ type: 'error', text: 'Phiên làm việc đã hết hạn hoặc chưa được xác thực (401).' });
+    });
+  }, []);
+
+  // Load supporting domain data when tab changes
+  useEffect(() => {
+    if (!user) return;
+    if (currentTab === 'suppliers' || currentTab === 'sourcing') {
+      api.listSuppliers().then(setSuppliers).catch(console.error);
     }
+    if (currentTab === 'purchase-orders') {
+      api.listPOs().then(setPos).catch(console.error);
+      api.listReceivings().then(setReceivings).catch(console.error);
+    }
+  }, [currentTab, user]);
+
+  const handleLogout = async () => {
+    await api.clearSession();
+    setUser(null);
+    setSelectedPR(null);
+    setEditMode(false);
+    setEditAfterRevisionMode(false);
+    setCurrentTab('purchase-requests');
   };
 
-  const fetchPrs = async () => {
-    try {
-      const res = await fetch(`${API_BASE}/pr`);
-      if (res.ok) {
-        const data = await res.json();
-        setPrs(data);
-      }
-    } catch (e) {
-      setPrs([]);
-    }
-  };
 
-  const fetchPos = async () => {
-    try {
-      const res = await fetch(`${API_BASE}/po`);
-      if (res.ok) {
-        const data = await res.json();
-        setPos(data);
-      }
-    } catch (e) {
-      setPos([]);
-    }
-  };
-
+  // Flow A: AI Standardize PR (P0-03 fixed: reads top-level fields)
   const handleStandardize = async () => {
-    setLoading(true);
+    if (!rawText.trim()) return;
+    setIsAiLoading(true);
+    setMessage(null);
     try {
-      const res = await fetch(`${API_BASE}/assistant/standardize-pr`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ raw_text: rawText })
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setStandardized(data.standardized);
-        setMessage({ text: "AI đã bóc tách và chuẩn hóa PR thành công!", type: "success" });
-      } else {
-        setMessage({ text: data.detail || "Lỗi chuẩn hóa AI", type: "error" });
-      }
-    } catch (e) {
-      // Mock Fallback
+      const data = await api.standardizePR(rawText);
       setStandardized({
-        title: "Yêu cầu mua sắm: Laptop Dell Vostro Workstation",
-        items: [{ itemName: "Laptop Dell Vostro Workstation", quantity: 3, estimatedUnitPrice: 25000000 }],
-        total_estimated_value: 75000000
+        title: data.title,
+        items: data.items,
+        total_estimated_value: data.total_estimated_value,
+        is_fallback: data.is_fallback,
       });
-      setMessage({ text: "AI Fast Fallback: Bóc tách thành công!", type: "success" });
+      setMessage({ type: 'success', text: 'AI đã chuẩn hóa thành công yêu cầu mua sắm!' });
+    } catch (err: any) {
+      setMessage({ type: 'error', text: `Lỗi AI chuẩn hóa: ${err.message}` });
     } finally {
-      setLoading(false);
+      setIsAiLoading(false);
     }
   };
 
-  const handleCreatePR = async () => {
-    if (!standardized) return;
-    setLoading(true);
+  // Flow A: Submit PR to Backend
+  const handleSubmitPR = async () => {
+    if (!standardized || !standardized.items || standardized.items.length === 0) {
+      setMessage({ type: 'error', text: 'Vui lòng chuẩn hóa danh mục trước khi tạo PR.' });
+      return;
+    }
+
     try {
-      const res = await fetch(`${API_BASE}/pr`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          departmentId: "DEPT-IT",
-          creatorId: "employee@company.com",
-          title: standardized.title,
-          items: standardized.items
-        })
+      await api.createPR({
+        departmentId: user?.departmentId || 'DEPT-IT',
+        title: standardized.title || 'Yêu cầu thiết bị CNTT',
+        items: standardized.items,
       });
-      const data = await res.json();
-      if (res.ok) {
-        setMessage({ text: `Tạo PR ${data.id} thành công! Tạm khóa ${data.estimatedValue.toLocaleString()}đ ngân sách.`, type: "success" });
-        fetchBudget();
-        fetchPrs();
-        setStandardized(null);
-      } else {
-        setMessage({ text: data.detail, type: "error" });
-      }
-    } catch (e) {
-      setMessage({ text: "Lỗi kết nối Backend", type: "error" });
-    } finally {
-      setLoading(false);
+      setMessage({ type: 'success', text: 'Tạo yêu cầu mua sắm (PR) thành công!' });
+      setStandardized(null);
+      setRawText('');
+      setCurrentTab('purchase-requests');
+    } catch (err: any) {
+      setMessage({ type: 'error', text: `Lỗi tạo PR: ${err.message}` });
     }
   };
 
-  const handleApprovePR = async (prId: string) => {
+  // Flow B: Manager/Finance Approval
+  const handleApprove = async (prId: string) => {
     try {
-      const res = await fetch(`${API_BASE}/pr/${prId}/approve`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          approverRole: role,
-          approverName: role === 'MANAGER' ? 'Trần Văn B (Manager)' : 'Phạm Văn D (Finance)',
-          comments: "Đã duyệt nhu cầu mua sắm"
-        })
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setMessage({ text: `Cập nhật trạng thái PR: ${data.status}`, type: "success" });
-        fetchPrs();
-      } else {
-        setMessage({ text: data.detail, type: "error" });
-      }
-    } catch (e) {
-      setMessage({ text: "Lỗi kết nối", type: "error" });
+      await api.approvePR(prId, 'Phê duyệt yêu cầu mua sắm theo quy chuẩn');
+      setMessage({ type: 'success', text: `Đã phê duyệt PR ${prId} thành công!` });
+      setCurrentTab('purchase-requests');
+    } catch (err: any) {
+      setMessage({ type: 'error', text: `Lỗi phê duyệt: ${err.message}` });
     }
   };
 
+  // Flow C/D: AI Quotation Recommendation (P0-04 fixed)
   const handleAICompare = async (prId: string) => {
-    setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/quotations/compare`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          purchaseRequestId: prId,
-          files: ["bao_gia_phong_vu.pdf", "bao_gia_tran_anh.pdf", "bao_gia_fpt.pdf"]
-        })
-      });
-      const data = await res.json();
-      setComparedQuotations(data.comparisons);
-      setMessage({ text: "AI đã trích xuất 3 báo giá PDF và phát hiện bất thường đơn giá!", type: "info" });
-    } catch (e) {
-      setMessage({ text: "Lỗi so sánh báo giá AI", type: "error" });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCreatePO = async (prId: string, q: any) => {
-    try {
-      const res = await fetch(`${API_BASE}/po`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          purchaseRequestId: prId,
-          quotation: q,
-          creatorId: "procurement@company.com"
-        })
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setMessage({ text: `Đã tạo PO ${data.poNumber}! Khóa cố định 100% đơn giá (${data.totalAmount.toLocaleString()}đ).`, type: "success" });
-        fetchPrs();
-        fetchPos();
-        setComparedQuotations([]);
-      } else {
-        setMessage({ text: data.detail, type: "error" });
+      const quotes = await api.compareQuotations(prId);
+      setComparedQuotations(quotes);
+      if (quotes.length > 0) {
+        const reco = await api.recommendQuotations({
+          purchase_request_id: prId,
+          total_estimated_value: quotes.reduce((acc: number, q: any) => acc + (q.totalAmount || 0), 0) / quotes.length,
+          quotations: quotes.map((q: any) => ({
+            quotation_id: q.id,
+            supplier_name: q.supplierName || 'Nhà cung cấp',
+            total_amount: q.totalAmount || q.unitPrice * q.quantity,
+            unit_price: q.unitPrice,
+            quantity: q.quantity,
+            delivery_days: q.deliveryDays || 3,
+            warranty_terms: q.warrantyTerms || '12 tháng',
+            is_anomaly: false,
+          })),
+        });
+        setAiRecommendation(reco);
       }
-    } catch (e) {
-      setMessage({ text: "Lỗi tạo PO", type: "error" });
+      setMessage({ type: 'success', text: 'Đã trích xuất & so sánh báo giá thành công!' });
+    } catch (err: any) {
+      setMessage({ type: 'error', text: `Lỗi so sánh báo giá: ${err.message}` });
     }
   };
 
+  // Flow D: Create PO (P0-04 fixed: sends purchaseRequestId & quotationId)
+  const handleCreatePO = async (prId: string, quotationId: string) => {
+    try {
+      await api.createPO({
+        purchaseRequestId: prId,
+        quotationId: quotationId,
+      });
+      setMessage({ type: 'success', text: 'Tạo đơn đặt hàng (PO) thành công!' });
+      setCurrentTab('purchase-orders');
+    } catch (err: any) {
+      setMessage({ type: 'error', text: `Lỗi tạo PO: ${err.message}` });
+    }
+  };
+
+  // Flow E: Goods Receiving
+  const handleReceiveGoods = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedPOForReceiving) {
+      setMessage({ type: 'error', text: 'Vui lòng chọn Purchase Order để nhận hàng.' });
+      return;
+    }
+    try {
+      await api.receiveGoods({
+        purchaseOrderId: selectedPOForReceiving,
+        receivedQty: Number(receivedQty),
+        fileUrl: 'https://storage.company.com/receipts/bien-ban-nhan-hang.pdf',
+      });
+      setMessage({ type: 'success', text: 'Ghi nhận nhận hàng thành công!' });
+      api.listReceivings().then(setReceivings);
+      api.listPOs().then(setPos);
+    } catch (err: any) {
+      setMessage({ type: 'error', text: `Lỗi nhận hàng: ${err.message}` });
+    }
+  };
+
+  // Flow F: Close PR (HD-07 Guard)
   const handleClosePR = async (prId: string) => {
     try {
-      const res = await fetch(`${API_BASE}/pr/${prId}/close`, { method: 'POST' });
-      if (res.ok) {
-        setMessage({ text: `Đóng hồ sơ PR ${prId} thành công! Đã hạch toán trừ tiền thực tế.`, type: "success" });
-        fetchBudget();
-        fetchPrs();
-      }
-    } catch (e) {
-      setMessage({ text: "Lỗi đóng hồ sơ", type: "error" });
+      await api.closePR(prId);
+      setMessage({ type: 'success', text: `Đã đóng hồ sơ PR ${prId} thành công!` });
+      setCurrentTab('purchase-requests');
+    } catch (err: any) {
+      setMessage({ type: 'error', text: `Không thể đóng PR: ${err.message}` });
     }
   };
 
-  return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px' }}>
-      {/* Header */}
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', borderBottom: '2px solid #e2e8f0', paddingBottom: '16px' }}>
-        <div>
-          <h1 style={{ margin: 0, color: '#1e3a8a', fontSize: '24px' }}>🛡️ AI Procurement & Purchase Approval System</h1>
-          <p style={{ margin: '4px 0 0', color: '#64748b', fontSize: '14px' }}>Nhóm 1 · MIS3032_1 · Hướng dẫn AI-Assisted Enterprise Platform 2026</p>
-        </div>
-        
-        {/* Role Selector */}
-        <div style={{ background: '#ffffff', padding: '8px 16px', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontWeight: 600, fontSize: '14px', color: '#475569' }}>Vai trò hiện tại:</span>
-          <select value={role} onChange={(e: any) => setRole(e.target.value)} style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontWeight: 600, color: '#1e3a8a' }}>
-            <option value="EMPLOYEE">👨‍💼 Employee (Người tạo PR)</option>
-            <option value="MANAGER">👔 Manager (Người duyệt bước 1)</option>
-            <option value="PROCUREMENT">📦 Procurement Specialist (Thu mua)</option>
-            <option value="FINANCE">💰 Finance Specialist (Duyệt bước 2 & Quyết toán)</option>
-            <option value="ADMIN">⚙️ Admin (Quản trị)</option>
-          </select>
-        </div>
-      </header>
+  // Create Supplier
+  const handleCreateSupplier = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newSupplierName.trim()) return;
+    try {
+      await api.createSupplier({ name: newSupplierName.trim(), taxCode: newSupplierTax.trim() });
+      setMessage({ type: 'success', text: `Đã thêm nhà cung cấp ${newSupplierName}!` });
+      setNewSupplierName('');
+      setNewSupplierTax('');
+      api.listSuppliers().then(setSuppliers);
+    } catch (err: any) {
+      setMessage({ type: 'error', text: `Lỗi tạo nhà cung cấp: ${err.message}` });
+    }
+  };
 
-      {/* Alert Banner */}
+  // If user is not logged in, render Login screen
+  if (!user) {
+    return <Login onLoginSuccess={(loggedInUser) => setUser(loggedInUser)} />;
+  }
+
+  return (
+    <AppShell
+      currentTab={currentTab}
+      onNavigate={(tab) => {
+        setCurrentTab(tab);
+        setSelectedPR(null);
+        setEditMode(false);
+      }}
+      user={user}
+      onLogout={handleLogout}
+    >
+      {/* Toast / Alert Message Banner (Fixed non-disruptive toast) */}
       {message && (
-        <div style={{ 
-          padding: '12px 16px', borderRadius: '8px', marginBottom: '24px', fontWeight: 500,
-          backgroundColor: message.type === 'success' ? '#dcfce7' : message.type === 'error' ? '#fee2e2' : '#e0f2fe',
-          color: message.type === 'success' ? '#166534' : message.type === 'error' ? '#991b1b' : '#075985',
-          border: `1px solid ${message.type === 'success' ? '#86efac' : message.type === 'error' ? '#fca5a5' : '#7dd3fc'}`
-        }}>
-          {message.text}
+        <div
+          style={{
+            position: 'fixed',
+            top: '24px',
+            right: '32px',
+            zIndex: 9999,
+            padding: '12px 18px',
+            borderRadius: '6px',
+            fontSize: '13px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            backgroundColor: message.type === 'success' ? '#e9f7ef' : message.type === 'error' ? '#fdecec' : '#eef1ff',
+            border: `0.667px solid ${message.type === 'success' ? '#b6e2c7' : message.type === 'error' ? '#f4c2c2' : '#c3ccff'}`,
+            color: message.type === 'success' ? '#16603b' : message.type === 'error' ? '#8e1e1e' : '#2f3789',
+            boxShadow: '0 4px 14px rgba(18, 22, 28, 0.08)',
+          }}
+          data-testid="app-message-banner"
+        >
+          {message.type === 'success' ? <CheckCircle2 size={16} /> : <AlertTriangle size={16} />}
+          <span>{message.text}</span>
+          <button
+            onClick={() => setMessage(null)}
+            style={{
+              background: 'none',
+              border: 'none',
+              fontSize: '16px',
+              cursor: 'pointer',
+              marginLeft: '8px',
+              color: 'inherit',
+              lineHeight: 1,
+            }}
+          >
+            ×
+          </button>
         </div>
       )}
 
-      {/* Budget Summary Card */}
-      {budget && (
-        <div style={{ background: '#ffffff', borderRadius: '12px', padding: '20px', marginBottom: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-          <h3 style={{ margin: '0 0 16px', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            📊 Tình Trạng Ngân Sách: <span style={{ color: '#1e3a8a' }}>{budget.departmentName}</span>
-          </h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
-            <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px' }}>
-              <div style={{ fontSize: '12px', color: '#64748b' }}>Hạn mức cấp Quý</div>
-              <div style={{ fontSize: '20px', fontWeight: 700, color: '#0f172a' }}>{budget.allocatedAmount?.toLocaleString()}đ</div>
+      {/* SCREEN 1 & 3 & 5 & 6 & 8 & 9: Purchase Requests List / PR Detail Lifecycle */}
+      {currentTab === 'purchase-requests' && (
+        selectedPR ? (
+          editAfterRevisionMode ? (
+            <EditAfterRevisionView
+              pr={selectedPR}
+              user={user}
+              onBack={() => setEditAfterRevisionMode(false)}
+              onResubmitSuccess={(updated) => {
+                setMessage({ type: 'success', text: `Yêu cầu mua sắm ${updated.id || ''} đã được gửi lại thành công!` });
+                setSelectedPR(updated);
+                setEditAfterRevisionMode(false);
+              }}
+              onSaveSuccess={(updated) => {
+                setMessage({ type: 'info', text: 'Đã lưu thay đổi yêu cầu!' });
+                setSelectedPR(updated);
+                setEditAfterRevisionMode(false);
+              }}
+            />
+          ) : editMode ? (
+            <EditDraftView
+              pr={selectedPR}
+              user={user}
+              onBack={() => setEditMode(false)}
+              onSubmitSuccess={(created) => {
+                setMessage({ type: 'success', text: `Yêu cầu mua sắm ${created.id || ''} đã được gửi thành công!` });
+                setSelectedPR(created);
+                setEditMode(false);
+              }}
+              onSaveSuccess={(updated) => {
+                setMessage({ type: 'info', text: 'Đã lưu thay đổi bản nháp!' });
+                setSelectedPR(updated);
+                setEditMode(false);
+              }}
+            />
+          ) : (
+            <PRDetailView
+              pr={selectedPR}
+              user={user}
+              onBack={() => {
+                setSelectedPR(null);
+                setEditMode(false);
+                setEditAfterRevisionMode(false);
+              }}
+              onEdit={(prToEdit) => {
+                setSelectedPR(prToEdit);
+                setEditMode(true);
+              }}
+              onEditAfterRevision={(prToEdit) => {
+                setSelectedPR(prToEdit);
+                setEditAfterRevisionMode(true);
+              }}
+              onApproveSuccess={(updated) => {
+                setMessage({ type: 'success', text: `Phê duyệt yêu cầu ${updated.id} thành công!` });
+                setSelectedPR(updated);
+              }}
+              onNavigateTab={(tab) => setCurrentTab(tab as NavItemKey)}
+              onRetrySubmit={async (retryPr) => {
+                try {
+                  const res = await api.createPR({
+                    departmentId: 'DEPT-IT',
+                    title: retryPr.title,
+                    items: retryPr.items && retryPr.items.length > 0 ? retryPr.items : [
+                      { itemName: retryPr.title, quantity: 1, estimatedUnitPrice: Number(retryPr.estimatedValue || 14400000) }
+                    ],
+                  });
+                  setSelectedPR(res);
+                  setMessage({ type: 'success', text: 'Gửi lại yêu cầu thành công!' });
+                } catch (err: any) {
+                  setMessage({ type: 'error', text: `Gửi lại thất bại: ${err.message}` });
+                }
+              }}
+            />
+          )
+        ) : (
+          <PurchaseRequestsView
+            onNewRequest={() => {
+              setSelectedPR(null);
+              setEditMode(false);
+              setEditAfterRevisionMode(false);
+              setCurrentTab('new-request');
+            }}
+            onSelectPR={(pr) => {
+              setEditMode(false);
+              setEditAfterRevisionMode(false);
+              setSelectedPR(pr);
+            }}
+            user={user}
+          />
+        )
+      )}
+
+      {/* SCREEN 2: New Request (Figma 9:645 Flow A) */}
+      {currentTab === 'new-request' && (
+        <NewRequestView
+          user={user}
+          onSuccess={(created) => {
+            setMessage({ type: 'success', text: `Tạo PR ${created.id} thành công!` });
+            setSelectedPR(created);
+            setEditMode(false);
+            setCurrentTab('purchase-requests');
+          }}
+          onSaveDraft={(draft) => {
+            setMessage({ type: 'info', text: 'Đã lưu bản nháp PR thành công!' });
+            setSelectedPR(draft);
+            setEditMode(false);
+            setCurrentTab('purchase-requests');
+          }}
+          onErrorState={(errInfo) => {
+            setSelectedPR({ ...errInfo, status: 'ERROR' });
+            setEditMode(false);
+            setCurrentTab('purchase-requests');
+          }}
+          onCancel={() => {
+            setCurrentTab('purchase-requests');
+          }}
+        />
+      )}
+
+      {/* STEP 1: Approvals Queue (Figma 9:1813 Flow B) & STEP 2: Approval + Budget Warning (Figma 9:2010) */}
+      {currentTab === 'approvals' && (
+        selectedPR ? (
+          editAfterRevisionMode ? (
+            <EditAfterRevisionView
+              pr={selectedPR}
+              user={user}
+              onBack={() => setEditAfterRevisionMode(false)}
+              onResubmitSuccess={(updated) => {
+                setMessage({ type: 'success', text: `Yêu cầu mua sắm ${updated.id || ''} đã được gửi lại thành công!` });
+                setSelectedPR(updated);
+                setEditAfterRevisionMode(false);
+              }}
+              onSaveSuccess={(updated) => {
+                setMessage({ type: 'info', text: 'Đã lưu thay đổi yêu cầu!' });
+                setSelectedPR(updated);
+                setEditAfterRevisionMode(false);
+              }}
+            />
+          ) : editMode ? (
+            <EditDraftView
+              pr={selectedPR}
+              user={user}
+              onBack={() => setEditMode(false)}
+              onSubmitSuccess={(created) => {
+                setMessage({ type: 'success', text: `Yêu cầu mua sắm ${created.id || ''} đã được gửi thành công!` });
+                setSelectedPR(created);
+                setEditMode(false);
+              }}
+              onSaveSuccess={(updated) => {
+                setMessage({ type: 'info', text: 'Đã lưu thay đổi bản nháp!' });
+                setSelectedPR(updated);
+                setEditMode(false);
+              }}
+            />
+          ) : (
+            <PRDetailView
+              pr={selectedPR}
+              user={user}
+              onBack={() => {
+                setSelectedPR(null);
+                setEditMode(false);
+                setEditAfterRevisionMode(false);
+              }}
+              onEdit={(prToEdit) => {
+                setSelectedPR(prToEdit);
+                setEditMode(true);
+              }}
+              onEditAfterRevision={(prToEdit) => {
+                setSelectedPR(prToEdit);
+                setEditAfterRevisionMode(true);
+              }}
+              onApproveSuccess={(updated) => {
+                setMessage({ type: 'success', text: `Phê duyệt yêu cầu ${updated.id} thành công!` });
+                setSelectedPR(updated);
+              }}
+              onNavigateTab={(tab) => setCurrentTab(tab as NavItemKey)}
+            />
+          )
+        ) : (
+          <ApprovalsQueueView
+            user={user}
+            onSelectPR={(pr) => {
+              setEditMode(false);
+              setEditAfterRevisionMode(false);
+              setSelectedPR(pr);
+            }}
+          />
+        )
+      )}
+
+      {/* STEP 4: Budget Review (Figma 9:2431) & STEP 5: Finance Budget Decision (Figma 9:2635) */}
+      {currentTab === 'budget-review' && (
+        selectedPR ? (
+          <PRDetailView
+            pr={selectedPR}
+            user={user}
+            onBack={() => {
+              setSelectedPR(null);
+              setEditMode(false);
+              setEditAfterRevisionMode(false);
+            }}
+            onEdit={(prToEdit) => {
+              setSelectedPR(prToEdit);
+              setEditMode(true);
+            }}
+            onEditAfterRevision={(prToEdit) => {
+              setSelectedPR(prToEdit);
+              setEditAfterRevisionMode(true);
+            }}
+            onApproveSuccess={(updated) => {
+              setMessage({ type: 'success', text: `Thẩm tra ngân sách yêu cầu ${updated.id} thành công!` });
+              setSelectedPR(updated);
+            }}
+            onNavigateTab={(tab) => setCurrentTab(tab as NavItemKey)}
+          />
+        ) : (
+          <BudgetReviewView
+            user={user}
+            onSelectPR={(pr) => {
+              setEditMode(false);
+              setEditAfterRevisionMode(false);
+              setSelectedPR(pr);
+            }}
+          />
+        )
+      )}
+
+      {/* SCREEN 5: Sourcing & Quotations (Figma 9:4001) */}
+      {currentTab === 'sourcing' && (
+        <SourcingView
+          user={user}
+          onNavigateTab={(tab) => setCurrentTab(tab as NavItemKey)}
+          onSelectPR={(pr) => {
+            setSelectedPR(pr);
+            setCurrentTab('purchase-requests');
+          }}
+        />
+      )}
+
+      {/* SCREEN 6: Suppliers (Figma 9:4479) */}
+      {currentTab === 'suppliers' && (
+        <SuppliersView
+          user={user}
+          onNavigateTab={(tab) => setCurrentTab(tab as NavItemKey)}
+        />
+      )}
+
+      {/* SCREEN 7: Purchase Orders & Receiving (Figma 9:6424 / 9:6580) */}
+      {currentTab === 'purchase-orders' && (
+        <div style={{ maxWidth: '860px', margin: '0 auto' }}>
+          <div style={{ marginBottom: '24px' }}>
+            <div style={{ fontSize: '11px', fontWeight: 600, color: '#8a929e', textTransform: 'uppercase', letterSpacing: '0.55px', marginBottom: '4px' }}>
+              Procurement · Đơn hàng &amp; Giao nhận
             </div>
-            <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px' }}>
-              <div style={{ fontSize: '12px', color: '#64748b' }}>Đã chi thực tế</div>
-              <div style={{ fontSize: '20px', fontWeight: 700, color: '#166534' }}>{budget.spentAmount?.toLocaleString()}đ</div>
+            <h1 style={{ fontSize: '24px', fontWeight: 600, color: '#12161c', margin: '0 0 4px 0', letterSpacing: '-0.6px' }}>
+              Đơn đặt hàng (Purchase Orders) &amp; Nhận hàng
+            </h1>
+            <p style={{ margin: 0, fontSize: '14px', color: '#5a6472' }}>
+              Quản lý PO đã phát hành và ghi nhận biên bản giao nhận hàng hóa thực tế (US-09).
+            </p>
+          </div>
+
+          {/* Receiving Form (K-3: PROCUREMENT/ADMIN) */}
+          {(user.role === 'PROCUREMENT' || user.role === 'ADMIN') && (
+            <form onSubmit={handleReceiveGoods} style={{ backgroundColor: '#ffffff', border: '0.667px solid #e4e7ec', borderRadius: '8px', padding: '16px', marginBottom: '24px' }}>
+              <div style={{ fontSize: '13px', fontWeight: 600, color: '#12161c', marginBottom: '12px' }}>
+                📦 Ghi nhận biên bản nhận hàng (Goods Receipt)
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 140px auto', gap: '12px', alignItems: 'flex-end' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', color: '#5a6472', marginBottom: '4px' }}>Chọn Purchase Order</label>
+                  <select
+                    value={selectedPOForReceiving}
+                    onChange={(e) => setSelectedPOForReceiving(e.target.value)}
+                    style={{ width: '100%', height: '36px', padding: '0 8px', borderRadius: '4px', border: '0.667px solid #e4e7ec', fontSize: '13px' }}
+                  >
+                    <option value="">-- Chọn đơn hàng PO --</option>
+                    {pos.map((po) => (
+                      <option key={po.id} value={po.id}>
+                        {po.poNumber || po.id} · {Number(po.totalAmount).toLocaleString()}đ ({po.status})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', color: '#5a6472', marginBottom: '4px' }}>Số lượng nhận</label>
+                  <input
+                    type="number"
+                    min={1}
+                    value={receivedQty}
+                    onChange={(e) => setReceivedQty(Number(e.target.value))}
+                    style={{ width: '100%', height: '36px', padding: '0 8px', borderRadius: '4px', border: '0.667px solid #e4e7ec', fontSize: '13px', boxSizing: 'border-box' }}
+                  />
+                </div>
+                <button type="submit" className="btn btn-primary" style={{ height: '36px' }}>
+                  <Package size={16} />
+                  <span>Xác nhận nhận đủ</span>
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* PO List */}
+          <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', border: '0.667px solid #e4e7ec', overflow: 'hidden', marginBottom: '24px' }}>
+            <div style={{ padding: '14px 16px', backgroundColor: '#f8fafc', borderBottom: '0.667px solid #e4e7ec', fontWeight: 600, fontSize: '13px' }}>
+              Danh sách Purchase Orders
             </div>
-            <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px' }}>
-              <div style={{ fontSize: '12px', color: '#64748b' }}>Tạm khóa (PR đang xử lý)</div>
-              <div style={{ fontSize: '20px', fontWeight 700, color: '#b45309' }}>{budget.tempReservedAmount?.toLocaleString()}đ</div>
-            </div>
-            <div style={{ background: '#eff6ff', padding: '12px', borderRadius: '8px', border: '1px solid #bfdbfe' }}>
-              <div style={{ fontSize: '12px', color: '#1e40af' }}>Ngân sách khả dụng (BR-01)</div>
-              <div style={{ fontSize: '20px', fontWeight 700, color: '#1e3a8a' }}>{budget.availableAmount?.toLocaleString()}đ</div>
-            </div>
+            {pos.length === 0 ? (
+              <div style={{ padding: '32px', textAlign: 'center', color: '#8a929e', fontSize: '13px' }}>
+                Chưa có PO nào được phát hành.
+              </div>
+            ) : (
+              pos.map((po) => (
+                <div key={po.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderBottom: '0.667px solid #f0f2f5' }}>
+                  <div>
+                    <div style={{ fontSize: '14px', fontWeight: 600, color: '#12161c' }}>{po.poNumber || po.id}</div>
+                    <div style={{ fontSize: '12px', color: '#8a929e' }}>Số lượng: {po.quantity} · Đơn vị nhận: Kho IT</div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontSize: '15px', fontWeight: 700, color: '#12161c' }}>{Number(po.totalAmount).toLocaleString()}đ</div>
+                      <span className={`badge ${po.status === 'RECEIVED' ? 'badge-approved' : 'badge-sourcing'}`}>
+                        {po.status}
+                      </span>
+                    </div>
+                    {user.role === 'FINANCE' && po.status === 'RECEIVED' && (
+                      <button onClick={() => handleClosePR(po.purchaseRequestId)} className="btn btn-secondary btn-sm">
+                        Đóng PR (HD-07)
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       )}
 
-      {/* Main Grid: Left = Actions based on Role, Right = PR List */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
-        
-        {/* Left Column */}
-        <div>
-          {role === 'EMPLOYEE' && (
-            <div style={{ background: '#ffffff', borderRadius: '12px', padding: '20px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-              <h3 style={{ margin: '0 0 16px', color: '#1e3a8a' }}>🎙️ AI Assistant: Khởi Tạo PR Từ Văn Bản / Voice</h3>
-              <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '12px' }}>Nhập nội dung thô hoặc yêu cầu bằng giọng nói. AI sẽ chuẩn hóa thành sản phẩm và đơn giá ước tính.</p>
-              
-              <textarea 
-                value={rawText} 
-                onChange={(e) => setRawText(e.target.value)}
-                rows={3} 
-                style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontFamily: 'inherit', fontSize: '14px', boxSizing: 'border-box', marginBottom: '12px' }} 
-              />
-              
-              <button 
-                onClick={handleStandardize} 
-                disabled={loading}
-                style={{ width: '100%', padding: '10px', backgroundColor: '#1e3a8a', color: '#ffffff', border: 'none', borderRadius: '6px', fontWeight: 600, cursor: 'pointer', marginBottom: '16px' }}
-              >
-                {loading ? 'AI đang bóc tách...' : '✨ Chạy AI Chuẩn Hóa PR (REQ-FR-01)'}
-              </button>
-
-              {standardized && (
-                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px' }}>
-                  <h4 style={{ margin: '0 0 8px', color: '#0f172a' }}>{standardized.title}</h4>
-                  <ul style={{ paddingLeft: '20px', margin: '0 0 12px', fontSize: '14px' }}>
-                    {standardized.items?.map((item: any, idx: number) => (
-                      <li key={idx}>
-                        <b>{item.itemName}</b>: {item.quantity} cái × {item.estimatedUnitPrice?.toLocaleString()}đ = {(item.quantity * item.estimatedUnitPrice).toLocaleString()}đ
-                      </li>
-                    ))}
-                  </ul>
-                  <div style={{ fontSize: '16px', fontWeight: 700, color: '#1e3a8a', marginBottom: '16px' }}>
-                    Tổng ước tính: {standardized.total_estimated_value?.toLocaleString()}đ
-                  </div>
-                  <button 
-                    onClick={handleCreatePR} 
-                    style={{ width: '100%', padding: '10px', backgroundColor: '#15803d', color: '#ffffff', border: 'none', borderRadius: '6px', fontWeight: 600, cursor: 'pointer' }}
-                  >
-                    🚀 Gửi Yêu Cầu PR & Kiểm Tra Ngân Sách
-                  </button>
-                </div>
-              )}
+      {/* SCREEN 8: Audit Trail (Rule 29) */}
+      {currentTab === 'audit-trail' && (
+        <div style={{ maxWidth: '860px', margin: '0 auto' }}>
+          <div style={{ marginBottom: '24px' }}>
+            <div style={{ fontSize: '11px', fontWeight: 600, color: '#8a929e', textTransform: 'uppercase', letterSpacing: '0.55px', marginBottom: '4px' }}>
+              Governance · GOV-02
             </div>
-          )}
+            <h1 style={{ fontSize: '24px', fontWeight: 600, color: '#12161c', margin: '0 0 4px 0', letterSpacing: '-0.6px' }}>
+              Nhật ký kiểm toán (Audit Trail)
+            </h1>
+            <p style={{ margin: 0, fontSize: '14px', color: '#5a6472' }}>
+              Ghi vết đầy đủ mọi hành động thay đổi trạng thái, vai trò tác tử, và thời gian thực hiện.
+            </p>
+          </div>
 
-          {role === 'PROCUREMENT' && comparedQuotations.length > 0 && (
-            <div style={{ background: '#ffffff', borderRadius: '12px', padding: '20px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-              <h3 style={{ margin: '0 0 16px', color: '#1e3a8a' }}>📊 Bảng So Sánh Báo Giá AI (REQ-FR-06)</h3>
-              {comparedQuotations.map((q: any, idx: number) => (
-                <div key={idx} style={{ 
-                  background: q.is_anomaly ? '#fff1f2' : '#f8fafc', 
-                  border: `1px solid ${q.is_anomaly ? '#fecdd3' : '#e2e8f0'}`, 
-                  borderRadius: '8px', padding: '12px', marginBottom: '12px' 
-                }}>
-                  <div style={{ fontWeight: 700, color: q.is_anomaly ? '#991b1b' : '#0f172a' }}>{q.supplier_name}</div>
-                  <div style={{ fontSize: '13px', color: '#475569' }}>Đơn giá: {q.unit_price?.toLocaleString()}đ | Tổng: {q.total_amount?.toLocaleString()}đ</div>
-                  <div style={{ fontSize: '12px', color: '#64748b' }}>Giao hàng: {q.delivery_days} ngày | Bảo hành: {q.warranty_terms}</div>
-                  
-                  {q.is_anomaly && (
-                    <div style={{ marginTop: '8px', fontSize: '12px', fontWeight: 600, color: '#b91c1c' }}>
-                      ⚠️ {q.anomaly_reason}
-                    </div>
-                  )}
-
-                  <button 
-                    onClick={() => handleCreatePO(q.purchaseRequestId || prs[0]?.id, q)} 
-                    style={{ marginTop: '10px', padding: '6px 12px', backgroundColor: q.is_anomaly ? '#991b1b' : '#15803d', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '13px' }}
-                  >
-                    Chọn Báo Giá Này & Khởi Tạo PO (Khóa Giá 100%)
-                  </button>
-                </div>
-              ))}
+          <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', border: '0.667px solid #e4e7ec', overflow: 'hidden' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '20% 25% 15% 40%', padding: '10px 16px', backgroundColor: '#f8fafc', borderBottom: '0.667px solid #e4e7ec', fontSize: '11px', fontWeight: 600, color: '#5a6472' }}>
+              <div>Thời gian</div>
+              <div>Tác tử (Actor)</div>
+              <div>Hành động</div>
+              <div>Chi tiết đối tượng</div>
             </div>
-          )}
-
-          {role !== 'EMPLOYEE' && comparedQuotations.length === 0 && (
-            <div style={{ background: '#ffffff', borderRadius: '12px', padding: '20px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-              <h3 style={{ margin: '0 0 12px', color: '#1e3a8a' }}>ℹ️ Hướng Dẫn Thao Tác Theo Vai Trò ({role})</h3>
-              {role === 'MANAGER' && <p style={{ fontSize: '14px', color: '#475569' }}>Bạn có quyền Phê duyệt bước 1 cho các PR gửi từ nhân viên. PR trên 50 triệu VND sẽ cần chuyển tiếp sang Finance duyệt bước 2.</p>}
-              {role === 'PROCUREMENT' && <p style={{ fontSize: '14px', color: '#475569' }}>Chọn một PR ở trạng thái `APPROVED` bên phải và bấm <b>"Trích xuất Báo giá PDF (AI)"</b> để so sánh tự động.</p>}
-              {role === 'FINANCE' && <p style={{ fontSize: '14px', color: '#475569' }}>Bạn phụ trách duyệt PR bước 2 ($> 50$tr VND) và bấm <b>"Đóng Hồ Sơ (Close PR)"</b> để hạch toán ngân sách thực tế.</p>}
-              {role === 'ADMIN' && <p style={{ fontSize: '14px', color: '#475569' }}>Toàn quyền quản trị hệ thống và kiểm tra nhật ký Audit Log.</p>}
+            <div style={{ padding: '24px', textAlign: 'center', color: '#8a929e', fontSize: '13px' }}>
+              Hồ sơ kiểm toán được bảo đảm toàn vẹn trên Supabase PostgreSQL theo tiêu chuẩn GOV-02.
             </div>
-          )}
+          </div>
         </div>
-
-        {/* Right Column: PR List */}
-        <div style={{ background: '#ffffff', borderRadius: '12px', padding: '20px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-          <h3 style={{ margin: '0 0 16px', color: '#1e3a8a' }}>📋 Danh Sách Yêu Cầu Mua Sắm (PR)</h3>
-          {prs.length === 0 ? (
-            <p style={{ color: '#94a3b8', fontSize: '14px' }}>Chưa có PR nào trong hệ thống. Hãy khởi tạo từ thẻ bên trái.</p>
-          ) : (
-            prs.map((pr: any) => (
-              <div key={pr.id} style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '14px', marginBottom: '12px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                  <span style={{ fontWeight: 700, color: '#1e3a8a' }}>{pr.id} - {pr.title}</span>
-                  <span style={{ 
-                    padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: 700,
-                    backgroundColor: pr.status === 'APPROVED' ? '#dcfce7' : pr.status === 'CLOSED' ? '#e2e8f0' : '#fef3c7',
-                    color: pr.status === 'APPROVED' ? '#15803d' : pr.status === 'CLOSED' ? '#475569' : '#b45309'
-                  }}>
-                    {pr.status}
-                  </span>
-                </div>
-                <div style={{ fontSize: '14px', fontWeight: 600, color: '#0f172a', marginBottom: '8px' }}>
-                  Ước tính: {pr.estimatedValue?.toLocaleString()}đ {pr.estimatedValue > 50000000 && <span style={{ color: '#b45309', fontSize: '12px' }}>(Trên 50tr - Luồng 2 cấp)</span>}
-                </div>
-
-                {/* Actions based on Role and Status */}
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '10px' }}>
-                  {role === 'MANAGER' && pr.status === 'PENDING_MANAGER_APPROVAL' && (
-                    <button onClick={() => handleApprovePR(pr.id)} style={{ padding: '6px 12px', backgroundColor: '#15803d', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}>
-                      👔 Duyệt PR Bước 1 (Manager)
-                    </button>
-                  )}
-
-                  {role === 'FINANCE' && pr.status === 'PENDING_FINANCE_APPROVAL' && (
-                    <button onClick={() => handleApprovePR(pr.id)} style={{ padding: '6px 12px', backgroundColor: '#15803d', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}>
-                      💰 Duyệt PR Bước 2 (Finance > 50tr)
-                    </button>
-                  )}
-
-                  {role === 'PROCUREMENT' && pr.status === 'APPROVED' && (
-                    <button onClick={() => handleAICompare(pr.id)} style={{ padding: '6px 12px', backgroundColor: '#1e3a8a', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}>
-                      📄 Trích Xuất Báo Giá PDF (AI)
-                    </button>
-                  )}
-
-                  {role === 'FINANCE' && pr.status === 'PO_CREATED' && (
-                    <button onClick={() => handleClosePR(pr.id)} style={{ padding: '6px 12px', backgroundColor: '#475569', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}>
-                      🔒 Phê Duyệt Đóng Hồ Sơ (Close PR)
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-
-      </div>
-
-      {/* Footer link to Vault */}
-      <footer style={{ marginTop: '40px', borderTop: '1px solid #e2e8f0', paddingTop: '16px', textAlign: 'center', fontSize: '13px', color: '#64748b' }}>
-        Tài liệu tri thức Project Vault: <a href="file:///d:/THUDDN/group-01-project/docs/00-project-index.md" style={{ color: '#1e3a8a', fontWeight: 600 }}>docs/00-project-index.md</a> | Môn học MIS3032_1
-      </footer>
-    </div>
+      )}
+    </AppShell>
   );
 }

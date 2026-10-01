@@ -513,3 +513,69 @@ This log records the authoritative architectural and business decisions for the 
 - **Verification/evidence required:** `POST /api/suppliers` lưu thành công vào PostgreSQL, `GET /api/suppliers` trả về đúng danh sách và chi tiết, RBAC phân quyền chính xác.
 - **Date:** 2026-09-24
 - **Owner:** Group 01
+
+---
+
+## HD-16: Revision Lifecycle & Resubmit Workflow
+
+- **ID:** HD-16
+- **Title:** Revision Lifecycle — Real State, Role Enforcement, and Resubmit Workflow
+- **Status:** **APPROVED / HUMAN CONFIRMED**
+- **Decision:** Revision Required là một lifecycle state riêng biệt:
+  `REVISION_REQUIRED`
+  Tuyệt đối không được dùng `DRAFT` để thay thế cho trạng thái này.
+  - **Approved lifecycle:**
+    ```text
+    PENDING_MANAGER_APPROVAL
+            ↓ (Manager / authorized approver requests revision with mandatory reason)
+    REVISION_REQUIRED
+            ↓ (Employee edits request)
+    RESUBMIT
+            ↓ (Employee resubmits request)
+    PENDING_MANAGER_APPROVAL
+    ```
+  - `REVISION_REQUIRED` không phải `DRAFT`:
+    - `DRAFT`: Bản nháp ban đầu, chưa submit lần đầu.
+    - `REVISION_REQUIRED`: Đã submit chính thức, approver yêu cầu chỉnh sửa và cung cấp lý do bắt buộc.
+  - **Authorization:**
+    - `MANAGER` / `FINANCE` / `ADMIN` được phép request revision tùy theo stage/policy hiện hành.
+    - `EMPLOYEE` là người sửa và resubmit request.
+    - Chặn `EMPLOYEE` và `PROCUREMENT` gọi revision endpoint (403 Forbidden).
+    - Quy tắc GOV-01 (No Self-Action): Người tạo PR không được tự request revision trên PR của chính mình.
+    - Server-side RBAC qua verified JWT là nguồn thẩm quyền duy nhất (`JWT.sub` → `User.authUserId` → `Application User`).
+    - Frontend không được quyết định quyền bằng role dropdown/client state.
+  - **Budget behavior:**
+    - Khi chuyển sang `REVISION_REQUIRED`, temporary reservation (`tempReservedAmount`) phải được release theo transaction để không khóa ngân sách phòng ban trong thời gian chờ sửa.
+    - Khi Employee resubmit, budget phải được kiểm tra và reserve lại theo transaction nguyên tử.
+    - Không được tạo reservation giả ở frontend.
+  - **History / audit:**
+    - Revision phải xuất hiện trong lifecycle / approval history (`decision: "REVISION_REQUIRED"`).
+    - Reason của revision bắt buộc phải được lưu lại.
+    - Khi resubmit, ghi nhận sự kiện `decision: "RESUBMITTED"` và chuyển về `PENDING_MANAGER_APPROVAL`.
+    - Không được làm mất lịch sử decision trước đó.
+- **Decision type:** Business Scope / Architecture / Lifecycle
+- **Requirement/source:** REQ-FR-06 (Must), US-03 AC3, US-04 AC2, T-11, Figma 9:2928, Figma 9:3179.
+- **Rationale:**
+  1. Thỏa mãn đầy đủ REQ-FR-06 / US-03 AC3 / US-04 AC2 và hiện thực hóa các màn hình trạng thái vòng đời Figma 9:2928 / 9:3179 với cơ sở dữ liệu thật.
+  2. Bảo toàn tính toàn vẹn của chuỗi kiểm toán (audit trail): mọi hành động revision và resubmit đều được ghi vào bảng `Approval` với danh tính người thực hiện trích xuất từ JWT hợp lệ.
+  3. Đảm bảo tính nhất quán ngân sách theo cơ chế giao dịch ACID giữa các lần yêu cầu chỉnh sửa và gửi lại.
+- **Affected Backend:**
+  - `backend/prisma/schema.prisma`: Bổ sung `REVISION_REQUIRED` vào `enum PRStatus`.
+  - `backend/app/services/procurement_service.py`: Hiện thực `request_revision_prisma()` (khóa dòng `SELECT ... FOR UPDATE`, giải phóng `tempReservedAmount`, tạo `Approval` record, đổi status) và `resubmit_pr_prisma()` (kiểm tra creator, kiểm tra lại ngân sách, cập nhật items, ghi log `RESUBMITTED`, chuyển về `PENDING_MANAGER_APPROVAL`).
+  - `backend/app/routers/pr.py`: Bổ sung endpoints `POST /api/pr/{id}/revision` (RBAC: MANAGER, FINANCE, ADMIN) và `POST /api/pr/{id}/resubmit` (xác thực requester qua JWT).
+- **Affected Frontend:**
+  - `frontend/src/api/client.ts`: Bổ sung phương thức `requestRevision(prId, comments)` và `resubmitPR(prId, data)`.
+  - `frontend/src/components/PRDetailView.tsx`: Kết nối nút Request Revision với API thực tế, hiển thị thông tin approver & comment thật (Figma 9:2928).
+  - `frontend/src/components/EditAfterRevisionView.tsx`: Tính toán "Changes on this edit" động theo dữ liệu chỉnh sửa, gọi `api.resubmitPR` (Figma 9:3179).
+  - `frontend/src/components/ApprovalsQueueView.tsx`: Đồng bộ danh sách hàng đợi và danh sách đã quyết định với trạng thái `REVISION_REQUIRED`.
+- **Tests & Verification:**
+  - Backend integration tests: `backend/tests/test_pr_revision_prisma.py` (10/10 test cases passed: TC-REV-001..006, TC-RESUB-001..004).
+  - Full Phase 3 regression: 59 passed (`test_pr_revision_prisma`, `test_pr_reject_prisma`, `test_pr_approval_prisma`, `test_rbac`).
+  - Browser E2E: `frontend/scripts/test_revision_e2e_flow.js` (Employee create PR → Manager request revision → Employee edit & resubmit → Manager review again).
+  - Build: `npm run build` (tsc & vite build pass with 0 errors).
+  - Visual QA: So khớp thực tế màn hình Figma 9:2928 và 9:3179 với browser screenshots trong `docs/evidence/browser/`.
+- **Confirmation status:** **APPROVED / HUMAN CONFIRMED** (Explicit confirmation by User: "APPROVE HD-16").
+- **Date:** 2026-10-01
+- **Owner:** Group 01
+
+
