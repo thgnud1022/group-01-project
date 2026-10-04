@@ -16,7 +16,8 @@ import {
   CheckCircle2,
   XCircle,
   ThumbsUp,
-  Ban
+  Ban,
+  RefreshCw
 } from 'lucide-react';
 import { api, AuthenticatedUser } from '../api/client';
 
@@ -46,6 +47,29 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
   const [excluded, setExcluded] = useState<Record<string, boolean>>({});
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [toastMessage, setToastMessage] = useState<{ type: 'info' | 'success' | 'warning'; text: string } | null>(null);
+  const [aiLoading, setAiLoading] = useState<boolean>(false);
+  const [aiResult, setAiResult] = useState<any | null>(null);
+  const [aiError, setAiError] = useState<string | null>(null);
+
+  const handleAskAssistant = async () => {
+    setAiLoading(true);
+    setAiError(null);
+    try {
+      const res = await api.recommendQuotations({
+        purchase_request_id: pr?.id || prId,
+        pr_title: pr?.title || 'Quotation comparison',
+      });
+      setAiResult(res);
+      if (res?.recommended_quotation_id) {
+        setSelectedQuoteId((prev) => prev || res.recommended_quotation_id);
+      }
+    } catch (err: any) {
+      console.error('Failed to get AI recommendations:', err);
+      setAiError(err.message || 'Không thể lấy đề xuất từ Trợ lý AI.');
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   useEffect(() => {
     loadComparisonData();
@@ -1039,55 +1063,402 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
         </div>
       </div>
 
-      {/* Assistant Analysis Banner (Phase 4D Bridge - Figma 9:5093) */}
-      <div 
-        style={{
-          backgroundColor: 'rgba(238,241,255,0.4)',
-          border: '0.667px solid #c3ccff',
-          borderRadius: '8px',
-          padding: '20px',
-          marginBottom: '24px',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-          <Sparkles size={16} color="#2f3789" />
-          <h3 style={{ margin: 0, fontSize: '14px', fontWeight: 600, color: '#2f3789' }}>
-            Assistant analysis not requested
-          </h3>
-        </div>
-
-        <p style={{ fontSize: '13px', color: '#5a6472', lineHeight: '21px', margin: '0 0 16px 0', maxWidth: '780px' }}>
-          You can compare and award without it. If you ask for an analysis, the assistant scores the quotations
-          on price, lead time, reliability and terms, and names a recommendation with its reasoning, risks and
-          the data it is missing. It cannot select a supplier.
-        </p>
-
-        <button
-          onClick={() => {
-            setToastMessage({
-              type: 'info',
-              text: 'Tính năng Trợ lý AI Phân tích & Đánh giá (AI Analysis) sẽ được triển khai tại Phase 4D.'
-            });
-          }}
-          data-testid="ask-assistant-btn"
+      {/* Assistant Analysis Section (Phase 4D - Figma 9:5093 / 9:5589 / Flow D 9:5291) */}
+      {aiLoading && (
+        <div 
+          data-testid="assistant-analysis-loading"
           style={{
-            backgroundColor: '#4a56d2',
-            color: '#ffffff',
-            border: 'none',
-            borderRadius: '4px',
-            padding: '8px 16px',
-            fontSize: '13px',
-            fontWeight: 600,
-            cursor: 'pointer',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
+            backgroundColor: '#ffffff',
+            border: '0.667px solid #c3ccff',
+            borderRadius: '8px',
+            padding: '32px 24px',
+            marginBottom: '24px',
+            textAlign: 'center',
+            boxShadow: '0 1px 3px rgba(18,22,28,0.04)',
           }}
         >
-          <Sparkles size={14} />
-          <span>Ask the assistant to analyse</span>
-        </button>
-      </div>
+          <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '40px', height: '40px', borderRadius: '20px', backgroundColor: '#eef2ff', marginBottom: '12px' }}>
+            <Loader2 className="animate-spin" size={20} color="#4a56d2" />
+          </div>
+          <h4 style={{ margin: '0 0 6px 0', fontSize: '15px', fontWeight: 600, color: '#12161c' }}>
+            Analysing quotations with AI Assistant...
+          </h4>
+          <p style={{ margin: 0, fontSize: '13px', color: '#5a6472' }}>
+            Evaluating price, lead time, supplier reliability and commercial terms based on authoritative data.
+          </p>
+        </div>
+      )}
+
+      {aiError && !aiLoading && (
+        <div 
+          style={{
+            backgroundColor: '#fdecec',
+            border: '0.667px solid #f4c2c2',
+            borderRadius: '8px',
+            padding: '16px 20px',
+            marginBottom: '24px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <AlertCircle size={18} color="#8e1e1e" />
+            <span style={{ fontSize: '13px', color: '#8e1e1e', fontWeight: 500 }}>{aiError}</span>
+          </div>
+          <button
+            onClick={handleAskAssistant}
+            style={{
+              backgroundColor: '#8e1e1e',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '4px',
+              padding: '6px 12px',
+              fontSize: '12px',
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
+      {!aiResult && !aiLoading && (
+        <div 
+          style={{
+            backgroundColor: 'rgba(238,241,255,0.4)',
+            border: '0.667px solid #c3ccff',
+            borderRadius: '8px',
+            padding: '20px',
+            marginBottom: '24px',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+            <Sparkles size={16} color="#2f3789" />
+            <h3 style={{ margin: 0, fontSize: '14px', fontWeight: 600, color: '#2f3789' }}>
+              Assistant analysis not requested
+            </h3>
+          </div>
+
+          <p style={{ fontSize: '13px', color: '#5a6472', lineHeight: '21px', margin: '0 0 16px 0', maxWidth: '780px' }}>
+            You can compare and award without it. If you ask for an analysis, the assistant scores the quotations
+            on price, lead time, reliability and terms, and names a recommendation with its reasoning, risks and
+            the data it is missing. It cannot select a supplier.
+          </p>
+
+          <button
+            onClick={handleAskAssistant}
+            data-testid="ask-assistant-btn"
+            style={{
+              backgroundColor: '#4a56d2',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '4px',
+              padding: '8px 16px',
+              fontSize: '13px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+            }}
+          >
+            <Sparkles size={14} />
+            <span>Ask the assistant to analyse</span>
+          </button>
+        </div>
+      )}
+
+      {aiResult && !aiLoading && (
+        <div 
+          data-node-id="9:5589"
+          data-testid="assistant-analysis-panel"
+          style={{
+            backgroundColor: '#ffffff',
+            border: '0.667px solid #c3ccff',
+            borderRadius: '8px',
+            boxShadow: '0 1px 3px rgba(18,22,28,0.04)',
+            overflow: 'hidden',
+            marginBottom: '24px',
+          }}
+        >
+          {/* Header */}
+          <div 
+            style={{
+              padding: '16px 20px',
+              borderBottom: '0.667px solid #e4e7ec',
+              backgroundColor: '#fafbff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Sparkles size={16} color="#4a56d2" />
+                <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 600, color: '#12161c' }}>
+                  Assistant analysis
+                </h3>
+              </div>
+              <div style={{ fontSize: '12px', color: '#5a6472', marginTop: '2px' }}>
+                <span>Generated just now · </span>
+                <span data-testid="ai-confidence-badge" style={{ fontWeight: 600, color: '#4a56d2' }}>
+                  confidence {aiResult.confidence}%
+                </span>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span 
+                style={{
+                  backgroundColor: aiResult.is_fallback ? '#fef3c7' : '#eef2ff',
+                  border: `0.667px solid ${aiResult.is_fallback ? '#fde68a' : '#c7d2fe'}`,
+                  color: aiResult.is_fallback ? '#92400e' : '#3730a3',
+                  borderRadius: '4px',
+                  padding: '2px 8px',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                }}
+              >
+                {aiResult.is_fallback ? 'Fallback / Heuristic' : 'Live LLM (gemini-3.8-flash)'}
+              </span>
+
+              <span 
+                style={{
+                  backgroundColor: '#ffffff',
+                  border: '0.667px solid #e4e7ec',
+                  borderRadius: '4px',
+                  padding: '2px 8px',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  color: '#5a6472',
+                  letterSpacing: '0.3px',
+                }}
+              >
+                Advisory
+              </span>
+
+              <button
+                onClick={handleAskAssistant}
+                title="Re-run analysis"
+                style={{
+                  background: 'none',
+                  border: '0.667px solid #e4e7ec',
+                  borderRadius: '4px',
+                  padding: '4px 8px',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  fontSize: '11px',
+                  color: '#5a6472',
+                  backgroundColor: '#ffffff'
+                }}
+              >
+                <RefreshCw size={11} />
+                <span>Re-analyse</span>
+              </button>
+            </div>
+          </div>
+
+          <div style={{ padding: '20px' }}>
+            {/* Weight description */}
+            <p style={{ margin: '0 0 16px 0', fontSize: '13px', color: '#5a6472', fontStyle: 'italic' }}>
+              Weighted on landed price 40%, lead time 25%, reliability 25%, terms 10%.
+            </p>
+
+            {/* Ranked Quotations List (Figma 9:5604) */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
+              {(aiResult.rankings || []).map((rankItem: any, idx: number) => {
+                const isRecommended = rankItem.quotation_id === aiResult.recommended_quotation_id || idx === 0;
+                return (
+                  <div 
+                    key={rankItem.quotation_id || idx}
+                    data-testid={isRecommended ? "ai-recommended-card" : undefined}
+                    style={{
+                      border: isRecommended ? '1.5px solid #4a56d2' : '0.667px solid #e4e7ec',
+                      borderRadius: '8px',
+                      backgroundColor: isRecommended ? '#f9faff' : '#ffffff',
+                      padding: '16px 20px',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{ fontSize: '15px', fontWeight: 600, color: '#12161c' }}>
+                          {rankItem.supplier_name}
+                        </span>
+                        {isRecommended && (
+                          <span 
+                            style={{
+                              backgroundColor: '#4a56d2',
+                              color: '#ffffff',
+                              fontSize: '11px',
+                              fontWeight: 600,
+                              borderRadius: '4px',
+                              padding: '2px 8px',
+                              letterSpacing: '0.3px',
+                            }}
+                          >
+                            Recommended
+                          </span>
+                        )}
+                        <span style={{ fontSize: '12px', color: '#8a929e' }}>
+                          Rank #{rankItem.rank || idx + 1}
+                        </span>
+                      </div>
+
+                      <div 
+                        data-testid={isRecommended ? "ai-recommended-score" : undefined}
+                        style={{ fontSize: '14px', fontWeight: 700, color: isRecommended ? '#4a56d2' : '#12161c' }}
+                      >
+                        Score: {rankItem.score} / 100
+                      </div>
+                    </div>
+
+                    {/* 4 Component Bars (Figma 9:5620) */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px' }}>
+                      {/* Landed Price */}
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', fontWeight: 500, color: '#5a6472', marginBottom: '4px' }}>
+                          <span>Landed price (40%)</span>
+                          <span style={{ fontWeight: 600, color: '#12161c' }}>{rankItem.price_score ?? 80}/100</span>
+                        </div>
+                        <div style={{ height: '6px', backgroundColor: '#e4e7ec', borderRadius: '3px', overflow: 'hidden' }}>
+                          <div style={{ height: '100%', width: `${Math.min(100, Math.max(0, rankItem.price_score ?? 80))}%`, backgroundColor: isRecommended ? '#4a56d2' : '#8a929e' }} />
+                        </div>
+                      </div>
+
+                      {/* Lead Time */}
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', fontWeight: 500, color: '#5a6472', marginBottom: '4px' }}>
+                          <span>Lead time (25%)</span>
+                          <span style={{ fontWeight: 600, color: '#12161c' }}>{rankItem.lead_time_score ?? 80}/100</span>
+                        </div>
+                        <div style={{ height: '6px', backgroundColor: '#e4e7ec', borderRadius: '3px', overflow: 'hidden' }}>
+                          <div style={{ height: '100%', width: `${Math.min(100, Math.max(0, rankItem.lead_time_score ?? 80))}%`, backgroundColor: isRecommended ? '#4a56d2' : '#8a929e' }} />
+                        </div>
+                      </div>
+
+                      {/* Reliability */}
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', fontWeight: 500, color: '#5a6472', marginBottom: '4px' }}>
+                          <span>Reliability (25%)</span>
+                          <span style={{ fontWeight: 600, color: '#12161c' }}>{rankItem.reliability_score ?? 80}/100</span>
+                        </div>
+                        <div style={{ height: '6px', backgroundColor: '#e4e7ec', borderRadius: '3px', overflow: 'hidden' }}>
+                          <div style={{ height: '100%', width: `${Math.min(100, Math.max(0, rankItem.reliability_score ?? 80))}%`, backgroundColor: isRecommended ? '#4a56d2' : '#8a929e' }} />
+                        </div>
+                      </div>
+
+                      {/* Commercial Terms */}
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', fontWeight: 500, color: '#5a6472', marginBottom: '4px' }}>
+                          <span>Commercial terms (10%)</span>
+                          <span style={{ fontWeight: 600, color: '#12161c' }}>{rankItem.terms_score ?? 80}/100</span>
+                        </div>
+                        <div style={{ height: '6px', backgroundColor: '#e4e7ec', borderRadius: '3px', overflow: 'hidden' }}>
+                          <div style={{ height: '100%', width: `${Math.min(100, Math.max(0, rankItem.terms_score ?? 80))}%`, backgroundColor: isRecommended ? '#4a56d2' : '#8a929e' }} />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Why, Risks, Missing data Columns (Figma 9:5707) */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '16px' }}>
+              {/* Left Column: Why */}
+              <div 
+                data-testid="ai-why-section"
+                style={{
+                  backgroundColor: '#ffffff',
+                  border: '0.667px solid #e4e7ec',
+                  borderRadius: '6px',
+                  padding: '16px',
+                }}
+              >
+                <div style={{ fontSize: '13px', fontWeight: 600, color: '#12161c', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <CheckCircle2 size={15} color="#16603b" />
+                  <span>Why</span>
+                </div>
+                <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '12px', color: '#323a46', lineHeight: '20px' }}>
+                  {(aiResult.why && aiResult.why.length > 0 ? aiResult.why : [aiResult.reasoning]).map((w: string, idx: number) => (
+                    <li key={idx} style={{ marginBottom: '6px' }}>{w}</li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Right Column: Risks & Missing Data */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                {/* Risks */}
+                <div 
+                  data-testid="ai-risks-section"
+                  style={{
+                    backgroundColor: '#ffffff',
+                    border: '0.667px solid #e4e7ec',
+                    borderRadius: '6px',
+                    padding: '14px 16px',
+                  }}
+                >
+                  <div style={{ fontSize: '13px', fontWeight: 600, color: '#8e1e1e', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <AlertTriangle size={15} color="#8e1e1e" />
+                    <span>Risks</span>
+                  </div>
+                  <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '12px', color: '#5a6472', lineHeight: '18px' }}>
+                    {(aiResult.risks && aiResult.risks.length > 0 ? aiResult.risks : ['Không phát hiện rủi ro nghiêm trọng.']).map((r: string, idx: number) => (
+                      <li key={idx} style={{ marginBottom: '4px' }}>{r}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Missing Data */}
+                <div 
+                  data-testid="ai-missing-data-section"
+                  style={{
+                    backgroundColor: '#ffffff',
+                    border: '0.667px solid #e4e7ec',
+                    borderRadius: '6px',
+                    padding: '14px 16px',
+                  }}
+                >
+                  <div style={{ fontSize: '13px', fontWeight: 600, color: '#7a5209', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Info size={15} color="#7a5209" />
+                    <span>Missing data</span>
+                  </div>
+                  <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '12px', color: '#5a6472', lineHeight: '18px' }}>
+                    {(aiResult.missing_data && aiResult.missing_data.length > 0 ? aiResult.missing_data : ['Dữ liệu báo giá đầy đủ.']).map((m: string, idx: number) => (
+                      <li key={idx} style={{ marginBottom: '4px' }}>{m}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Reasoning summary note */}
+            {aiResult.reasoning && (
+              <div style={{ backgroundColor: '#f5f7ff', border: '0.667px solid #dbe2ff', borderRadius: '6px', padding: '10px 14px', fontSize: '12px', color: '#2f3789', marginBottom: '16px' }}>
+                <strong>Tổng kết phân tích: </strong>{aiResult.reasoning}
+              </div>
+            )}
+          </div>
+
+          {/* Footer Notice (Figma 9:5735) */}
+          <div 
+            style={{
+              padding: '12px 20px',
+              backgroundColor: '#f9fafb',
+              borderTop: '0.667px solid #e4e7ec',
+              fontSize: '12px',
+              color: '#5a6472',
+              lineHeight: '18px',
+            }}
+          >
+            This is a recommendation, not a decision. Procurement selects the supplier and may choose any quotation regardless of these scores.
+          </div>
+        </div>
+      )}
 
       {/* Anomaly Alerts Panel (Figma 9:5110) */}
       {anomalyQuotes.length > 0 && (
@@ -1227,6 +1598,22 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
                       <span style={{ fontSize: '14px', fontWeight: 500, color: '#12161c' }}>
                         {q.supplierName || q.supplier?.name}
                       </span>
+                      {aiResult && (aiResult.recommended_quotation_id === q.id || aiResult.recommended_supplier_name === (q.supplierName || q.supplier?.name)) && (
+                        <span 
+                          data-testid="ai-recommended-badge"
+                          style={{
+                            backgroundColor: '#eef2ff',
+                            color: '#4338ca',
+                            border: '0.667px solid #c7d2fe',
+                            borderRadius: '4px',
+                            padding: '1px 6px',
+                            fontSize: '11px',
+                            fontWeight: 600,
+                          }}
+                        >
+                          AI recommended
+                        </span>
+                      )}
                       {isExpired && (
                         <span style={{ fontSize: '11px', color: '#8e1e1e', backgroundColor: '#fdecec', padding: '1px 6px', borderRadius: '4px' }}>
                           Expired
@@ -1240,6 +1627,22 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
                 </label>
               );
             })}
+          </div>
+
+          {/* Human-in-the-loop advisory notice (Figma 9:5814) */}
+          <div 
+            style={{ 
+              marginTop: '14px', 
+              fontSize: '12px', 
+              color: '#8a929e', 
+              fontStyle: 'italic',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            <Info size={13} color="#8a929e" />
+            <span>Only a person can complete this step. The assistant has no ability to award a request.</span>
           </div>
 
           <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>

@@ -10,6 +10,7 @@ from app.schemas.ai import (
     StandardizeResponseSchema,
     QuotationRecommendationRequest,
     QuotationRecommendationResponse,
+    QuotationInputItem,
 )
 from app.services.ai_service import AIService
 
@@ -41,6 +42,32 @@ async def recommend_quotations(
     Pure decision support — does NOT write to database, select supplier, or bypass approval rules.
     Accessible to all authenticated users (HD-13 Policy K-1).
     """
+    # Enforce PostgreSQL data authority if purchase_request_id exists in DB
+    if req.purchase_request_id and req.purchase_request_id.strip():
+        try:
+            from app.services.procurement_service import ProcurementService
+            db_comparisons = await ProcurementService.compare_quotations_prisma(req.purchase_request_id.strip())
+            if db_comparisons and len(db_comparisons) >= 2:
+                req.quotations = [
+                    QuotationInputItem(
+                        quotation_id=q["id"],
+                        supplier_name=q.get("supplierName") or (q.get("supplier", {}).get("name") if isinstance(q.get("supplier"), dict) else "Nhà cung cấp"),
+                        total_amount=float(q["totalAmount"]),
+                        unit_price=float(q["unitPrice"]),
+                        quantity=int(q.get("quantity", 1)),
+                        delivery_days=int(q.get("deliveryDays", 0)),
+                        warranty_terms=q.get("warrantyTerms"),
+                        valid_until=q.get("validUntil").isoformat() if hasattr(q.get("validUntil"), "isoformat") else (str(q.get("validUntil")) if q.get("validUntil") else None),
+                        is_anomaly=bool(q.get("isAnomaly", False)),
+                        anomaly_reason=q.get("anomalyReason"),
+                        is_expired=bool(q.get("isExpired", False)),
+                    )
+                    for q in db_comparisons
+                ]
+        except Exception:
+            # Fall back to client-provided quotations if PR is not in DB or error
+            pass
+
     if not req.quotations:
         raise HTTPException(status_code=400, detail="Danh sách báo giá không được rỗng.")
     return await AIService.recommend_quotations_async(req)

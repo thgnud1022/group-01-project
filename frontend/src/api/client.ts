@@ -262,8 +262,9 @@ class ApiClient {
 
   public async recommendQuotations(data: {
     purchase_request_id: string;
-    total_estimated_value: number;
-    quotations: any[];
+    total_estimated_value?: number;
+    pr_title?: string;
+    quotations?: any[];
   }) {
     return this.request<any>('/api/assistant/recommend-quotations', {
       method: 'POST',

@@ -1,0 +1,614 @@
+const imgSvg = "http://localhost:3845/assets/8e5dc0f62950d56a90247ed8499554bc92a82327.svg";
+const imgSvg1 = "http://localhost:3845/assets/58116be58dfa2295daace10f10a180ec9509543f.svg";
+const imgSvg2 = "http://localhost:3845/assets/fc5b283865682d07096a3cb6930537a91d4b2c2b.svg";
+const imgSvg3 = "http://localhost:3845/assets/d89698369b9e400fb2004ab372bef4676a3b5842.svg";
+const imgSvg4 = "http://localhost:3845/assets/7d3ea3ac128da0e771485e27654da12ed8ab8464.svg";
+const imgSvg5 = "http://localhost:3845/assets/3cef3632f94720baf7091930b2288874e2f75c76.svg";
+const imgSvg6 = "http://localhost:3845/assets/f8de8a48d40a20c87ec6a86cc8317998d5cf35b3.svg";
+const imgSvg7 = "http://localhost:3845/assets/ee78308d4f3e91f4d8c89382ef84c17b7757ee1d.svg";
+const imgSvg8 = "http://localhost:3845/assets/bdf52fd17bef91d179007c6334cf43d945c5b5d9.svg";
+const imgSvg9 = "http://localhost:3845/assets/b63697c2771062899721ce8f9aa761bd8a173756.svg";
+const imgSvg10 = "http://localhost:3845/assets/cf35386a45fb16326a8d8bc9f6a5958f33d0bd17.svg";
+const imgSvg11 = "http://localhost:3845/assets/586420f0eb85e8dfa74fcf4b6fc354740dc57667.svg";
+
+export default function RejectedRequest() {
+  return (
+    <div className="bg-white relative size-full" data-node-id="9:3468" data-name="Rejected request">
+      <div className="absolute bg-[#f5f6f8] h-[1293.42px] left-0 top-0 w-[1180.67px]" data-node-id="9:3469" data-name="Background">
+        <p className="[word-break:break-word] absolute font-['Inter:Regular'] font-normal leading-[24px] left-[-1px] not-italic text-[#12161c] text-[16px] top-[-1px] whitespace-nowrap" data-node-id="9:3470" style={{ fontFeatureSettings: '"dlig" 1' }}>
+          Skip to content
+        </p>
+        <div className="absolute h-[1293.42px] left-[256px] top-0 w-[924.67px]" data-node-id="9:3471" data-name="Container">
+          <div className="absolute h-[1293.42px] left-0 top-0 w-[924.67px]" data-node-id="9:3472" data-name="Container">
+            <div className="absolute h-[1229.42px] left-[32px] top-[32px] w-[860.67px]" data-node-id="9:3473" data-name="Container">
+              <div className="absolute h-[16px] left-0 top-[2.33px] w-[88.89px]" data-node-id="9:3474" data-name="Link">
+                <div className="absolute left-0 size-[14px] top-px" data-node-id="9:3475" data-name="SVG">
+                  <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgSvg} />
+                </div>
+                <p className="[word-break:break-word] absolute font-['Inter:SemiBold'] leading-[16px] left-[20px] not-italic text-[#5a6472] text-[12px] top-[0.67px] whitespace-nowrap" data-node-id="9:3478" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                  All requests
+                </p>
+              </div>
+              <div className="absolute h-[61.33px] left-0 top-[36px] w-[860.67px]" data-node-id="9:3479" data-name="Container">
+                <div className="absolute h-[61.33px] left-0 top-0 w-[329.82px]" data-node-id="9:3480" data-name="Container">
+                  <div className="absolute h-[21.33px] left-0 top-0 w-[329.82px]" data-node-id="9:3481" data-name="Container">
+                    <div className="absolute bg-[#fdecec] border-[#f4c2c2] border-[0.667px] border-solid h-[21.33px] left-0 rounded-[4px] top-0 w-[67.43px]" data-node-id="9:3482" data-name="Background">
+                      <p className="[word-break:break-word] absolute font-['Inter:Medium'] font-medium leading-[16px] left-[8px] not-italic text-[#8e1e1e] text-[12px] top-[2.66px] whitespace-nowrap" data-node-id="9:3483" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                        Rejected
+                      </p>
+                    </div>
+                    <p className="[word-break:break-word] absolute font-['Inter:Regular'] font-normal leading-[16px] left-[75.43px] not-italic text-[#8a929e] text-[12px] top-[2.67px] whitespace-nowrap" data-node-id="9:3484" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                      PR-2026-036
+                    </p>
+                  </div>
+                  <p className="[word-break:break-word] absolute font-['Inter:SemiBold'] leading-[32px] left-0 not-italic text-[#12161c] text-[24px] top-[29.33px] tracking-[-0.6px] whitespace-nowrap" data-node-id="9:3485" style={{ fontFeatureSettings: '"dlig" 1' }}>{`Conference room display, 86"`}</p>
+                </div>
+                <div className="absolute h-[50px] left-[702.14px] top-0 w-[158.53px]" data-node-id="9:3486" data-name="Container">
+                  <div className="[word-break:break-word] absolute h-[50px] left-0 not-italic text-right top-0 w-[158.53px] whitespace-nowrap" data-node-id="9:3487" data-name="Container">
+                    <p className="-translate-x-full absolute font-['Inter:Regular'] font-normal leading-[16px] left-[76.97px] text-[#8a929e] text-[11px] top-0 tracking-[0.55px]" data-node-id="9:3488" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                      Estimated total
+                    </p>
+                    <p className="-translate-x-full absolute font-['Inter:SemiBold'] leading-[32px] left-[158.53px] text-[#12161c] text-[24px] top-[18px]" data-node-id="9:3489" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                      96,000,000 ₫
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="absolute bg-white border-[#e4e7ec] border-[0.667px] border-solid drop-shadow-[0px_1px_0.5px_rgba(18,22,28,0.03),0px_1px_1px_rgba(18,22,28,0.04)] h-[53.33px] left-0 rounded-[8px] top-[117.33px] w-[860.67px]" data-node-id="9:3490" data-name="Background">
+                <div className="absolute h-[20px] left-[16px] overflow-clip top-[16px] w-[827.33px]" data-node-id="9:3491" data-name="Container">
+                  <div className="absolute h-[20px] left-0 top-0 w-[827.33px]" data-node-id="9:3492" data-name="List">
+                    <div className="absolute h-[20px] left-0 top-0 w-[113.04px]" data-node-id="9:3493" data-name="ListItem">
+                      <div className="absolute bg-[#e9f7ef] border-[#b6e2c7] border-[0.667px] border-solid left-0 rounded-[9999px] size-[20px] top-0" data-node-id="9:3494" data-name="Background">
+                        <div className="absolute left-[3.33px] size-[12px] top-[3.33px]" data-node-id="9:3495" data-name="SVG">
+                          <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgSvg1} />
+                        </div>
+                      </div>
+                      <p className="[word-break:break-word] absolute font-['Inter:Regular'] font-normal leading-[16px] left-[26px] not-italic text-[#5a6472] text-[11px] top-[2px] whitespace-nowrap" data-node-id="9:3497" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                        Request
+                      </p>
+                      <div className="absolute bg-[#b6e2c7] h-px left-[74.39px] top-[9.5px] w-[38.65px]" data-node-id="9:3498" data-name="Background" />
+                    </div>
+                    <div className="absolute h-[20px] left-[119.04px] top-0 w-[113.05px]" data-node-id="9:3499" data-name="ListItem">
+                      <div className="absolute bg-[#fdecec] border-[#f4c2c2] border-[0.667px] border-solid left-0 rounded-[9999px] size-[20px] top-0" data-node-id="9:3500" data-name="Background">
+                        <div className="absolute left-[3.33px] size-[12px] top-[3.33px]" data-node-id="9:3501" data-name="SVG">
+                          <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgSvg2} />
+                        </div>
+                      </div>
+                      <p className="[word-break:break-word] absolute font-['Inter:SemiBold'] leading-[16px] left-[26px] not-italic text-[#12161c] text-[11px] top-[2px] whitespace-nowrap" data-node-id="9:3504" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                        Approval
+                      </p>
+                      <div className="absolute bg-[#e4e7ec] h-px left-[79.92px] top-[9.5px] w-[33.14px]" data-node-id="9:3505" data-name="Background" />
+                    </div>
+                    <div className="absolute h-[20px] left-[238.09px] top-0 w-[113.04px]" data-node-id="9:3506" data-name="ListItem">
+                      <div className="absolute bg-white border-[#e4e7ec] border-[0.667px] border-solid left-0 rounded-[9999px] size-[20px] top-0" data-node-id="9:3507" data-name="Background">
+                        <p className="[word-break:break-word] absolute font-['Inter:SemiBold'] leading-[16px] left-[5.83px] not-italic text-[#8a929e] text-[11px] top-[2.66px] whitespace-nowrap" data-node-id="9:3508" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                          3
+                        </p>
+                      </div>
+                      <p className="[word-break:break-word] absolute font-['Inter:Regular'] font-normal leading-[16px] left-[26px] not-italic text-[#8a929e] text-[11px] top-[2px] whitespace-nowrap" data-node-id="9:3509" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                        Quotations
+                      </p>
+                      <div className="absolute bg-[#e4e7ec] h-px left-[88.51px] top-[9.5px] w-[24.53px]" data-node-id="9:3510" data-name="Background" />
+                    </div>
+                    <div className="absolute h-[20px] left-[357.13px] top-0 w-[113.05px]" data-node-id="9:3511" data-name="ListItem">
+                      <div className="absolute bg-white border-[#e4e7ec] border-[0.667px] border-solid left-0 rounded-[9999px] size-[20px] top-0" data-node-id="9:3512" data-name="Background">
+                        <p className="[word-break:break-word] absolute font-['Inter:SemiBold'] leading-[16px] left-[5.67px] not-italic text-[#8a929e] text-[11px] top-[2.66px] whitespace-nowrap" data-node-id="9:3513" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                          4
+                        </p>
+                      </div>
+                      <p className="[word-break:break-word] absolute font-['Inter:Regular'] font-normal leading-[16px] left-[26px] not-italic text-[#8a929e] text-[11px] top-[2px] whitespace-nowrap" data-node-id="9:3514" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                        Comparison
+                      </p>
+                      <div className="absolute bg-[#e4e7ec] h-px left-[95.11px] top-[9.5px] w-[17.95px]" data-node-id="9:3515" data-name="Background" />
+                    </div>
+                    <div className="absolute h-[20px] left-[476.18px] top-0 w-[113.04px]" data-node-id="9:3516" data-name="ListItem">
+                      <div className="absolute bg-white border-[#e4e7ec] border-[0.667px] border-solid left-0 rounded-[9999px] size-[20px] top-0" data-node-id="9:3517" data-name="Background">
+                        <p className="[word-break:break-word] absolute font-['Inter:SemiBold'] leading-[16px] left-[5.96px] not-italic text-[#8a929e] text-[11px] top-[2.66px] whitespace-nowrap" data-node-id="9:3518" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                          5
+                        </p>
+                      </div>
+                      <p className="[word-break:break-word] absolute font-['Inter:Regular'] font-normal leading-[16px] left-[26px] not-italic text-[#8a929e] text-[11px] top-[2px] whitespace-nowrap" data-node-id="9:3519" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                        Purchase order
+                      </p>
+                      <div className="absolute bg-[#e4e7ec] h-px left-[111.62px] top-[9.5px] w-[1.43px]" data-node-id="9:3520" data-name="Background" />
+                    </div>
+                    <div className="absolute h-[20px] left-[595.23px] top-0 w-[113.05px]" data-node-id="9:3521" data-name="ListItem">
+                      <div className="absolute bg-white border-[#e4e7ec] border-[0.667px] border-solid left-0 rounded-[9999px] size-[20px] top-0" data-node-id="9:3522" data-name="Background">
+                        <p className="[word-break:break-word] absolute font-['Inter:SemiBold'] leading-[16px] left-[5.81px] not-italic text-[#8a929e] text-[11px] top-[2.66px] whitespace-nowrap" data-node-id="9:3523" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                          6
+                        </p>
+                      </div>
+                      <p className="[word-break:break-word] absolute font-['Inter:Regular'] font-normal leading-[16px] left-[26px] not-italic text-[#8a929e] text-[11px] top-[2px] whitespace-nowrap" data-node-id="9:3524" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                        Received
+                      </p>
+                      <div className="absolute bg-[#e4e7ec] h-px left-[79.81px] top-[9.5px] w-[33.24px]" data-node-id="9:3525" data-name="Background" />
+                    </div>
+                    <div className="absolute h-[20px] left-[714.28px] top-0 w-[113.05px]" data-node-id="9:3526" data-name="ListItem">
+                      <div className="absolute bg-white border-[#e4e7ec] border-[0.667px] border-solid left-0 rounded-[9999px] size-[20px] top-0" data-node-id="9:3527" data-name="Background">
+                        <p className="[word-break:break-word] absolute font-['Inter:SemiBold'] leading-[16px] left-[6.15px] not-italic text-[#8a929e] text-[11px] top-[2.66px] whitespace-nowrap" data-node-id="9:3528" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                          7
+                        </p>
+                      </div>
+                      <p className="[word-break:break-word] absolute font-['Inter:Regular'] font-normal leading-[16px] left-[26px] not-italic text-[#8a929e] text-[11px] top-[2px] whitespace-nowrap" data-node-id="9:3529" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                        Closed
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="absolute h-[1034.75px] left-0 top-[194.67px] w-[860.67px]" data-node-id="9:3530" data-name="Container">
+                <div className="absolute h-[1034.75px] left-0 top-0 w-[484.67px]" data-node-id="9:3531" data-name="Container">
+                  <div className="absolute bg-white border-[#e4e7ec] border-[0.667px] border-solid drop-shadow-[0px_1px_0.5px_rgba(18,22,28,0.03),0px_1px_1px_rgba(18,22,28,0.04)] h-[118.75px] left-0 rounded-[8px] top-0 w-[484.67px]" data-node-id="9:3532" data-name="Background">
+                    <div className="[word-break:break-word] absolute bg-[#fdecec] border-[#f4c2c2] border-b-[0.667px] border-solid h-[62.67px] left-0 not-italic text-[#8e1e1e] top-[-0.01px] w-[483.33px] whitespace-nowrap" data-node-id="9:3533" data-name="Background">
+                      <p className="absolute font-['Inter:SemiBold'] leading-[20px] left-[16px] text-[14px] top-[12px]" data-node-id="9:3534" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                        Rejected
+                      </p>
+                      <p className="absolute font-['Inter:Regular'] font-normal leading-[16px] left-[16px] text-[12px] top-[34px]" data-node-id="9:3535" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                        Vũ Minh Châu (Operations Manager)
+                      </p>
+                    </div>
+                    <div className="absolute h-[54.75px] left-0 top-[62.66px] w-[483.33px]" data-node-id="9:3536" data-name="Container">
+                      <p className="[word-break:break-word] absolute font-['Inter:Regular'] font-normal leading-[22.75px] left-[16px] not-italic text-[#12161c] text-[14px] top-[16px] whitespace-nowrap" data-node-id="9:3537" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                        Rejected for Q3. Repair the current unit and resubmit in Q4.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="absolute bg-[rgba(253,244,227,0.6)] border-[#f2ddad] border-[0.667px] border-solid drop-shadow-[0px_1px_0.5px_rgba(18,22,28,0.03),0px_1px_1px_rgba(18,22,28,0.04)] h-[414.58px] left-0 rounded-[8px] top-[142.75px] w-[484.67px]" data-node-id="9:3538" data-name="Background">
+                    <div className="absolute border-[rgba(228,231,236,0.7)] border-b-[0.667px] border-solid h-[92px] left-0 top-[-0.01px] w-[483.33px]" data-node-id="9:3539" data-name="Container">
+                      <div className="[word-break:break-word] absolute h-[38px] left-[16px] not-italic top-[12px] w-[312.19px] whitespace-nowrap" data-node-id="9:3540" data-name="Container">
+                        <p className="absolute font-['Inter:SemiBold'] leading-[20px] left-0 text-[#12161c] text-[14px] top-0" data-node-id="9:3541" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                          Budget warning
+                        </p>
+                        <p className="absolute font-['Inter:Regular'] font-normal leading-[16px] left-0 text-[#5a6472] text-[12px] top-[22px]" data-node-id="9:3542" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                          IT Equipment · Q3 2026 · owner Finance · Trần Mỹ Linh
+                        </p>
+                      </div>
+                      <div className="absolute bg-white border-[#f2ddad] border-[0.667px] border-solid h-[21.33px] left-[16px] rounded-[4px] top-[58px] w-[163.61px]" data-node-id="9:3543" data-name="Background">
+                        <div className="absolute left-[7.99px] size-[14px] top-[3px]" data-node-id="9:3544" data-name="SVG">
+                          <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgSvg3} />
+                        </div>
+                        <p className="[word-break:break-word] absolute font-['Inter:Medium'] font-medium leading-[16px] left-[27.99px] not-italic text-[#7a5209] text-[12px] top-[2.67px] whitespace-nowrap" data-node-id="9:3548" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                          Over by 38,000,000 ₫
+                        </p>
+                      </div>
+                    </div>
+                    <div className="absolute h-[321.25px] left-0 top-[91.99px] w-[483.33px]" data-node-id="9:3549" data-name="Container">
+                      <div className="[word-break:break-word] absolute font-['Inter:Regular'] font-normal leading-[0] left-[16px] not-italic text-[#7a5209] text-[14px] top-[16px] whitespace-nowrap" data-node-id="9:3550" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                        <p className="leading-[22.75px] mb-0">This request is 38,000,000 ₫ above the remaining IT Equipment</p>
+                        <p className="leading-[22.75px] mb-0">budget for Q3 2026. It cannot be approved until Finance reviews</p>
+                        <p className="leading-[22.75px]">the position.</p>
+                      </div>
+                      <div className="absolute bg-[#f5f6f8] h-[10px] left-[16px] overflow-clip rounded-[9999px] top-[100.25px] w-[451.33px]" data-node-id="9:3551" data-name="Background">
+                        <div className="absolute h-[10px] left-0 top-0 w-[451.33px]" data-node-id="9:3552" data-name="Container">
+                          <div className="absolute bg-[rgba(18,22,28,0.7)] h-[10px] left-0 top-0 w-[398.97px]" data-node-id="9:3553" data-name="Background" />
+                          <div className="absolute bg-[#96650b] h-[10px] left-[398.97px] top-0 w-[52.35px]" data-node-id="9:3554" data-name="Background" />
+                        </div>
+                      </div>
+                      <div className="[word-break:break-word] absolute h-[58px] left-[16px] not-italic top-[126.25px] w-[451.33px] whitespace-nowrap" data-node-id="9:3555" data-name="Container">
+                        <div className="absolute h-[58px] left-0 top-0 w-[94.83px]" data-node-id="9:3556" data-name="Container">
+                          <p className="absolute font-['Inter:Regular'] font-normal leading-[16px] left-0 text-[#8a929e] text-[12px] top-0" data-node-id="9:3557" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                            Allocated
+                          </p>
+                          <div className="absolute font-['Inter:Medium'] font-medium leading-[0] left-0 text-[#12161c] text-[14px] top-[18px]" data-node-id="9:3558" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                            <p className="leading-[20px] mb-0">500,000,000</p>
+                            <p className="leading-[20px]">₫</p>
+                          </div>
+                        </div>
+                        <div className="absolute h-[58px] left-[118.83px] top-0 w-[94.83px]" data-node-id="9:3559" data-name="Container">
+                          <p className="absolute font-['Inter:Regular'] font-normal leading-[16px] left-0 text-[#8a929e] text-[12px] top-0" data-node-id="9:3560" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                            Spent
+                          </p>
+                          <div className="absolute font-['Inter:Medium'] font-medium leading-[0] left-0 text-[#12161c] text-[14px] top-[18px]" data-node-id="9:3561" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                            <p className="leading-[20px] mb-0">412,000,000</p>
+                            <p className="leading-[20px]">₫</p>
+                          </div>
+                        </div>
+                        <div className="absolute h-[58px] left-[237.66px] top-0 w-[94.83px]" data-node-id="9:3562" data-name="Container">
+                          <p className="absolute font-['Inter:Regular'] font-normal leading-[16px] left-0 text-[#8a929e] text-[12px] top-0" data-node-id="9:3563" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                            Committed
+                          </p>
+                          <p className="absolute font-['Inter:Medium'] font-medium leading-[20px] left-0 text-[#12161c] text-[14px] top-[18px]" data-node-id="9:3564" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                            30,000,000 ₫
+                          </p>
+                        </div>
+                        <div className="absolute h-[58px] left-[356.5px] top-0 w-[94.83px]" data-node-id="9:3565" data-name="Container">
+                          <p className="absolute font-['Inter:Regular'] font-normal leading-[16px] left-0 text-[#8a929e] text-[12px] top-0" data-node-id="9:3566" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                            Available
+                          </p>
+                          <p className="absolute font-['Inter:SemiBold'] leading-[20px] left-0 text-[#12161c] text-[14px] top-[18px]" data-node-id="9:3567" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                            58,000,000 ₫
+                          </p>
+                        </div>
+                      </div>
+                      <div className="[word-break:break-word] absolute border-[rgba(228,231,236,0.7)] border-solid border-t-[0.667px] h-[36.67px] left-[16px] not-italic top-[200.25px] w-[451.33px] whitespace-nowrap" data-node-id="9:3568" data-name="Container">
+                        <p className="absolute font-['Inter:Regular'] font-normal leading-[20px] left-0 text-[#5a6472] text-[14px] top-[14.67px]" data-node-id="9:3569" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                          This request
+                        </p>
+                        <p className="absolute font-['Inter:SemiBold'] leading-[24px] left-[345.64px] text-[#12161c] text-[16px] top-[12px]" data-node-id="9:3570" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                          96,000,000 ₫
+                        </p>
+                      </div>
+                      <div className="[word-break:break-word] absolute bg-[#fbfcfd] border-[#e4e7ec] border-[0.667px] border-solid h-[56.33px] leading-[19.5px] left-[16px] not-italic rounded-[4px] text-[12px] top-[248.92px] w-[451.33px] whitespace-nowrap" data-node-id="9:3571" data-name="Paragraph">
+                        <p className="absolute font-['Inter:SemiBold'] left-[11.99px] text-[#12161c] top-[10.66px]" data-node-id="9:3572" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                          Marked exceeded by Finance
+                        </p>
+                        <p className="absolute font-['Inter:Regular'] font-normal left-[181.98px] text-[#5a6472] top-[10.66px]" data-node-id="9:3573" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                          · Trần Mỹ Linh (Finance)
+                        </p>
+                        <p className="absolute font-['Inter:Regular'] font-normal left-[11.99px] text-[#5a6472] top-[10.66px]" data-node-id="9:3574" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                          — No headroom left in Q3 IT Equipment.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="[word-break:break-word] absolute bg-white border-[#e4e7ec] border-[0.667px] border-solid drop-shadow-[0px_1px_0.5px_rgba(18,22,28,0.03),0px_1px_1px_rgba(18,22,28,0.04)] h-[290.75px] left-0 not-italic rounded-[8px] top-[581.33px] w-[484.67px] whitespace-nowrap" data-node-id="9:3575" data-name="Background">
+                    <p className="absolute font-['Inter:SemiBold'] leading-[20px] left-[20px] text-[#12161c] text-[14px] top-[20px]" data-node-id="9:3576" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                      Justification
+                    </p>
+                    <p className="absolute font-['Inter:Regular'] font-normal leading-[22.75px] left-[20px] text-[#5a6472] text-[14px] top-[46px]" data-node-id="9:3577" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                      Existing display in Room 3.2 flickers during calls.
+                    </p>
+                    <div className="absolute border-[rgba(228,231,236,0.7)] border-solid border-t-[0.667px] font-['Inter:Regular'] font-normal h-[180.67px] left-[20px] top-[88.75px] w-[443.33px]" data-node-id="9:3578" data-name="Container">
+                      <div className="absolute h-[58px] left-0 top-[15.99px] w-[92.83px]" data-node-id="9:3579" data-name="Container">
+                        <p className="absolute leading-[16px] left-0 text-[#8a929e] text-[11px] top-0 tracking-[0.275px]" data-node-id="9:3580" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                          Requester
+                        </p>
+                        <p className="absolute leading-[20px] left-0 text-[#12161c] text-[14px] top-[18px]" data-node-id="9:3581" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                          Phạm Thu Hà
+                        </p>
+                      </div>
+                      <div className="absolute h-[58px] left-[116.83px] top-[15.99px] w-[92.83px]" data-node-id="9:3582" data-name="Container">
+                        <p className="absolute leading-[16px] left-0 text-[#8a929e] text-[11px] top-0 tracking-[0.275px]" data-node-id="9:3583" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                          Department
+                        </p>
+                        <p className="absolute leading-[20px] left-0 text-[#12161c] text-[14px] top-[18px]" data-node-id="9:3584" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                          Operations
+                        </p>
+                      </div>
+                      <div className="absolute h-[58px] left-[233.66px] top-[15.99px] w-[92.83px]" data-node-id="9:3585" data-name="Container">
+                        <p className="absolute leading-[16px] left-0 text-[#8a929e] text-[11px] top-0 tracking-[0.275px]" data-node-id="9:3586" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                          Category
+                        </p>
+                        <p className="absolute leading-[20px] left-0 text-[#12161c] text-[14px] top-[18px]" data-node-id="9:3587" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                          IT Equipment
+                        </p>
+                      </div>
+                      <div className="absolute h-[58px] left-[350.5px] top-[15.99px] w-[92.83px]" data-node-id="9:3588" data-name="Container">
+                        <p className="absolute leading-[16px] left-0 text-[#8a929e] text-[11px] top-0 tracking-[0.275px]" data-node-id="9:3589" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                          Cost centre
+                        </p>
+                        <div className="absolute leading-[0] left-0 text-[#12161c] text-[14px] top-[18px]" data-node-id="9:3590" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                          <p className="leading-[20px] mb-0">CC-OPS-</p>
+                          <p className="leading-[20px]">3100</p>
+                        </div>
+                      </div>
+                      <div className="absolute h-[94px] left-0 top-[85.99px] w-[92.83px]" data-node-id="9:3591" data-name="Container">
+                        <p className="absolute leading-[16px] left-0 text-[#8a929e] text-[11px] top-0 tracking-[0.275px]" data-node-id="9:3592" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                          Required by
+                        </p>
+                        <p className="absolute leading-[20px] left-0 text-[#12161c] text-[14px] top-[18px]" data-node-id="9:3593" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                          10 Sept 2026
+                        </p>
+                      </div>
+                      <div className="absolute h-[94px] leading-[0] left-[116.83px] top-[85.99px] w-[92.83px]" data-node-id="9:3594" data-name="Container">
+                        <div className="absolute left-0 text-[#8a929e] text-[11px] top-0 tracking-[0.275px]" data-node-id="9:3595" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                          <p className="leading-[16px] mb-0">Delivery</p>
+                          <p className="leading-[16px]">location</p>
+                        </div>
+                        <div className="absolute left-0 text-[#12161c] text-[14px] top-[34px]" data-node-id="9:3596" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                          <p className="leading-[20px] mb-0">HQ Hanoi ·</p>
+                          <p className="leading-[20px] mb-0">Floor 3 ·</p>
+                          <p className="leading-[20px]">Reception</p>
+                        </div>
+                      </div>
+                      <div className="absolute h-[94px] left-[233.66px] top-[85.99px] w-[92.83px]" data-node-id="9:3597" data-name="Container">
+                        <p className="absolute leading-[16px] left-0 text-[#8a929e] text-[11px] top-0 tracking-[0.275px]" data-node-id="9:3598" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                          Created
+                        </p>
+                        <div className="absolute leading-[0] left-0 text-[#12161c] text-[14px] top-[18px]" data-node-id="9:3599" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                          <p className="leading-[20px] mb-0">02 Aug 2026</p>
+                          <p className="leading-[20px]">· 10:00</p>
+                        </div>
+                      </div>
+                      <div className="absolute h-[94px] left-[350.5px] top-[85.99px] w-[92.83px]" data-node-id="9:3600" data-name="Container">
+                        <p className="absolute leading-[16px] left-0 text-[#8a929e] text-[11px] top-0 tracking-[0.275px]" data-node-id="9:3601" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                          Last updated
+                        </p>
+                        <div className="absolute leading-[0] left-0 text-[#12161c] text-[14px] top-[18px]" data-node-id="9:3602" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                          <p className="leading-[20px] mb-0">09 Aug 2026</p>
+                          <p className="leading-[20px]">· 16:00</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="absolute bg-white border-[#e4e7ec] border-[0.667px] border-solid h-[138.67px] left-0 overflow-clip rounded-[8px] shadow-[0px_1px_1px_0px_rgba(18,22,28,0.03),0px_1px_2px_0px_rgba(18,22,28,0.04)] top-[896.08px] w-[484.67px]" data-node-id="9:3603" data-name="Background">
+                    <div className="absolute border-[#e4e7ec] border-b-[0.667px] border-solid h-[44.67px] left-0 top-0 w-[483.33px]" data-node-id="9:3604" data-name="Container">
+                      <p className="[word-break:break-word] absolute font-['Inter:SemiBold'] leading-[20px] left-[20px] not-italic text-[#12161c] text-[14px] top-[12px] whitespace-nowrap" data-node-id="9:3605" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                        Line items
+                      </p>
+                    </div>
+                    <div className="absolute h-[92.67px] left-0 top-[44.66px] w-[483.33px]" data-node-id="9:3606" data-name="Container">
+                      <p className="[word-break:break-word] absolute font-['Inter:Regular'] font-normal leading-[20px] left-[-1px] not-italic text-[#12161c] text-[14px] top-[31.67px] whitespace-nowrap" data-node-id="9:3607" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                        Line items on PR-2026-036
+                      </p>
+                      <div className="absolute h-[32.33px] left-0 top-0 w-[483.33px]" data-node-id="9:3608" data-name="Container">
+                        <div className="absolute bg-[#fbfcfd] border-[#e4e7ec] border-b-[0.667px] border-solid h-[32.33px] left-0 top-0 w-[483.33px]" data-node-id="9:3609" data-name="Background">
+                          <div className="absolute h-[32.33px] left-0 top-0 w-[173.29px]" data-node-id="9:3610" data-name="Container">
+                            <p className="[word-break:break-word] absolute font-['Inter:SemiBold'] leading-[16px] left-[20px] not-italic text-[#8a929e] text-[11px] top-[9.34px] tracking-[0.275px] whitespace-nowrap" data-node-id="9:3611" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                              Description
+                            </p>
+                          </div>
+                          <div className="absolute h-[32.33px] left-[173.29px] top-0 w-[63.78px]" data-node-id="9:3612" data-name="Container">
+                            <p className="-translate-x-full [word-break:break-word] absolute font-['Inter:SemiBold'] leading-[16px] left-[42.4px] not-italic text-[#8a929e] text-[11px] text-right top-[9.34px] tracking-[0.275px] whitespace-nowrap" data-node-id="9:3613" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                              Qty
+                            </p>
+                          </div>
+                          <div className="absolute h-[32.33px] left-[237.07px] top-0 w-[119.13px]" data-node-id="9:3614" data-name="Container">
+                            <p className="-translate-x-full [word-break:break-word] absolute font-['Inter:SemiBold'] leading-[16px] left-[90.3px] not-italic text-[#8a929e] text-[11px] text-right top-[9.34px] tracking-[0.275px] whitespace-nowrap" data-node-id="9:3615" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                              Est. unit
+                            </p>
+                          </div>
+                          <div className="absolute h-[32.33px] left-[356.19px] top-0 w-[127.14px]" data-node-id="9:3616" data-name="Container">
+                            <p className="-translate-x-full [word-break:break-word] absolute font-['Inter:SemiBold'] leading-[16px] left-[90.55px] not-italic text-[#8a929e] text-[11px] text-right top-[9.34px] tracking-[0.275px] whitespace-nowrap" data-node-id="9:3617" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                              Line total
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="absolute h-[60px] left-0 top-[32.67px] w-[483.33px]" data-node-id="9:3618" data-name="Container">
+                        <div className="absolute h-[60px] left-0 top-0 w-[483.33px]" data-node-id="9:3619" data-name="Container">
+                          <div className="absolute h-[60px] left-0 top-0 w-[173.29px]" data-node-id="9:3620" data-name="Container">
+                            <p className="[word-break:break-word] absolute font-['Inter:Regular'] font-normal leading-[20px] left-[20px] not-italic text-[#12161c] text-[14px] top-[11.33px] whitespace-nowrap" data-node-id="9:3621" style={{ fontFeatureSettings: '"dlig" 1' }}>{`86" 4K conference display`}</p>
+                          </div>
+                          <div className="absolute h-[60px] left-[173.29px] top-0 w-[63.78px]" data-node-id="9:3622" data-name="Container">
+                            <p className="-translate-x-full [word-break:break-word] absolute font-['Inter:Regular'] font-normal leading-[20px] left-[44.39px] not-italic text-[#5a6472] text-[14px] text-right top-[11.33px] whitespace-nowrap" data-node-id="9:3623" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                              1
+                            </p>
+                          </div>
+                          <div className="absolute h-[60px] left-[237.07px] top-0 w-[119.13px]" data-node-id="9:3624" data-name="Container">
+                            <p className="-translate-x-full [word-break:break-word] absolute font-['Inter:Regular'] font-normal leading-[20px] left-[103.13px] not-italic text-[#5a6472] text-[14px] text-right top-[11.33px] whitespace-nowrap" data-node-id="9:3625" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                              96,000,000 ₫
+                            </p>
+                          </div>
+                          <div className="absolute h-[60px] left-[356.19px] top-0 w-[127.14px]" data-node-id="9:3626" data-name="Container">
+                            <p className="-translate-x-full [word-break:break-word] absolute font-['Inter:Medium'] font-medium leading-[20px] left-[107.14px] not-italic text-[#12161c] text-[14px] text-right top-[11.33px] whitespace-nowrap" data-node-id="9:3627" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                              96,000,000 ₫
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute h-[1034.75px] left-[508.67px] top-0 w-[352px]" data-node-id="9:3628" data-name="Container">
+                  <div className="absolute bg-white border-[#e4e7ec] border-[0.667px] border-solid drop-shadow-[0px_1px_0.5px_rgba(18,22,28,0.03),0px_1px_1px_rgba(18,22,28,0.04)] h-[313.33px] left-0 rounded-[8px] top-0 w-[352px]" data-node-id="9:3629" data-name="Background">
+                    <p className="[word-break:break-word] absolute font-['Inter:SemiBold'] leading-[20px] left-[15.99px] not-italic text-[#12161c] text-[14px] top-[15.99px] whitespace-nowrap" data-node-id="9:3630" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                      Activity
+                    </p>
+                    <div className="absolute h-[244px] left-[15.99px] top-[51.99px] w-[318.67px]" data-node-id="9:3631" data-name="Container">
+                      <div className="absolute h-[244px] left-0 top-0 w-[318.67px]" data-node-id="9:3632" data-name="List">
+                        <div className="absolute bg-[#e4e7ec] h-[232px] left-[3px] top-[6px] w-px" data-node-id="9:3633" data-name="Background" />
+                        <div className="absolute h-[37.25px] left-[20px] top-0 w-[298.67px]" data-node-id="9:3634" data-name="ListItem">
+                          <div className="absolute bg-[#1f6394] left-[-20px] rounded-[9999px] shadow-[0px_0px_0px_0px_white,0px_0px_0px_0px_white] size-[7px] top-[6px]" data-node-id="9:3635" data-name="Background" />
+                          <p className="[word-break:break-word] absolute font-['Inter:Medium'] font-medium leading-[19.25px] left-0 not-italic text-[#12161c] text-[14px] top-0 whitespace-nowrap" data-node-id="9:3636" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                            Submitted for approval
+                          </p>
+                          <p className="[word-break:break-word] absolute font-['Inter:Regular'] font-normal leading-[16px] left-0 not-italic text-[#8a929e] text-[12px] top-[21.25px] whitespace-nowrap" data-node-id="9:3637" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                            Employee · Phạm Thu Hà · 02 Aug 2026 · 10:00
+                          </p>
+                        </div>
+                        <div className="absolute h-[37.25px] left-[20px] top-[53.25px] w-[298.67px]" data-node-id="9:3638" data-name="ListItem">
+                          <div className="absolute bg-[#8a929e] left-[-20px] rounded-[9999px] shadow-[0px_0px_0px_0px_white,0px_0px_0px_0px_white] size-[7px] top-[6px]" data-node-id="9:3639" data-name="Background" />
+                          <p className="[word-break:break-word] absolute font-['Inter:Medium'] font-medium leading-[19.25px] left-0 not-italic text-[#12161c] text-[14px] top-0 whitespace-nowrap" data-node-id="9:3640" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                            Budget warning raised
+                          </p>
+                          <p className="[word-break:break-word] absolute font-['Inter:Regular'] font-normal leading-[16px] left-0 not-italic text-[#8a929e] text-[12px] top-[21.25px] whitespace-nowrap" data-node-id="9:3641" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                            System · System · 03 Aug 2026 · 09:00
+                          </p>
+                        </div>
+                        <div className="absolute h-[60.75px] left-[20px] top-[106.5px] w-[298.67px]" data-node-id="9:3642" data-name="ListItem">
+                          <div className="absolute bg-[#96650b] left-[-20px] rounded-[9999px] shadow-[0px_0px_0px_0px_white,0px_0px_0px_0px_white] size-[7px] top-[6px]" data-node-id="9:3643" data-name="Background" />
+                          <p className="[word-break:break-word] absolute font-['Inter:Medium'] font-medium leading-[19.25px] left-0 not-italic text-[#12161c] text-[14px] top-0 whitespace-nowrap" data-node-id="9:3644" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                            Budget exceeded
+                          </p>
+                          <p className="[word-break:break-word] absolute font-['Inter:Regular'] font-normal leading-[16px] left-0 not-italic text-[#8a929e] text-[12px] top-[21.25px] whitespace-nowrap" data-node-id="9:3645" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                            Finance · Trần Mỹ Linh · 06 Aug 2026 · 11:00
+                          </p>
+                          <p className="[word-break:break-word] absolute font-['Inter:Regular'] font-normal leading-[19.5px] left-0 not-italic text-[#5a6472] text-[12px] top-[41.25px] whitespace-nowrap" data-node-id="9:3646" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                            No headroom left in Q3 IT Equipment.
+                          </p>
+                        </div>
+                        <div className="absolute h-[60.75px] left-[20px] top-[183.25px] w-[298.67px]" data-node-id="9:3647" data-name="ListItem">
+                          <div className="absolute bg-[#4a56d2] left-[-20px] rounded-[9999px] shadow-[0px_0px_0px_0px_white,0px_0px_0px_0px_white] size-[7px] top-[6px]" data-node-id="9:3648" data-name="Background" />
+                          <p className="[word-break:break-word] absolute font-['Inter:Medium'] font-medium leading-[19.25px] left-0 not-italic text-[#12161c] text-[14px] top-0 whitespace-nowrap" data-node-id="9:3649" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                            Rejected
+                          </p>
+                          <p className="[word-break:break-word] absolute font-['Inter:Regular'] font-normal leading-[16px] left-0 not-italic text-[#8a929e] text-[12px] top-[21.25px] whitespace-nowrap" data-node-id="9:3650" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                            Manager · Vũ Minh Châu · 09 Aug 2026 · 16:00
+                          </p>
+                          <p className="[word-break:break-word] absolute font-['Inter:Regular'] font-normal leading-[19.5px] left-0 not-italic text-[#5a6472] text-[12px] top-[41.25px] whitespace-nowrap" data-node-id="9:3651" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                            Repair the current unit and resubmit in Q4.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="absolute bg-white border-[#e4e7ec] border-r-[0.667px] border-solid h-[1293.42px] left-0 top-0 w-[256px]" data-node-id="9:3652" data-name="Background">
+          <div className="absolute border-[#e4e7ec] border-b-[0.667px] border-solid h-[56px] left-0 top-0 w-[255.33px]" data-node-id="9:3653" data-name="Container">
+            <div className="[word-break:break-word] absolute h-[33.5px] left-[16px] not-italic top-[10.92px] w-[131.58px] whitespace-nowrap" data-node-id="9:3654" data-name="Container">
+              <p className="absolute font-['Inter:SemiBold'] leading-[17.5px] left-0 text-[#12161c] text-[14px] top-0" data-node-id="9:3655" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                Procure
+              </p>
+              <p className="absolute font-['Inter:Regular'] font-normal leading-[16px] left-0 text-[#8a929e] text-[11px] top-[17.5px] tracking-[0.55px]" data-node-id="9:3656" style={{ fontFeatureSettings: '"dlig" 1' }}>{`Request & approval`}</p>
+            </div>
+          </div>
+          <div className="absolute h-[318px] left-0 top-[56px] w-[255.33px]" data-node-id="9:3657" data-name="Container">
+            <div className="absolute h-[302px] left-[8px] top-[8px] w-[239.33px]" data-node-id="9:3658" data-name="List">
+              <div className="absolute h-[36px] left-0 top-0 w-[239.33px]" data-node-id="9:3659" data-name="ListItem">
+                <div className="absolute bg-[#eef1ff] h-[36px] left-0 rounded-[4px] top-0 w-[239.33px]" data-node-id="9:3660" data-name="Link">
+                  <div className="absolute left-[10px] size-[16px] top-[10px]" data-node-id="9:3661" data-name="SVG">
+                    <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgSvg4} />
+                  </div>
+                  <p className="[word-break:break-word] absolute font-['Inter:Medium'] font-medium leading-[20px] left-[36px] not-italic text-[#2f3789] text-[14px] top-[8px] whitespace-nowrap" data-node-id="9:3668" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                    Purchase requests
+                  </p>
+                  <p className="[word-break:break-word] absolute font-['Inter:Regular'] font-normal leading-[16px] left-[139.79px] not-italic text-[#8a929e] text-[11px] top-[10px] tracking-[0.275px] whitespace-nowrap" data-node-id="9:3669" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                    Employee
+                  </p>
+                  <div className="absolute bg-[#f5f6f8] h-[16px] left-[210.21px] rounded-[4px] top-[10px] w-[19.13px]" data-node-id="9:3670" data-name="Background">
+                    <p className="[word-break:break-word] absolute font-['Inter:SemiBold'] leading-[16px] left-[6px] not-italic text-[#5a6472] text-[11px] top-[1.33px] whitespace-nowrap" data-node-id="9:3671" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                      3
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="absolute h-[36px] left-0 top-[38px] w-[239.33px]" data-node-id="9:3672" data-name="ListItem">
+                <div className="absolute h-[36px] left-0 rounded-[4px] top-0 w-[239.33px]" data-node-id="9:3673" data-name="Link">
+                  <div className="absolute left-[10px] size-[16px] top-[10px]" data-node-id="9:3674" data-name="SVG">
+                    <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgSvg5} />
+                  </div>
+                  <p className="[word-break:break-word] absolute font-['Inter:Medium'] font-medium leading-[20px] left-[36px] not-italic text-[#5a6472] text-[14px] top-[8px] whitespace-nowrap" data-node-id="9:3677" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                    New request
+                  </p>
+                  <p className="[word-break:break-word] absolute font-['Inter:Regular'] font-normal leading-[16px] left-[168.92px] not-italic text-[#8a929e] text-[11px] top-[10px] tracking-[0.275px] whitespace-nowrap" data-node-id="9:3678" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                    Employee
+                  </p>
+                </div>
+              </div>
+              <div className="absolute h-[36px] left-0 top-[76px] w-[239.33px]" data-node-id="9:3679" data-name="ListItem">
+                <div className="absolute h-[36px] left-0 rounded-[4px] top-0 w-[239.33px]" data-node-id="9:3680" data-name="Link">
+                  <div className="absolute left-[10px] size-[16px] top-[10px]" data-node-id="9:3681" data-name="SVG">
+                    <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgSvg6} />
+                  </div>
+                  <p className="[word-break:break-word] absolute font-['Inter:Medium'] font-medium leading-[20px] left-[36px] not-italic text-[#5a6472] text-[14px] top-[8px] whitespace-nowrap" data-node-id="9:3687" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                    Approvals
+                  </p>
+                  <p className="[word-break:break-word] absolute font-['Inter:Regular'] font-normal leading-[16px] left-[143.35px] not-italic text-[#8a929e] text-[11px] top-[10px] tracking-[0.275px] whitespace-nowrap" data-node-id="9:3688" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                    Manager
+                  </p>
+                  <div className="absolute bg-[#f5f6f8] h-[16px] left-[210.21px] rounded-[4px] top-[10px] w-[19.13px]" data-node-id="9:3689" data-name="Background">
+                    <p className="[word-break:break-word] absolute font-['Inter:SemiBold'] leading-[16px] left-[6px] not-italic text-[#5a6472] text-[11px] top-[1.33px] whitespace-nowrap" data-node-id="9:3690" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                      1
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="absolute h-[36px] left-0 top-[114px] w-[239.33px]" data-node-id="9:3691" data-name="ListItem">
+                <div className="absolute h-[36px] left-0 rounded-[4px] top-0 w-[239.33px]" data-node-id="9:3692" data-name="Link">
+                  <div className="absolute left-[10px] size-[16px] top-[10px]" data-node-id="9:3693" data-name="SVG">
+                    <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgSvg7} />
+                  </div>
+                  <p className="[word-break:break-word] absolute font-['Inter:Medium'] font-medium leading-[20px] left-[36px] not-italic text-[#5a6472] text-[14px] top-[8px] whitespace-nowrap" data-node-id="9:3696" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                    Budget review
+                  </p>
+                  <p className="[word-break:break-word] absolute font-['Inter:Regular'] font-normal leading-[16px] left-[150.02px] not-italic text-[#8a929e] text-[11px] top-[10px] tracking-[0.275px] whitespace-nowrap" data-node-id="9:3697" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                    Finance
+                  </p>
+                  <div className="absolute bg-[#f5f6f8] h-[16px] left-[210.21px] rounded-[4px] top-[10px] w-[19.13px]" data-node-id="9:3698" data-name="Background">
+                    <p className="[word-break:break-word] absolute font-['Inter:SemiBold'] leading-[16px] left-[6px] not-italic text-[#5a6472] text-[11px] top-[1.33px] whitespace-nowrap" data-node-id="9:3699" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                      1
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="absolute h-[36px] left-0 top-[152px] w-[239.33px]" data-node-id="9:3700" data-name="ListItem">
+                <div className="absolute h-[36px] left-0 rounded-[4px] top-0 w-[239.33px]" data-node-id="9:3701" data-name="Link">
+                  <div className="absolute left-[10px] size-[16px] top-[10px]" data-node-id="9:3702" data-name="SVG">
+                    <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgSvg8} />
+                  </div>
+                  <p className="[word-break:break-word] absolute font-['Inter:Medium'] font-medium leading-[20px] left-[36px] not-italic text-[#5a6472] text-[14px] top-[8px] whitespace-nowrap" data-node-id="9:3708" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                    Sourcing
+                  </p>
+                  <p className="[word-break:break-word] absolute font-['Inter:Regular'] font-normal leading-[16px] left-[112.81px] not-italic text-[#8a929e] text-[11px] top-[10px] tracking-[0.275px] whitespace-nowrap" data-node-id="9:3709" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                    Procurement
+                  </p>
+                  <div className="absolute bg-[#f5f6f8] h-[16px] left-[210.21px] rounded-[4px] top-[10px] w-[19.13px]" data-node-id="9:3710" data-name="Background">
+                    <p className="[word-break:break-word] absolute font-['Inter:SemiBold'] leading-[16px] left-[6px] not-italic text-[#5a6472] text-[11px] top-[1.33px] whitespace-nowrap" data-node-id="9:3711" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                      3
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="absolute h-[36px] left-0 top-[190px] w-[239.33px]" data-node-id="9:3712" data-name="ListItem">
+                <div className="absolute h-[36px] left-0 rounded-[4px] top-0 w-[239.33px]" data-node-id="9:3713" data-name="Link">
+                  <div className="absolute left-[10px] size-[16px] top-[10px]" data-node-id="9:3714" data-name="SVG">
+                    <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgSvg9} />
+                  </div>
+                  <p className="[word-break:break-word] absolute font-['Inter:Medium'] font-medium leading-[20px] left-[36px] not-italic text-[#5a6472] text-[14px] top-[8px] whitespace-nowrap" data-node-id="9:3720" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                    Suppliers
+                  </p>
+                  <p className="[word-break:break-word] absolute font-['Inter:Regular'] font-normal leading-[16px] left-[141.94px] not-italic text-[#8a929e] text-[11px] top-[10px] tracking-[0.275px] whitespace-nowrap" data-node-id="9:3721" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                    Procurement
+                  </p>
+                </div>
+              </div>
+              <div className="absolute h-[36px] left-0 top-[228px] w-[239.33px]" data-node-id="9:3722" data-name="ListItem">
+                <div className="absolute h-[36px] left-0 rounded-[4px] top-0 w-[239.33px]" data-node-id="9:3723" data-name="Link">
+                  <div className="absolute left-[10px] size-[16px] top-[10px]" data-node-id="9:3724" data-name="SVG">
+                    <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgSvg10} />
+                  </div>
+                  <p className="[word-break:break-word] absolute font-['Inter:Medium'] font-medium leading-[20px] left-[36px] not-italic text-[#5a6472] text-[14px] top-[8px] whitespace-nowrap" data-node-id="9:3729" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                    Purchase orders
+                  </p>
+                  <p className="[word-break:break-word] absolute font-['Inter:Regular'] font-normal leading-[16px] left-[112.81px] not-italic text-[#8a929e] text-[11px] top-[10px] tracking-[0.275px] whitespace-nowrap" data-node-id="9:3730" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                    Procurement
+                  </p>
+                  <div className="absolute bg-[#f5f6f8] h-[16px] left-[210.21px] rounded-[4px] top-[10px] w-[19.13px]" data-node-id="9:3731" data-name="Background">
+                    <p className="[word-break:break-word] absolute font-['Inter:SemiBold'] leading-[16px] left-[6px] not-italic text-[#5a6472] text-[11px] top-[1.33px] whitespace-nowrap" data-node-id="9:3732" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                      1
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="absolute h-[36px] left-0 top-[266px] w-[239.33px]" data-node-id="9:3733" data-name="ListItem">
+                <div className="absolute h-[36px] left-0 rounded-[4px] top-0 w-[239.33px]" data-node-id="9:3734" data-name="Link">
+                  <div className="absolute left-[10px] size-[16px] top-[10px]" data-node-id="9:3735" data-name="SVG">
+                    <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgSvg11} />
+                  </div>
+                  <p className="[word-break:break-word] absolute font-['Inter:Medium'] font-medium leading-[20px] left-[36px] not-italic text-[#5a6472] text-[14px] top-[8px] whitespace-nowrap" data-node-id="9:3741" style={{ fontFeatureSettings: '"dlig" 1' }}>
+                    Prototype assumptions
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="[word-break:break-word] absolute bg-[#fbfcfd] border-[#e4e7ec] border-[0.667px] border-solid h-[142.83px] left-[8px] not-italic rounded-[4px] top-[390px] w-[239.33px] whitespace-nowrap" data-node-id="9:3742" data-name="Background">
+            <p className="absolute font-['Inter:SemiBold'] leading-[16px] left-[12px] text-[#8a929e] text-[11px] top-[12px] tracking-[0.275px]" data-node-id="9:3743" style={{ fontFeatureSettings: '"dlig" 1' }}>
+              Prototype
+            </p>
+            <div className="absolute font-['Inter:Regular'] font-normal leading-[0] left-[12px] text-[#5a6472] text-[12px] top-[32px]" data-node-id="9:3744" style={{ fontFeatureSettings: '"dlig" 1' }}>
+              <p className="leading-[19.5px] mb-0">Sample data only. The assistant</p>
+              <p className="leading-[19.5px] mb-0">never approves a request or selects a</p>
+              <p className="leading-[19.5px] mb-0">supplier — it produces</p>
+              <p className="leading-[19.5px] mb-0">recommendations that a person</p>
+              <p className="leading-[19.5px]">accepts or overrides.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+--- PART ---
+
+SUPER CRITICAL: The generated React+Tailwind code MUST be converted to match the target project's technology stack and styling system.
+1. Analyze the target codebase to identify: technology stack, styling approach, component patterns, and design tokens
+2. Convert React syntax to the target framework/library
+3. Transform all Tailwind classes to the target styling system while preserving exact visual design
+4. Follow the project's existing patterns and conventions
+DO NOT install any Tailwind as a dependency unless the user instructs you to do so.
+
+
+--- PART ---
+
+Node ids have been added to the code as data attributes, e.g. `data-node-id="1:2"`.
+
+--- PART ---
+
+Image assets are stored on a localhost server. Clients can use these images directly in code as a way to view the image assets the same way they would other remote servers. Images and SVGs will be stored as constants, e.g. const image = 'http://localhost:3845/assets/10c13ac1a228a365cb98a0064b1d5afbc84887b2.png' These constants will be used in the code as the source for the image, e.g. <img src={image} /> This is true for both images and SVGs, so you can use the same approach for both types of assets.

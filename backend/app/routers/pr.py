@@ -52,12 +52,13 @@ async def list_prs(
         await connect_db()
         prisma = get_prisma()
         prs = await prisma.purchaserequest.find_many(
-            include={"items": True, "department": True, "creator": True, "approvals": True},
+            include={"items": True, "department": True, "creator": True, "approvals": True, "quotations": True},
             order={"created_at": "desc"}
         )
         res = []
         for p in prs:
             created_val = getattr(p, 'created_at', getattr(p, 'createdAt', None))
+            linked_quotes_count = len(getattr(p, 'quotations', []) or [])
             res.append({
                 "id": p.id,
                 "title": p.title,
@@ -68,6 +69,18 @@ async def list_prs(
                 "creatorName": p.creator.name if (p.creator and hasattr(p.creator, 'name')) else (getattr(p.creator, 'fullName', p.creatorId) if p.creator else p.creatorId),
                 "estimatedValue": float(p.estimatedValue),
                 "status": p.status,
+                "linkedQuotes": linked_quotes_count,
+                "quotations": [
+                    {
+                        "id": q.id,
+                        "supplierId": q.supplierId,
+                        "totalAmount": float(q.totalAmount),
+                        "unitPrice": round(float(q.totalAmount) / max(1, q.quantity), 2),
+                        "quantity": q.quantity,
+                        "deliveryDays": q.deliveryDays,
+                    }
+                    for q in (getattr(p, 'quotations', []) or [])
+                ],
                 "createdAt": created_val.isoformat() if created_val else None,
                 "items": [
                     {

@@ -58,11 +58,18 @@ export const SourcingView: React.FC<SourcingViewProps> = ({
     return Number(num || 0).toLocaleString('vi-VN') + ' ₫';
   };
 
-  // Figma 9:4001 reference items
-  const awaitingQuotations = approvedPRs.filter((p: any) => p.status === 'APPROVED');
-  const inComparison = approvedPRs.filter((p: any) => 
-    p.status === 'QUOTATION_COMPARISON' || p.status === 'AI_RECOMMENDATION_READY'
+  // Figma 9:4001 reference items & DB items
+  const awaitingQuotations = approvedPRs.filter((p: any) => 
+    p.status === 'APPROVED' && (!p.linkedQuotes || p.linkedQuotes < 2)
   );
+  const inComparison = approvedPRs.filter((p: any) => 
+    p.status === 'QUOTATION_COMPARISON' || 
+    p.status === 'AI_RECOMMENDATION_READY' ||
+    (p.status === 'APPROVED' && p.linkedQuotes >= 2)
+  ).map((p: any) => ({
+    ...p,
+    subtitle: p.subtitle || `${p.linkedQuotes || 2} normalised quotations · ready for comparison & AI analysis`
+  }));
 
   // If no DB items, provide canonical Figma reference items (only after loading completes)
   const displayAwaiting = awaitingQuotations.length > 0 ? awaitingQuotations : (loading ? [] : [
