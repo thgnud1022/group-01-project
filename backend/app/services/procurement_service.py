@@ -1728,6 +1728,7 @@ class ProcurementService:
             include={
                 "quotation": {"include": {"supplier": True}},
                 "purchaseRequest": True,
+                "receivingDocs": True,
                 "creator": True,
             },
             order={"created_at": "desc"},
@@ -1738,12 +1739,27 @@ class ProcurementService:
             qty = p.quantity
             u_price = (tot / Decimal(str(qty))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP) if qty > 0 else Decimal("0.00")
             supp_name = p.quotation.supplier.name if (p.quotation and p.quotation.supplier) else None
+            receivings = getattr(p, "receivingDocs", []) or []
+            total_received = sum(r.receivedQty for r in receivings)
+            pr_status = p.purchaseRequest.status if p.purchaseRequest else None
+            
+            # Determine effective PO status
+            if pr_status == "CLOSED" or p.status == "CLOSED":
+                eff_status = "CLOSED"
+            elif total_received >= qty or p.status == "RECEIVED":
+                eff_status = "RECEIVED"
+            elif total_received > 0 or p.status == "PARTIALLY_RECEIVED":
+                eff_status = "PARTIALLY_RECEIVED"
+            else:
+                eff_status = p.status or "SENT"
+
             results.append({
                 "id": p.id,
                 "poNumber": p.poNumber,
                 "purchaseRequestId": p.purchaseRequestId,
                 "prId": p.purchaseRequestId,
                 "prTitle": p.purchaseRequest.title if p.purchaseRequest else None,
+                "prStatus": pr_status,
                 "quotationId": p.quotationId,
                 "creatorId": p.creatorId,
                 "supplierId": p.quotation.supplierId if p.quotation else None,
@@ -1751,12 +1767,23 @@ class ProcurementService:
                 "totalAmount": float(tot),
                 "quantity": qty,
                 "unitPrice": float(u_price),
-                "status": p.status,
+                "totalReceived": total_received,
+                "remainingQty": max(0, qty - total_received),
+                "status": eff_status,
+                "receivings": [
+                    {
+                        "id": r.id,
+                        "receivedQty": r.receivedQty,
+                        "receivedItems": r.receivedItems,
+                        "receivedDate": r.receivedDate.isoformat() if r.receivedDate else None,
+                        "fileUrl": r.fileUrl,
+                    }
+                    for r in receivings
+                ],
                 "createdAt": p.created_at.isoformat() if p.created_at else None,
                 "created_at": p.created_at.isoformat() if p.created_at else None,
             })
         return results
-
 
     # =========================================================================
     # STEP 3B.6: Goods Receiving Prisma Client Implementation (US-10)
@@ -1773,6 +1800,7 @@ class ProcurementService:
         Create a Goods Receipt record directly in Supabase PostgreSQL via Prisma Client (US-10).
         Enforces:
         - PO MUST exist in PostgreSQL.
+        - PO cannot be in CLOSED status.
         - Row-level lock on PurchaseOrder (SELECT ... FOR UPDATE) inside transaction.
         - REQ-BR-04: Accumulated received quantity (SUM(receivedQty)) CANNOT exceed PO.quantity.
         - Supports valid partial receipts (multiple receipts up to PO.quantity).
@@ -1808,13 +1836,13 @@ class ProcurementService:
         async with prisma.tx() as tx:
             # 1. Row-level lock on PurchaseOrder
             locked_pos = await tx.query_raw(
-                'SELECT id, quantity, "poNumber", status FROM "PurchaseOrder" WHERE id = $1 FOR UPDATE',
+                'SELECT id, quantity, "poNumber", status, "purchaseRequestId" FROM "PurchaseOrder" WHERE id = $1 FOR UPDATE',
                 clean_po_id,
             )
             # Support lookup by poNumber if client passed poNumber instead of UUID
             if not locked_pos:
                 locked_pos = await tx.query_raw(
-                    'SELECT id, quantity, "poNumber", status FROM "PurchaseOrder" WHERE "poNumber" = $1 FOR UPDATE',
+                    'SELECT id, quantity, "poNumber", status, "purchaseRequestId" FROM "PurchaseOrder" WHERE "poNumber" = $1 FOR UPDATE',
                     clean_po_id,
                 )
 
@@ -1824,6 +1852,17 @@ class ProcurementService:
             po_record = locked_pos[0]
             po_db_id = po_record["id"]
             po_max_quantity = int(po_record["quantity"])
+            po_status = po_record.get("status")
+
+            # Check if PO or PR is already closed
+            if po_status == "CLOSED":
+                raise ValueError(f"Không thể nhận hàng: Purchase Order '{clean_po_id}' đã ở trạng thái CLOSED.")
+
+            pr_id_val = po_record.get("purchaseRequestId")
+            if pr_id_val:
+                pr_check = await tx.purchaserequest.find_unique(where={"id": pr_id_val})
+                if pr_check and pr_check.status == "CLOSED":
+                    raise ValueError(f"Không thể nhận hàng: Purchase Request '{pr_id_val}' đã ở trạng thái CLOSED.")
 
             # 2. Query accumulated received quantity in PostgreSQL
             existing_receivings = await tx.receiving.find_many(
@@ -1847,6 +1886,13 @@ class ProcurementService:
                     "fileUrl": clean_file_url,
                 }
             )
+
+            # 5. If fully received, update PO status to RECEIVED
+            if total_already_received + qty >= po_max_quantity:
+                await tx.purchaseorder.update(
+                    where={"id": po_db_id},
+                    data={"status": "RECEIVED"}
+                )
 
         return {
             "id": created_rec.id,
@@ -2024,9 +2070,13 @@ class ProcurementService:
                 }
             )
 
-            # 6. Update PurchaseRequest status to CLOSED
+            # 6. Update PurchaseRequest and PurchaseOrder status to CLOSED
             updated_pr = await tx.purchaserequest.update(
                 where={"id": clean_pr_id},
+                data={"status": "CLOSED"}
+            )
+            await tx.purchaseorder.update(
+                where={"id": po_id},
                 data={"status": "CLOSED"}
             )
 
