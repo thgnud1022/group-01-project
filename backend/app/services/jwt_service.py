@@ -97,11 +97,17 @@ class SupabaseJWTService:
         if not kid:
             raise JWTVerificationError("Token thiếu trường 'kid' (Key ID) trong header.")
 
-        # 2. Retrieve public key from JWKS
+        # 2. Retrieve public key from JWKS (with cache refresh fallback on miss)
         try:
             signing_key = self._jwks_client.get_signing_key_from_jwt(clean_token)
-        except PyJWKClientError as e:
-            raise JWTVerificationError(f"Không thể lấy khóa công khai từ JWKS cho kid '{kid}': {str(e)}")
+        except PyJWKClientError:
+            try:
+                self._jwks_client.get_signing_keys(refresh=True)
+                signing_key = self._jwks_client.get_signing_key_from_jwt(clean_token)
+            except PyJWKClientError as e:
+                raise JWTVerificationError(f"Không thể lấy khóa công khai từ JWKS cho kid '{kid}': {str(e)}")
+            except Exception as e:
+                raise JWTVerificationError(f"Lỗi khi tra cứu khóa ký từ JWKS: {str(e)}")
         except Exception as e:
             raise JWTVerificationError(f"Lỗi khi tra cứu khóa ký từ JWKS: {str(e)}")
 

@@ -16,6 +16,7 @@ class QuotationCreateSchema(BaseModel):
     deliveryDays: int = 3
     warrantyTerms: Optional[str] = None
     fileUrl: str = "quotes/default.pdf"
+    validUntil: Optional[str] = None
 
 class CompareRequest(BaseModel):
     purchaseRequestId: str
@@ -36,6 +37,7 @@ async def create_quotation(
     - Supplier exists (T-053 Integrity)
     - quantity > 0, totalAmount > 0
     - Derived Decimal unitPrice
+    - Optional validUntil date
     """
     try:
         return await ProcurementService.create_quotation_prisma(
@@ -46,6 +48,7 @@ async def create_quotation(
             delivery_days=payload.deliveryDays,
             warranty_terms=payload.warrantyTerms,
             file_url=payload.fileUrl,
+            valid_until=payload.validUntil,
         )
     except PermissionError as e:
         raise HTTPException(status_code=403, detail=str(e))
@@ -94,6 +97,7 @@ async def compare_quotations(
     Compare quotations for a PR reading directly from Supabase PostgreSQL (T-061).
     Zero MockDB read/write, zero external LLM dependencies.
     Human Decision K-2: Accessible to all authenticated users.
+    HD-17 Guard: Enforces minimum 2 quotations.
     """
     try:
         comparisons = await ProcurementService.compare_quotations_prisma(payload.purchaseRequestId)
@@ -104,4 +108,6 @@ async def compare_quotations(
     except PermissionError as e:
         raise HTTPException(status_code=403, detail=str(e))
     except ValueError as e:
+        if "Không tìm thấy" in str(e):
+            raise HTTPException(status_code=404, detail=str(e))
         raise HTTPException(status_code=400, detail=str(e))

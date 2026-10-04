@@ -13,6 +13,7 @@ import { EditLockedModal } from './components/EditLockedModal';
 import { SourcingView } from './components/SourcingView';
 import { SuppliersView } from './components/SuppliersView';
 import { CollectQuotationsView } from './components/CollectQuotationsView';
+import { ComparisonView } from './components/ComparisonView';
 import { 
   Sparkles, 
   Send, 
@@ -34,6 +35,7 @@ export default function App() {
   const [editMode, setEditMode] = useState<boolean>(false);
   const [editAfterRevisionMode, setEditAfterRevisionMode] = useState<boolean>(false);
   const [collectingQuotationsPR, setCollectingQuotationsPR] = useState<any | null>(null);
+  const [comparingPR, setComparingPR] = useState<any | null>(null);
 
   // System message banner
   const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
@@ -107,6 +109,7 @@ export default function App() {
     setEditMode(false);
     setEditAfterRevisionMode(false);
     setCollectingQuotationsPR(null);
+    setComparingPR(null);
     setCurrentTab('purchase-requests');
   };
 
@@ -168,7 +171,8 @@ export default function App() {
   // Flow C/D: AI Quotation Recommendation (P0-04 fixed)
   const handleAICompare = async (prId: string) => {
     try {
-      const quotes = await api.compareQuotations(prId);
+      const res = await api.compareQuotations(prId);
+      const quotes = res?.comparisons || (Array.isArray(res) ? res : []);
       setComparedQuotations(quotes);
       if (quotes.length > 0) {
         const reco = await api.recommendQuotations({
@@ -266,6 +270,9 @@ export default function App() {
         setCurrentTab(tab);
         setSelectedPR(null);
         setEditMode(false);
+        setEditAfterRevisionMode(false);
+        setCollectingQuotationsPR(null);
+        setComparingPR(null);
       }}
       user={user}
       onLogout={handleLogout}
@@ -537,9 +544,25 @@ export default function App() {
         )
       )}
 
-      {/* SCREEN 5: Sourcing (Figma 9:4001) / Collect Quotations (Figma 9:4163) */}
+      {/* SCREEN 5: Sourcing (Figma 9:4001) / Collect Quotations (Figma 9:4163) / Comparison (Figma 9:4373 & 9:4790) */}
       {currentTab === 'sourcing' && (
-        collectingQuotationsPR ? (
+        comparingPR ? (
+          <ComparisonView
+            prId={comparingPR.id}
+            prData={comparingPR}
+            user={user}
+            onBack={() => setComparingPR(null)}
+            onCollectQuotations={(pr) => {
+              setComparingPR(null);
+              setCollectingQuotationsPR(pr);
+            }}
+            onViewRequest={(pr) => {
+              setComparingPR(null);
+              setSelectedPR(pr);
+              setCurrentTab('purchase-requests');
+            }}
+          />
+        ) : collectingQuotationsPR ? (
           <CollectQuotationsView
             prId={collectingQuotationsPR.id}
             prData={collectingQuotationsPR}
@@ -549,8 +572,8 @@ export default function App() {
               setCollectingQuotationsPR(null);
               setCurrentTab(tab as NavItemKey);
             }}
-            onProceedToComparison={(_prId) => {
-              setMessage({ type: 'info', text: 'Chuyển sang bước so sánh báo giá (Comparison) — Phase 4C.' });
+            onProceedToComparison={(prId) => {
+              setComparingPR(collectingQuotationsPR || { id: prId });
             }}
           />
         ) : (
@@ -563,6 +586,9 @@ export default function App() {
             }}
             onCollectQuotations={(pr) => {
               setCollectingQuotationsPR(pr);
+            }}
+            onCompareQuotations={(pr) => {
+              setComparingPR(pr);
             }}
           />
         )

@@ -309,6 +309,7 @@ class ApiClient {
     deliveryDays: number;
     warrantyTerms?: string;
     fileUrl?: string;
+    validUntil?: string;
   }) {
     return this.request<any>('/api/quotations', {
       method: 'POST',
@@ -317,7 +318,7 @@ class ApiClient {
   }
 
   public async compareQuotations(purchaseRequestId: string) {
-    return this.request<any[]>('/api/quotations/compare', {
+    return this.request<{ purchaseRequestId: string; comparisons: any[] }>('/api/quotations/compare', {
       method: 'POST',
       body: JSON.stringify({ purchaseRequestId }),
     });

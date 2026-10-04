@@ -449,6 +449,549 @@ class ProcurementService:
         }
 
     @staticmethod
+    async def reject_pr_prisma(
+        pr_id: str,
+        current_user: Optional[Union[AuthenticatedUser, str]] = None,
+        comments: Optional[str] = None,
+        approver_email: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """
+        Prisma Client Python implementation for PR rejection directly in Supabase PostgreSQL.
+        Enforces:
+        - REQ-FR-06 & US-04 AC2: Manager/Finance/Admin can reject PR with mandatory reason.
+        - HD-12: Acting approver identity resolved from JWT/DB authenticated user.
+        - GOV-01: No Self-Action check (approver != creator).
+        - HD-REQ-10: Status Guard (only permitted in PENDING_MANAGER_APPROVAL or PENDING_FINANCE_APPROVAL).
+        - Atomic transaction using prisma.tx() with row lock (SELECT ... FOR UPDATE).
+        - Releases tempReservedAmount from Budget upon rejection.
+        - Persists Approval record with decision="REJECTED" and mandatory comments.
+        - Transitions PR status to REJECTED.
+        """
+        if not pr_id or not isinstance(pr_id, str) or not pr_id.strip():
+            raise ValueError("Mã PR không hợp lệ hoặc rỗng.")
+        clean_pr_id = pr_id.strip()
+
+        if not comments or not isinstance(comments, str) or not comments.strip():
+            raise ValueError("Lý do từ chối là bắt buộc (US-04 AC2).")
+        clean_comments = comments.strip()
+
+        await connect_db()
+        prisma = get_prisma()
+
+        async with prisma.tx() as tx:
+            # 1. Lock PurchaseRequest row with SELECT ... FOR UPDATE
+            locked_prs = await tx.query_raw(
+                'SELECT id, status, "creatorId", "departmentId", "estimatedValue" FROM "PurchaseRequest" WHERE id = $1 FOR UPDATE',
+                clean_pr_id,
+            )
+            if not locked_prs:
+                raise ValueError(f"Không tìm thấy mã PR {clean_pr_id}")
+
+            current_pr = locked_prs[0]
+            current_status = current_pr["status"]
+            pr_creator_id = current_pr["creatorId"]
+            dept_id = current_pr["departmentId"]
+            estimated_val = Decimal(str(current_pr["estimatedValue"]))
+
+            # 2. HD-REQ-10: Status Guard
+            if current_status not in ["PENDING_MANAGER_APPROVAL", "PENDING_FINANCE_APPROVAL"]:
+                raise ValueError(
+                    f"PR đang ở trạng thái '{current_status}', không thể thực hiện từ chối."
+                )
+
+            # 3. HD-12: Resolve approver identity & role
+            if isinstance(current_user, AuthenticatedUser):
+                approver_id = current_user.id
+                approver_role = current_user.role
+            elif isinstance(current_user, str) and current_user.strip():
+                ident = current_user.strip()
+                if "@" in ident:
+                    user = await tx.user.find_unique(where={"email": ident.lower()})
+                else:
+                    user = await tx.user.find_unique(where={"id": ident})
+                if not user:
+                    raise ValueError(f"Không tìm thấy người dùng '{ident}'.")
+                approver_id = user.id
+                approver_role = str(user.role)
+            elif approver_email and approver_email.strip():
+                clean_email = approver_email.strip().lower()
+                user = await tx.user.find_unique(where={"email": clean_email})
+                if not user:
+                    raise ValueError(f"Không tìm thấy người dùng với email '{clean_email}'.")
+                approver_id = user.id
+                approver_role = str(user.role)
+            else:
+                raise ValueError("Không xác định được danh tính người từ chối.")
+
+            # 4. Role Authorization
+            if approver_role not in ["MANAGER", "FINANCE", "ADMIN"]:
+                raise AuthorizationError("Chỉ Manager, Finance hoặc Admin mới có quyền từ chối PR.")
+
+            # 5. GOV-01: No Self-Action check
+            if approver_id == pr_creator_id:
+                raise AuthorizationError(
+                    "Không thể từ chối PR do chính mình tạo (No Self-Approval — GOV-01)."
+                )
+
+            # 6. Release Budget tempReservedAmount if budget exists
+            budget = await tx.budget.find_first(
+                where={"departmentId": dept_id, "fiscalYear": 2026, "quarter": 1}
+            )
+            if budget:
+                new_reserved = max(Decimal("0.00"), budget.tempReservedAmount - estimated_val)
+                await tx.budget.update(
+                    where={"id": budget.id},
+                    data={"tempReservedAmount": new_reserved},
+                )
+
+            # 7. Insert Approval record with decision="REJECTED"
+            await tx.approval.create(
+                data={
+                    "purchaseRequestId": clean_pr_id,
+                    "approverId": approver_id,
+                    "decision": "REJECTED",
+                    "comments": clean_comments,
+                }
+            )
+
+            # 8. Update PurchaseRequest status to REJECTED
+            await tx.purchaserequest.update(
+                where={"id": clean_pr_id},
+                data={"status": "REJECTED"},
+            )
+
+        # 9. Query updated PurchaseRequest from PostgreSQL
+        pr = await prisma.purchaserequest.find_unique(
+            where={"id": clean_pr_id},
+            include={
+                "items": True,
+                "approvals": {
+                    "include": {"approver": True},
+                    "order_by": {"created_at": "asc"},
+                },
+            },
+        )
+        if not pr:
+            raise ValueError(f"Không thể truy vấn PR sau khi từ chối: {clean_pr_id}")
+
+        return {
+            "id": pr.id,
+            "title": pr.title,
+            "description": pr.description,
+            "departmentId": pr.departmentId,
+            "creatorId": pr.creatorId,
+            "estimatedValue": float(pr.estimatedValue),
+            "status": pr.status,
+            "items": [
+                {
+                    "id": it.id,
+                    "itemName": it.itemName,
+                    "quantity": it.quantity,
+                    "estimatedUnitPrice": float(it.estimatedUnitPrice),
+                }
+                for it in pr.items
+            ],
+            "approvals": [
+                {
+                    "id": app.id,
+                    "purchaseRequestId": app.purchaseRequestId,
+                    "approverId": app.approverId,
+                    "decision": app.decision,
+                    "comments": app.comments,
+                    "createdAt": app.created_at.isoformat() if app.created_at else None,
+                    "step": app.approver.role if app.approver else "MANAGER",
+                    "approver": app.approver.name if app.approver else "Approver",
+                }
+                for app in pr.approvals
+            ],
+        }
+
+    @staticmethod
+    async def request_revision_prisma(
+        pr_id: str,
+        current_user: Optional[Union[AuthenticatedUser, str]] = None,
+        comments: Optional[str] = None,
+        approver_email: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """
+        Request Revision flow implemented with Prisma Client Python in Supabase PostgreSQL (HD-16).
+        Enforces:
+        - REQ-FR-06, US-03 AC3, US-04 AC2: Manager/Finance/Admin can request revision with mandatory comment/reason.
+        - HD-12: Acting approver identity resolved from JWT/DB authenticated user.
+        - GOV-01: No Self-Action check (approver != creator).
+        - Status Guard: Only permitted from PENDING_MANAGER_APPROVAL or PENDING_FINANCE_APPROVAL.
+        - Rejection of invalid states: APPROVED, REJECTED, PO_CREATED, CLOSED, REVISION_REQUIRED.
+        - Releases tempReservedAmount from Budget so funds are not locked during revision drafting.
+        - Persists Approval record with decision="REVISION_REQUIRED" and approver comments.
+        - Transitions PR status to REVISION_REQUIRED.
+        """
+        if not pr_id or not isinstance(pr_id, str) or not pr_id.strip():
+            raise ValueError("Mã PR không hợp lệ hoặc rỗng.")
+        clean_pr_id = pr_id.strip()
+
+        if not comments or not isinstance(comments, str) or not comments.strip():
+            raise ValueError("Lý do yêu cầu chỉnh sửa là bắt buộc (US-04 AC2 / HD-16).")
+        clean_comments = comments.strip()
+
+        await connect_db()
+        prisma = get_prisma()
+
+        async with prisma.tx() as tx:
+            # 1. Lock PurchaseRequest row with SELECT ... FOR UPDATE
+            locked_prs = await tx.query_raw(
+                'SELECT id, status, "creatorId", "departmentId", "estimatedValue" FROM "PurchaseRequest" WHERE id = $1 FOR UPDATE',
+                clean_pr_id,
+            )
+            if not locked_prs:
+                raise ValueError(f"Không tìm thấy mã PR {clean_pr_id}")
+
+            current_pr = locked_prs[0]
+            current_status = current_pr["status"]
+            pr_creator_id = current_pr["creatorId"]
+            dept_id = current_pr["departmentId"]
+            estimated_val = Decimal(str(current_pr["estimatedValue"]))
+
+            # 2. Status Guard (HD-16 / Section 7)
+            if current_status not in ["PENDING_MANAGER_APPROVAL", "PENDING_FINANCE_APPROVAL"]:
+                raise ValueError(
+                    f"PR đang ở trạng thái '{current_status}', không thể thực hiện yêu cầu chỉnh sửa."
+                )
+
+            # 3. Resolve approver identity & role
+            if isinstance(current_user, AuthenticatedUser):
+                approver_id = current_user.id
+                approver_role = current_user.role
+            elif isinstance(current_user, str) and current_user.strip():
+                ident = current_user.strip()
+                if "@" in ident:
+                    user = await tx.user.find_unique(where={"email": ident.lower()})
+                else:
+                    user = await tx.user.find_unique(where={"id": ident})
+                if not user:
+                    raise ValueError(f"Không tìm thấy người dùng '{ident}'.")
+                approver_id = user.id
+                approver_role = str(user.role)
+            elif approver_email and approver_email.strip():
+                clean_email = approver_email.strip().lower()
+                user = await tx.user.find_unique(where={"email": clean_email})
+                if not user:
+                    raise ValueError(f"Không tìm thấy người dùng với email '{clean_email}'.")
+                approver_id = user.id
+                approver_role = str(user.role)
+            else:
+                raise ValueError("Không xác định được danh tính người yêu cầu chỉnh sửa.")
+
+            # 4. Role Authorization (MANAGER, FINANCE, ADMIN only)
+            if approver_role not in ["MANAGER", "FINANCE", "ADMIN"]:
+                raise AuthorizationError("Chỉ Manager, Finance hoặc Admin mới có quyền yêu cầu chỉnh sửa PR.")
+
+            # 5. GOV-01: No Self-Action check
+            if approver_id == pr_creator_id:
+                raise AuthorizationError(
+                    "Không thể yêu cầu chỉnh sửa PR do chính mình tạo (No Self-Approval — GOV-01)."
+                )
+
+            # 6. Release Budget tempReservedAmount while in revision drafting
+            budget = await tx.budget.find_first(
+                where={"departmentId": dept_id, "fiscalYear": 2026, "quarter": 1}
+            )
+            if budget:
+                new_reserved = max(Decimal("0.00"), budget.tempReservedAmount - estimated_val)
+                await tx.budget.update(
+                    where={"id": budget.id},
+                    data={"tempReservedAmount": new_reserved},
+                )
+
+            # 7. Insert Approval record with decision="REVISION_REQUIRED"
+            await tx.approval.create(
+                data={
+                    "purchaseRequestId": clean_pr_id,
+                    "approverId": approver_id,
+                    "decision": "REVISION_REQUIRED",
+                    "comments": clean_comments,
+                }
+            )
+
+            # 8. Update PurchaseRequest status to REVISION_REQUIRED
+            await tx.purchaserequest.update(
+                where={"id": clean_pr_id},
+                data={"status": "REVISION_REQUIRED"},
+            )
+
+        # 9. Query updated PurchaseRequest from PostgreSQL
+        pr = await prisma.purchaserequest.find_unique(
+            where={"id": clean_pr_id},
+            include={
+                "items": True,
+                "approvals": {
+                    "include": {"approver": True},
+                    "order_by": {"created_at": "asc"},
+                },
+            },
+        )
+        if not pr:
+            raise ValueError(f"Không thể truy vấn PR sau khi yêu cầu chỉnh sửa: {clean_pr_id}")
+
+        return {
+            "id": pr.id,
+            "title": pr.title,
+            "description": pr.description,
+            "departmentId": pr.departmentId,
+            "creatorId": pr.creatorId,
+            "estimatedValue": float(pr.estimatedValue),
+            "status": pr.status,
+            "items": [
+                {
+                    "id": it.id,
+                    "itemName": it.itemName,
+                    "quantity": it.quantity,
+                    "estimatedUnitPrice": float(it.estimatedUnitPrice),
+                }
+                for it in pr.items
+            ],
+            "approvals": [
+                {
+                    "id": app.id,
+                    "purchaseRequestId": app.purchaseRequestId,
+                    "approverId": app.approverId,
+                    "decision": app.decision,
+                    "comments": app.comments,
+                    "createdAt": app.created_at.isoformat() if app.created_at else None,
+                    "step": app.approver.role if app.approver else "MANAGER",
+                    "approver": app.approver.name if app.approver else "Approver",
+                }
+                for app in pr.approvals
+            ],
+        }
+
+    @staticmethod
+    async def resubmit_pr_prisma(
+        pr_id: str,
+        current_user: Optional[Union[AuthenticatedUser, str]] = None,
+        title: Optional[str] = None,
+        description: Optional[str] = None,
+        items: Optional[List[Dict[str, Any]]] = None,
+        comments: Optional[str] = None,
+        actor_email: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """
+        Resubmit PR flow implemented with Prisma Client Python in Supabase PostgreSQL (HD-16).
+        Enforces:
+        - Only PR with status == REVISION_REQUIRED can be resubmitted.
+        - Only the PR creator (or authorized admin) can resubmit.
+        - Identity verified from JWT / application user.
+        - Re-validates data and recalculates total estimated value.
+        - Budget consistency: Atomically checks available budget (allocated - spent - current_reserved)
+          and reserves the new estimatedValue.
+        - Deletes old PRItems and inserts updated PRItems.
+        - Inserts an Approval record with decision="RESUBMITTED" preserving complete history.
+        - Transitions status to PENDING_MANAGER_APPROVAL.
+        """
+        if not pr_id or not isinstance(pr_id, str) or not pr_id.strip():
+            raise ValueError("Mã PR không hợp lệ hoặc rỗng.")
+        clean_pr_id = pr_id.strip()
+
+        await connect_db()
+        prisma = get_prisma()
+
+        async with prisma.tx() as tx:
+            # 1. Lock PurchaseRequest row with SELECT ... FOR UPDATE
+            locked_prs = await tx.query_raw(
+                'SELECT id, status, title, description, "creatorId", "departmentId", "estimatedValue" FROM "PurchaseRequest" WHERE id = $1 FOR UPDATE',
+                clean_pr_id,
+            )
+            if not locked_prs:
+                raise ValueError(f"Không tìm thấy mã PR {clean_pr_id}")
+
+            current_pr = locked_prs[0]
+            current_status = current_pr["status"]
+            pr_creator_id = current_pr["creatorId"]
+            dept_id = current_pr["departmentId"]
+
+            # 2. Status Guard: Must be REVISION_REQUIRED
+            if current_status != "REVISION_REQUIRED":
+                raise ValueError(
+                    f"Chỉ PR ở trạng thái 'REVISION_REQUIRED' mới có thể gửi lại (trạng thái hiện tại: '{current_status}')."
+                )
+
+            # 3. Resolve actor identity & role
+            if isinstance(current_user, AuthenticatedUser):
+                actor_id = current_user.id
+                actor_role = current_user.role
+            elif isinstance(current_user, str) and current_user.strip():
+                ident = current_user.strip()
+                if "@" in ident:
+                    user = await tx.user.find_unique(where={"email": ident.lower()})
+                else:
+                    user = await tx.user.find_unique(where={"id": ident})
+                if not user:
+                    raise ValueError(f"Không tìm thấy người dùng '{ident}'.")
+                actor_id = user.id
+                actor_role = str(user.role)
+            elif actor_email and actor_email.strip():
+                clean_email = actor_email.strip().lower()
+                user = await tx.user.find_unique(where={"email": clean_email})
+                if not user:
+                    raise ValueError(f"Không tìm thấy người dùng với email '{clean_email}'.")
+                actor_id = user.id
+                actor_role = str(user.role)
+            else:
+                raise ValueError("Không xác định được danh tính người gửi lại yêu cầu.")
+
+            # 4. Authorization: Only the original creator or ADMIN may resubmit
+            if actor_id != pr_creator_id and actor_role != "ADMIN":
+                raise AuthorizationError(
+                    "Chỉ người tạo PR mới có quyền chỉnh sửa và gửi lại yêu cầu (HD-16 / Resubmit Authorization)."
+                )
+
+            # 5. Process and validate updated items
+            final_title = title.strip() if (title and isinstance(title, str) and title.strip()) else current_pr["title"]
+            final_desc = description.strip() if (description and isinstance(description, str)) else current_pr["description"]
+
+            if items is not None:
+                if not items or len(items) == 0:
+                    raise ValueError("Danh mục hàng hóa không được để trống khi gửi lại.")
+                
+                new_items_data = []
+                total_estimated = Decimal("0.00")
+                for it in items:
+                    name = it.get("itemName") or it.get("name")
+                    if not name or not str(name).strip():
+                        raise ValueError("Tên mặt hàng không được để trống.")
+                    qty = int(it.get("quantity") or 0)
+                    if qty <= 0:
+                        raise ValueError(f"Số lượng cho '{name}' phải lớn hơn 0.")
+                    unit_price = Decimal(str(it.get("estimatedUnitPrice") or it.get("unitPrice") or 0))
+                    if unit_price <= 0:
+                        raise ValueError(f"Đơn giá cho '{name}' phải lớn hơn 0.")
+                    
+                    total_estimated += unit_price * qty
+                    new_items_data.append({
+                        "purchaseRequestId": clean_pr_id,
+                        "itemName": str(name).strip(),
+                        "quantity": qty,
+                        "estimatedUnitPrice": unit_price,
+                    })
+            else:
+                # Keep existing items, recalculate total from DB
+                existing_items = await tx.pritem.find_many(where={"purchaseRequestId": clean_pr_id})
+                if not existing_items:
+                    raise ValueError("Không tìm thấy mặt hàng nào trong PR để gửi lại.")
+                total_estimated = sum(Decimal(str(it.estimatedUnitPrice)) * it.quantity for it in existing_items)
+                new_items_data = None
+
+            # 6. Budget Check & Reservation (HD-REQ-08: fiscalYear=2026, quarter=1)
+            rows = await tx.query_raw(
+                'SELECT id, "allocatedAmount", "spentAmount", "tempReservedAmount" '
+                'FROM "Budget" '
+                'WHERE "departmentId" = $1 AND "fiscalYear" = $2 AND quarter = $3 '
+                'FOR UPDATE',
+                dept_id,
+                ACTIVE_BUDGET_FISCAL_YEAR,
+                ACTIVE_BUDGET_QUARTER,
+            )
+            if not rows:
+                raise ValueError(
+                    f"Không tìm thấy ngân sách khả dụng cho phòng ban '{dept_id}' "
+                    f"trong kỳ tài chính Năm {ACTIVE_BUDGET_FISCAL_YEAR} - Quý {ACTIVE_BUDGET_QUARTER}."
+                )
+
+            budget_row = rows[0]
+            budget_id = budget_row["id"]
+            allocated = Decimal(str(budget_row["allocatedAmount"]))
+            spent = Decimal(str(budget_row["spentAmount"]))
+            current_reserved = Decimal(str(budget_row["tempReservedAmount"]))
+            available = allocated - spent - current_reserved
+
+            if total_estimated > available:
+                raise ValueError(
+                    f"Gửi lại PR thất bại: Giá trị ước tính mới ({total_estimated:,.0f}đ) vượt quá "
+                    f"Ngân sách khả dụng còn lại ({available:,.0f}đ)."
+                )
+
+            # Atomically reserve budget for resubmitted PR
+            new_reserved = current_reserved + total_estimated
+            await tx.budget.update(
+                where={"id": budget_id},
+                data={"tempReservedAmount": new_reserved},
+            )
+
+            # 7. Update PR items if provided
+            if new_items_data is not None:
+                await tx.pritem.delete_many(where={"purchaseRequestId": clean_pr_id})
+                for it_data in new_items_data:
+                    await tx.pritem.create(data=it_data)
+
+            # 8. Record Approval history for resubmission
+            resubmit_comment = comments.strip() if (comments and isinstance(comments, str) and comments.strip()) else "Đã chỉnh sửa và gửi lại yêu cầu"
+            await tx.approval.create(
+                data={
+                    "purchaseRequestId": clean_pr_id,
+                    "approverId": actor_id,
+                    "decision": "RESUBMITTED",
+                    "comments": resubmit_comment,
+                }
+            )
+
+            # 9. Update PurchaseRequest status to PENDING_MANAGER_APPROVAL
+            await tx.purchaserequest.update(
+                where={"id": clean_pr_id},
+                data={
+                    "title": final_title,
+                    "description": final_desc,
+                    "estimatedValue": total_estimated,
+                    "status": "PENDING_MANAGER_APPROVAL",
+                },
+            )
+
+        # 10. Query updated PurchaseRequest from PostgreSQL
+        pr = await prisma.purchaserequest.find_unique(
+            where={"id": clean_pr_id},
+            include={
+                "items": True,
+                "approvals": {
+                    "include": {"approver": True},
+                    "order_by": {"created_at": "asc"},
+                },
+            },
+        )
+        if not pr:
+            raise ValueError(f"Không thể truy vấn PR sau khi gửi lại: {clean_pr_id}")
+
+        return {
+            "id": pr.id,
+            "title": pr.title,
+            "description": pr.description,
+            "departmentId": pr.departmentId,
+            "creatorId": pr.creatorId,
+            "estimatedValue": float(pr.estimatedValue),
+            "status": pr.status,
+            "items": [
+                {
+                    "id": it.id,
+                    "itemName": it.itemName,
+                    "quantity": it.quantity,
+                    "estimatedUnitPrice": float(it.estimatedUnitPrice),
+                }
+                for it in pr.items
+            ],
+            "approvals": [
+                {
+                    "id": app.id,
+                    "purchaseRequestId": app.purchaseRequestId,
+                    "approverId": app.approverId,
+                    "decision": app.decision,
+                    "comments": app.comments,
+                    "createdAt": app.created_at.isoformat() if app.created_at else None,
+                    "step": app.approver.role if app.approver else "MANAGER",
+                    "approver": app.approver.name if app.approver else "Approver",
+                }
+                for app in pr.approvals
+            ],
+        }
+
+
+    @staticmethod
     def approve_pr(pr_id: str, approver_role: str, approver_name: str, comments: str) -> Dict[str, Any]:
         pr = db.prs.get(pr_id)
         if not pr:
@@ -591,6 +1134,8 @@ class ProcurementService:
             "is_anomaly": q.isAnomaly,
             "anomalyReason": q.anomalyReason,
             "anomaly_reason": q.anomalyReason,
+            "validUntil": q.validUntil.isoformat() if getattr(q, "validUntil", None) else None,
+            "valid_until": q.validUntil.isoformat() if getattr(q, "validUntil", None) else None,
             "createdAt": q.created_at.isoformat() if q.created_at else None,
             "created_at": q.created_at.isoformat() if q.created_at else None,
         }
@@ -604,6 +1149,7 @@ class ProcurementService:
         delivery_days: int = 3,
         warranty_terms: Optional[str] = None,
         file_url: str = "quotes/default.pdf",
+        valid_until: Optional[Any] = None,
     ) -> Dict[str, Any]:
         """
         Create a new Quotation directly in Supabase PostgreSQL via Prisma Client.
@@ -613,6 +1159,7 @@ class ProcurementService:
         - Commercial Validation: quantity > 0 (int), total_amount > 0 (Decimal), delivery_days >= 0 (int).
         - Derived unitPrice computed as Decimal with ROUND_HALF_UP.
         - HRD-03: fileUrl string persistence (binary upload deferred).
+        - HD-17: validUntil DateTime persistence for expiry tracking.
         - Atomic transaction using prisma.tx() with PR row lock (SELECT ... FOR UPDATE).
         """
         if not purchase_request_id or not isinstance(purchase_request_id, str) or not purchase_request_id.strip():
@@ -650,6 +1197,17 @@ class ProcurementService:
 
         clean_warranty = warranty_terms.strip() if (warranty_terms and isinstance(warranty_terms, str) and warranty_terms.strip()) else None
 
+        parsed_valid_until = None
+        if valid_until:
+            if isinstance(valid_until, datetime):
+                parsed_valid_until = valid_until
+            elif isinstance(valid_until, str) and valid_until.strip():
+                try:
+                    clean_dt_str = valid_until.strip().replace("Z", "+00:00")
+                    parsed_valid_until = datetime.fromisoformat(clean_dt_str)
+                except Exception:
+                    parsed_valid_until = None
+
         await connect_db()
         prisma = get_prisma()
 
@@ -683,6 +1241,7 @@ class ProcurementService:
                     "deliveryDays": del_days,
                     "warrantyTerms": clean_warranty,
                     "fileUrl": clean_file_url,
+                    "validUntil": parsed_valid_until,
                 }
             )
 
@@ -749,6 +1308,7 @@ class ProcurementService:
         Reads real database records, joins Supplier, calculates derived unitPrice,
         and computes price comparison and anomaly detection deterministically.
         Zero MockDB writes, zero LLM calls (TASK-009 boundary preserved).
+        HD-17 Guard: Enforces minimum 2 quotations (len(quotes) >= 2).
         """
         if not purchase_request_id or not isinstance(purchase_request_id, str) or not purchase_request_id.strip():
             raise ValueError("Mã Purchase Request không hợp lệ hoặc rỗng.")
@@ -763,8 +1323,9 @@ class ProcurementService:
             include={"supplier": True},
             order={"created_at": "asc"},
         )
-        if not quotes:
-            raise ValueError(f"Chưa có báo giá nào cho Purchase Request {clean_pr_id} trong cơ sở dữ liệu để so sánh.")
+        if not quotes or len(quotes) < 2:
+            quote_count = len(quotes) if quotes else 0
+            raise ValueError(f"Cần tối thiểu 2 báo giá để thực hiện so sánh (hiện có: {quote_count}).")
 
         # Deterministic comparison calculation
         prices = [Decimal(str(q.totalAmount)) / Decimal(str(q.quantity)) for q in quotes]

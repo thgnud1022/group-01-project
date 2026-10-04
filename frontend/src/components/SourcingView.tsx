@@ -17,6 +17,7 @@ interface SourcingViewProps {
   onNavigateTab?: (tab: string) => void;
   onSelectPR?: (pr: any) => void;
   onCollectQuotations?: (pr: any) => void;
+  onCompareQuotations?: (pr: any) => void;
 }
 
 export const SourcingView: React.FC<SourcingViewProps> = ({
@@ -24,6 +25,7 @@ export const SourcingView: React.FC<SourcingViewProps> = ({
   onNavigateTab,
   onSelectPR,
   onCollectQuotations,
+  onCompareQuotations,
 }) => {
   const [approvedPRs, setApprovedPRs] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -62,8 +64,8 @@ export const SourcingView: React.FC<SourcingViewProps> = ({
     p.status === 'QUOTATION_COMPARISON' || p.status === 'AI_RECOMMENDATION_READY'
   );
 
-  // If no DB items, provide canonical Figma reference items
-  const displayAwaiting = awaitingQuotations.length > 0 ? awaitingQuotations : [
+  // If no DB items, provide canonical Figma reference items (only after loading completes)
+  const displayAwaiting = awaitingQuotations.length > 0 ? awaitingQuotations : (loading ? [] : [
     {
       id: 'PR-2026-040',
       title: 'Ergonomic task chairs (20 units)',
@@ -74,9 +76,9 @@ export const SourcingView: React.FC<SourcingViewProps> = ({
       linkedQuotes: 0,
       neededQuotes: 3,
     }
-  ];
+  ]);
 
-  const displayComparison = inComparison.length > 0 ? inComparison : [
+  const displayComparison = inComparison.length > 0 ? inComparison : (loading ? [] : [
     {
       id: 'PR-2026-039',
       title: 'Printer toner — bulk replenishment',
@@ -89,7 +91,7 @@ export const SourcingView: React.FC<SourcingViewProps> = ({
       status: 'AI_RECOMMENDATION_READY',
       subtitle: '3 normalised quotations · assistant analysis available',
     }
-  ];
+  ]);
 
   return (
     <div 
@@ -255,7 +257,7 @@ export const SourcingView: React.FC<SourcingViewProps> = ({
                     alignItems: 'center',
                     gap: '6px',
                   }}
-                  data-testid="collect-quotations-btn"
+                  data-testid={`collect-quotations-btn-${pr.id}`}
                   onClick={() => {
                     if (onCollectQuotations) {
                       onCollectQuotations(pr);
@@ -338,7 +340,11 @@ export const SourcingView: React.FC<SourcingViewProps> = ({
                   }}
                   data-testid={`compare-btn-${item.id}`}
                   onClick={() => {
-                    if (onSelectPR) onSelectPR(item);
+                    if (onCompareQuotations) {
+                      onCompareQuotations(item);
+                    } else if (onSelectPR) {
+                      onSelectPR(item);
+                    }
                   }}
                 >
                   <span>Compare</span>

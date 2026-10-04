@@ -578,4 +578,23 @@ This log records the authoritative architectural and business decisions for the 
 - **Date:** 2026-10-01
 - **Owner:** Group 01
 
+---
+
+### HD-17: Quotation Comparison Governance & Precondition Rules (Phase 4C)
+- **Context:**
+  - Triển khai Phase 4C — Comparison nối tiếp từ Phase 4B (Collect Quotations) sang So sánh báo giá trước khi chuyển sang Phase 4D (AI Analysis).
+  - Cần xác định source of truth giữa backend database authority, các màn hình Figma (`9:4373` Comparison Not Ready, `9:4790` Comparison + Expiry Warning), quy tắc anomaly và quy tắc tính điểm/hạn báo giá.
+- **Approved Decisions:**
+  1. **Deterministic Multi-Criteria Comparison:** Giữ so sánh đa tiêu chí thuần túy dựa trên dữ liệu thật PostgreSQL (`totalAmount`, `unitPrice`, `quantity`, `deliveryDays`, `warrantyTerms`, và cờ `isAnomaly` tiền định). KHÔNG tự chế trọng số chấm điểm (scoring weights) hay công thức ranking giả định. Trợ lý AI chấm điểm / ranking sẽ được thực hiện đúng phạm vi tại Phase 4D.
+  2. **Quotation Expiry Tracking & Warning (Figma 9:4790):** Bổ sung trường `validUntil: DateTime?` (nullable) vào `model Quotation` trong `backend/prisma/schema.prisma`. Cảnh báo hết hạn được tính toán động dựa trên ngày hiệu lực thực tế lưu trong PostgreSQL; không tạo cảnh báo giả nếu báo giá không có thông tin hết hạn.
+  3. **Comparison Precondition Enforcement (Figma 9:4373):**
+     - Backend authority: Endpoint `POST /api/quotations/compare` bắt buộc kiểm tra `len(quotes) >= 2`. Nếu có 0 hoặc 1 báo giá, từ chối với HTTP 400 Bad Request (`Cần tối thiểu 2 báo giá để thực hiện so sánh`).
+     - Frontend UI: Hiển thị đúng trạng thái Figma `9:4373` (*Comparison not ready: "No quotations collected yet / A comparison is shown once at least two quotations are linked to [PR-ID]"*) cho cả trường hợp 0 và 1 báo giá với các nút hành động `[Collect quotations]` và `[View request / Sourcing]`.
+- **Decision type:** Business Scope / Architecture / Comparison Rules
+- **Requirement/source:** REQ-FR-11, REQ-FR-12, REQ-FR-15, US-06, US-08, Figma 9:4373, Figma 9:4790.
+- **Confirmation status:** **APPROVED / HUMAN CONFIRMED** (Human Decision Gate Phase 4C).
+- **Date:** 2026-10-04
+- **Owner:** Group 01
+
+
 

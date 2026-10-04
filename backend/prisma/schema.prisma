@@ -29,7 +29,9 @@ enum PRStatus {
   RECEIVED
   CLOSED
   REJECTED
+  REVISION_REQUIRED
 }
+
 
 model User {
   id           String        @id @default(uuid())
@@ -116,6 +118,7 @@ model Quotation {
   fileUrl           String
   isAnomaly         Boolean         @default(false)
   anomalyReason     String?
+  validUntil        DateTime?
   purchaseOrders    PurchaseOrder[]
   created_at        DateTime        @default(now())
 }
