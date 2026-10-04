@@ -1211,6 +1211,7 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span 
+                data-testid="ai-mode-badge"
                 style={{
                   backgroundColor: aiResult.is_fallback ? '#fef3c7' : '#eef2ff',
                   border: `0.667px solid ${aiResult.is_fallback ? '#fde68a' : '#c7d2fe'}`,

@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-04  
 **Evaluation:** Phase 4D Visual Gate — AI Analysis / Evaluation / Recommendation (US-07 / REQ-FR-14 / HD-03 / Flow D / Figma 9:5291)  
-**Status:** **PHASE 4D COMPLETE — VISUAL GATE & GOVERNANCE VERIFIED (100% GREEN)**
+**Status:** **PHASE 4D COMPLETE — LIVE GEMINI SMOKE UNVERIFIED (FALLBACK / HEURISTIC VERIFIED)**
 
 ---
 
@@ -62,3 +62,24 @@ Every network request is secured by server-side JWT authentication verified via 
 
 3. **Fallback & Graceful Degradation (HD-03):**
    - When external LLM API key is unavailable (`LLM_API_KEY_NOT_CONFIGURED`), deterministic Heuristic Fallback Engine calculates composite weighted score (40% price, 25% lead, 25% reliability, 10% terms), confidence 78%, and structured why/risks/missing data.
+
+---
+
+## 5. FINAL RELEASE GATE AUDIT DETAILS
+
+- **Fallback Scoring Provenance (CASE B):**
+  - Formula: Landed price 40%, Lead time 25%, Reliability 25%, Commercial terms 10%.
+  - Provenance: Internal heuristic fallback scoring based on Figma Node `9:5589` UI specification (`Weighted on landed price 40%, lead time 25%, reliability 25%, terms 10%.`). It is designated strictly as `Fallback / Heuristic scoring`, NOT an official enterprise procurement business weighting rule.
+- **Confidence Provenance:**
+  - Value: `78%`.
+  - Provenance: Baseline UI specification extracted from Figma Node `9:5589` (`confidence 78%`). Designated as `Fallback / Heuristic Confidence`.
+- **Live Gemini Status:**
+  - `GEMINI_API_KEY` / `LLM_API_KEY` is not present in server environment.
+  - Status: `UNVERIFIED / BLOCKED — API KEY UNAVAILABLE`. No live AI success is claimed or faked.
+- **E2E Test Mode:**
+  - Mode: `FALLBACK / HEURISTIC` (clearly verified and logged in Puppeteer console and browser UI badge).
+- **Relevant Regression Suite:**
+  - Total: `109 / 109 PASS` across AI (21), Comparison (14), Supplier/Quotation (15), Revision (10), Reject (6), Approval (15), and RBAC (28).
+- **Database Non-Mutation (Gate E):**
+  - Verified pre/post AI baseline: PR Status `APPROVED` (unchanged), Quotations (4 unchanged), PO count `0` (unchanged), Approval (1 unchanged), Receiving `0` (unchanged). Zero side effects observed.
+

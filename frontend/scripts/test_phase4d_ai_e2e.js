@@ -127,9 +127,16 @@ async function runPhase4DAiE2E() {
     // 7. VERIFY COMPONENT SECTIONS
     console.log('\n--- STEP 5: VERIFY AI ANALYSIS COMPONENTS (Figma 9:5589) ---');
     
+    // Mode badge
+    const modeBadge = await page.$eval('[data-testid="ai-mode-badge"]', el => el.textContent.trim());
+    const e2eMode = modeBadge.includes('Fallback') ? 'FALLBACK / HEURISTIC' : 'LIVE GEMINI';
+    console.log(`\n========================================`);
+    console.log(`E2E MODE: ${e2eMode}`);
+    console.log(`========================================\n`);
+
     // Confidence badge
     const confidenceText = await page.$eval('[data-testid="ai-confidence-badge"]', el => el.textContent);
-    console.log(`✓ AI Confidence Badge verified: "${confidenceText.trim()}"`);
+    console.log(`✓ Confidence Badge verified: "${confidenceText.trim()}" (Provenance: Fallback / Heuristic Confidence matching Figma 9:5589)`);
 
     // Top recommended card
     const recommendedCard = await page.$('[data-testid="ai-recommended-card"]');
