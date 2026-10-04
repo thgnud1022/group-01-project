@@ -1,6 +1,7 @@
 import puppeteer from 'puppeteer-core';
 import fs from 'fs';
 import path from 'path';
+import { execSync } from 'child_process';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -34,6 +35,15 @@ async function dismissToast(page) {
 
 async function runPhase4CComparisonE2E() {
   console.log('=== STARTING PHASE 4C COMPARISON BROWSER E2E & VISUAL QA ===');
+
+  console.log('Ensuring Supabase test user identities are bound in PostgreSQL...');
+  try {
+    const pythonExe = path.resolve(__dirname, '../../backend/.venv/Scripts/python.exe');
+    const syncScript = path.resolve(__dirname, '../../scratch/sync_all_supabase_users.py');
+    execSync(`"${pythonExe}" "${syncScript}"`, { stdio: 'inherit' });
+  } catch (err) {
+    console.warn('User sync warning:', err.message);
+  }
 
   const browser = await puppeteer.launch({
     executablePath: CHROME_PATH,
@@ -137,8 +147,26 @@ async function runPhase4CComparisonE2E() {
     await delay(800);
     console.log('✓ Figma 9:4790 (Comparison Ready) loaded.');
 
-    // 6. VERIFY POSTGRESQL REAL DATA IN COMPARISON MATRIX
-    console.log('\n--- STEP 5: VERIFY DATABASE AUTHORITY IN COMPARISON MATRIX ---');
+    // 6. VERIFY EXPIRY WARNING BANNER & REAL VALIDUNTIL STATE (FIGMA 9:4851)
+    console.log('\n--- STEP 5: VERIFY REAL VALIDUNTIL & EXPIRY WARNING BANNER (FIGMA 9:4790 / 9:4851) ---');
+    await page.waitForSelector('[data-testid="expiry-warning-banner"]', { timeout: 10000 });
+    const bannerText = await page.$eval('[data-testid="expiry-warning-banner"]', el => el.innerText);
+    console.log(`Banner content:\n${bannerText}`);
+
+    if (bannerText.includes('quotation has expired') || bannerText.includes('quotations have expired')) {
+      console.log('✓ PASS: Expiry warning heading verified.');
+    } else {
+      throw new Error(`Expected expiry heading in banner, got: ${bannerText}`);
+    }
+
+    if (bannerText.includes('Expired') && (bannerText.includes('Trần Anh') || bannerText.includes('Phong Vũ'))) {
+      console.log('✓ PASS: Real expired supplier quote and timeline verified in banner.');
+    } else {
+      throw new Error(`Expected expired supplier in banner, got: ${bannerText}`);
+    }
+
+    // 7. VERIFY POSTGRESQL REAL DATA IN COMPARISON MATRIX
+    console.log('\n--- STEP 6: VERIFY DATABASE AUTHORITY IN COMPARISON MATRIX ---');
     const matrixText = await page.$eval('[data-testid="comparison-matrix"]', el => el.innerText);
 
     // Verify joined supplier names from PostgreSQL
@@ -161,6 +189,11 @@ async function runPhase4CComparisonE2E() {
     // Verify warranty terms
     if (matrixText.includes('12 tháng') || matrixText.includes('chính hãng')) {
       console.log('✓ PASS: Real warrantyTerms from PostgreSQL verified.');
+    }
+
+    // Verify Quote valid until row
+    if (matrixText.includes('Quote valid until') && (matrixText.includes('Expired') || matrixText.includes('Valid for'))) {
+      console.log('✓ PASS: Real validUntil status badges verified in comparison matrix.');
     }
 
     // Verify attribute indicators

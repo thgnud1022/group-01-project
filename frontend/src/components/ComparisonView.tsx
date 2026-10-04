@@ -604,9 +604,10 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
       </div>
 
       {/* Expiry Warning Box (Figma 9:4851) */}
-      {(expiredQuotes.length > 0 || expiringSoonQuotes.length > 0) && (
+      {expiredQuotes.length > 0 && (
         <div 
           data-testid="expiry-warning-banner"
+          data-node-id="9:4851"
           style={{
             backgroundColor: '#fdecec',
             border: '0.667px solid #f4c2c2',
@@ -616,12 +617,10 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
             marginBottom: '20px',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+          <div data-node-id="9:4852" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
             <AlertTriangle size={16} color="#8e1e1e" />
-            <h3 style={{ margin: 0, fontSize: '14px', fontWeight: 600, color: '#8e1e1e' }}>
-              {expiredQuotes.length > 0 
-                ? `${expiredQuotes.length} quotation has expired` 
-                : `${expiringSoonQuotes.length} quotation is expiring soon`}
+            <h3 data-node-id="9:4856" style={{ margin: 0, fontSize: '14px', fontWeight: 600, color: '#8e1e1e' }}>
+              {expiredQuotes.length} quotation{expiredQuotes.length > 1 ? 's have' : ' has'} expired
             </h3>
           </div>
 

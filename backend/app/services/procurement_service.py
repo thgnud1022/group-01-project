@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional, Union
 from decimal import Decimal, ROUND_HALF_UP, InvalidOperation as DecimalException
 from prisma import errors
@@ -1331,6 +1331,7 @@ class ProcurementService:
         prices = [Decimal(str(q.totalAmount)) / Decimal(str(q.quantity)) for q in quotes]
         avg_price = sum(prices) / Decimal(str(len(prices))) if prices else Decimal("0.00")
 
+        now_utc = datetime.now(timezone.utc)
         results = []
         for q in quotes:
             u_price = (Decimal(str(q.totalAmount)) / Decimal(str(q.quantity))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
@@ -1342,11 +1343,18 @@ class ProcurementService:
                     is_anomaly = True
                     anomaly_reason = f"CẢNH BÁO: Đơn giá {float(u_price):,.0f}đ cao hơn {float(diff_ratio * 100):.1f}% so với đơn giá trung bình ({float(avg_price):,.0f}đ)."
 
+            is_expired = False
+            if getattr(q, "validUntil", None):
+                q_valid = q.validUntil if q.validUntil.tzinfo else q.validUntil.replace(tzinfo=timezone.utc)
+                is_expired = q_valid < now_utc
+
             formatted = ProcurementService._format_quotation_dict(q)
             formatted["isAnomaly"] = is_anomaly
             formatted["is_anomaly"] = is_anomaly
             formatted["anomalyReason"] = anomaly_reason
             formatted["anomaly_reason"] = anomaly_reason
+            formatted["isExpired"] = is_expired
+            formatted["is_expired"] = is_expired
             results.append(formatted)
         return results
 

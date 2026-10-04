@@ -20,9 +20,11 @@ Test Cases (10 Required):
 import asyncio
 import threading
 import pytest
+from datetime import datetime, timezone, timedelta
 from decimal import Decimal
 from fastapi.testclient import TestClient
 from app.main import app
+from app.dependencies.auth import get_current_identity, AuthenticatedUser
 from app.services.db import get_prisma, connect_db, disconnect_db
 from app.services.procurement_service import ProcurementService, db
 
@@ -351,3 +353,146 @@ def test_tc_cmp_010_anomaly_result_is_deterministic():
         assert "CẢNH BÁO" in q3["anomalyReason"]
         assert "cao hơn" in q3["anomalyReason"]
     run_async(run_test())
+
+
+def test_tc_cmp_011_valid_until_expired_flagged():
+    """TC-CMP-011: validUntil < current time -> isExpired is True, ISO string returned."""
+    async def run_test():
+        pr = await helper_create_approved_pr("Expired Quote")
+        now = datetime.now(timezone.utc)
+        expired_date = now - timedelta(days=5)
+        future_date = now + timedelta(days=30)
+
+        await ProcurementService.create_quotation_prisma(
+            purchase_request_id=pr["id"],
+            supplier_id="SUP-01",
+            total_amount=Decimal("20000000.00"),
+            quantity=1,
+            valid_until=expired_date
+        )
+        await ProcurementService.create_quotation_prisma(
+            purchase_request_id=pr["id"],
+            supplier_id="SUP-02",
+            total_amount=Decimal("22000000.00"),
+            quantity=1,
+            valid_until=future_date
+        )
+
+        comparisons = await ProcurementService.compare_quotations_prisma(pr["id"])
+        q_expired = next(c for c in comparisons if c["supplierId"] == "SUP-01")
+        q_valid = next(c for c in comparisons if c["supplierId"] == "SUP-02")
+
+        assert q_expired["isExpired"] is True
+        assert q_expired["validUntil"] is not None
+        assert q_valid["isExpired"] is False
+        assert q_valid["validUntil"] is not None
+    run_async(run_test())
+
+
+def test_tc_cmp_012_valid_until_future_not_expired():
+    """TC-CMP-012: validUntil > current time -> isExpired is False."""
+    async def run_test():
+        pr = await helper_create_approved_pr("Future Quotes")
+        now = datetime.now(timezone.utc)
+
+        await ProcurementService.create_quotation_prisma(
+            purchase_request_id=pr["id"],
+            supplier_id="SUP-01",
+            total_amount=Decimal("15000000.00"),
+            quantity=1,
+            valid_until=now + timedelta(days=10)
+        )
+        await ProcurementService.create_quotation_prisma(
+            purchase_request_id=pr["id"],
+            supplier_id="SUP-02",
+            total_amount=Decimal("16000000.00"),
+            quantity=1,
+            valid_until=now + timedelta(days=20)
+        )
+
+        comparisons = await ProcurementService.compare_quotations_prisma(pr["id"])
+        for q in comparisons:
+            assert q["isExpired"] is False
+            assert q["validUntil"] is not None
+    run_async(run_test())
+
+
+def test_tc_cmp_013_valid_until_none_handled_gracefully():
+    """TC-CMP-013: validUntil is None -> validUntil is None, isExpired is False."""
+    async def run_test():
+        pr = await helper_create_approved_pr("No Expiry Quotes")
+
+        await ProcurementService.create_quotation_prisma(
+            purchase_request_id=pr["id"],
+            supplier_id="SUP-01",
+            total_amount=Decimal("18000000.00"),
+            quantity=1,
+            valid_until=None
+        )
+        await ProcurementService.create_quotation_prisma(
+            purchase_request_id=pr["id"],
+            supplier_id="SUP-02",
+            total_amount=Decimal("19000000.00"),
+            quantity=1,
+            valid_until=None
+        )
+
+        comparisons = await ProcurementService.compare_quotations_prisma(pr["id"])
+        for q in comparisons:
+            assert q["validUntil"] is None
+            assert q["isExpired"] is False
+    run_async(run_test())
+
+
+def test_tc_cmp_014_all_authenticated_roles_can_compare_hd13_k2():
+    """
+    TC-CMP-014: HD-13 / K-2 Policy Verification.
+    All authenticated roles (EMPLOYEE, PROCUREMENT, MANAGER, FINANCE, ADMIN)
+    MUST be permitted to call POST /api/quotations/compare when preconditions are met.
+    Unauthenticated calls MUST return HTTP 401.
+    """
+    from httpx import AsyncClient, ASGITransport
+
+    async def run_test():
+        pr = await helper_create_approved_pr("HD13-K2 RBAC")
+        await ProcurementService.create_quotation_prisma(
+            purchase_request_id=pr["id"],
+            supplier_id="SUP-01",
+            total_amount=Decimal("10000000.00"),
+            quantity=1
+        )
+        await ProcurementService.create_quotation_prisma(
+            purchase_request_id=pr["id"],
+            supplier_id="SUP-02",
+            total_amount=Decimal("11000000.00"),
+            quantity=1
+        )
+
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as ac:
+            # 1. Unauthenticated -> 401
+            app.dependency_overrides.clear()
+            unauth_resp = await ac.post("/api/quotations/compare", json={"purchaseRequestId": pr["id"]})
+            assert unauth_resp.status_code == 401
+
+            # 2. All 5 authenticated roles -> 200 (HD-13 / K-2)
+            roles = ["EMPLOYEE", "PROCUREMENT", "MANAGER", "FINANCE", "ADMIN"]
+            for role in roles:
+                app.dependency_overrides[get_current_identity] = lambda r=role: AuthenticatedUser(
+                    id=f"test-uuid-{r.lower()}",
+                    auth_sub=f"auth-sub-{r.lower()}",
+                    email=f"{r.lower()}@company.com",
+                    name=f"Test {r}",
+                    role=r,
+                    departmentId="DEPT-IT"
+                )
+                resp = await ac.post("/api/quotations/compare", json={"purchaseRequestId": pr["id"]})
+                assert resp.status_code == 200, f"Role {role} failed with status {resp.status_code}: {resp.text}"
+                data = resp.json()
+                assert data["purchaseRequestId"] == pr["id"]
+                assert len(data["comparisons"]) == 2
+
+            app.dependency_overrides.clear()
+
+    run_async(run_test())
+
