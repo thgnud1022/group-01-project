@@ -14,6 +14,7 @@ import { SourcingView } from './components/SourcingView';
 import { SuppliersView } from './components/SuppliersView';
 import { CollectQuotationsView } from './components/CollectQuotationsView';
 import { ComparisonView } from './components/ComparisonView';
+import { PurchaseOrdersView } from './components/PurchaseOrdersView';
 import { 
   Sparkles, 
   Send, 
@@ -561,6 +562,10 @@ export default function App() {
               setSelectedPR(pr);
               setCurrentTab('purchase-requests');
             }}
+            onOpenPO={() => {
+              setComparingPR(null);
+              setCurrentTab('purchase-orders');
+            }}
           />
         ) : collectingQuotationsPR ? (
           <CollectQuotationsView
@@ -602,95 +607,12 @@ export default function App() {
         />
       )}
 
-      {/* SCREEN 7: Purchase Orders & Receiving (Figma 9:6424 / 9:6580) */}
+      {/* SCREEN 7: Purchase Orders (Figma 9:6424) */}
       {currentTab === 'purchase-orders' && (
-        <div style={{ maxWidth: '860px', margin: '0 auto' }}>
-          <div style={{ marginBottom: '24px' }}>
-            <div style={{ fontSize: '11px', fontWeight: 600, color: '#8a929e', textTransform: 'uppercase', letterSpacing: '0.55px', marginBottom: '4px' }}>
-              Procurement · Đơn hàng &amp; Giao nhận
-            </div>
-            <h1 style={{ fontSize: '24px', fontWeight: 600, color: '#12161c', margin: '0 0 4px 0', letterSpacing: '-0.6px' }}>
-              Đơn đặt hàng (Purchase Orders) &amp; Nhận hàng
-            </h1>
-            <p style={{ margin: 0, fontSize: '14px', color: '#5a6472' }}>
-              Quản lý PO đã phát hành và ghi nhận biên bản giao nhận hàng hóa thực tế (US-09).
-            </p>
-          </div>
-
-          {/* Receiving Form (K-3: PROCUREMENT/ADMIN) */}
-          {(user.role === 'PROCUREMENT' || user.role === 'ADMIN') && (
-            <form onSubmit={handleReceiveGoods} style={{ backgroundColor: '#ffffff', border: '0.667px solid #e4e7ec', borderRadius: '8px', padding: '16px', marginBottom: '24px' }}>
-              <div style={{ fontSize: '13px', fontWeight: 600, color: '#12161c', marginBottom: '12px' }}>
-                📦 Ghi nhận biên bản nhận hàng (Goods Receipt)
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 140px auto', gap: '12px', alignItems: 'flex-end' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '12px', color: '#5a6472', marginBottom: '4px' }}>Chọn Purchase Order</label>
-                  <select
-                    value={selectedPOForReceiving}
-                    onChange={(e) => setSelectedPOForReceiving(e.target.value)}
-                    style={{ width: '100%', height: '36px', padding: '0 8px', borderRadius: '4px', border: '0.667px solid #e4e7ec', fontSize: '13px' }}
-                  >
-                    <option value="">-- Chọn đơn hàng PO --</option>
-                    {pos.map((po) => (
-                      <option key={po.id} value={po.id}>
-                        {po.poNumber || po.id} · {Number(po.totalAmount).toLocaleString()}đ ({po.status})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '12px', color: '#5a6472', marginBottom: '4px' }}>Số lượng nhận</label>
-                  <input
-                    type="number"
-                    min={1}
-                    value={receivedQty}
-                    onChange={(e) => setReceivedQty(Number(e.target.value))}
-                    style={{ width: '100%', height: '36px', padding: '0 8px', borderRadius: '4px', border: '0.667px solid #e4e7ec', fontSize: '13px', boxSizing: 'border-box' }}
-                  />
-                </div>
-                <button type="submit" className="btn btn-primary" style={{ height: '36px' }}>
-                  <Package size={16} />
-                  <span>Xác nhận nhận đủ</span>
-                </button>
-              </div>
-            </form>
-          )}
-
-          {/* PO List */}
-          <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', border: '0.667px solid #e4e7ec', overflow: 'hidden', marginBottom: '24px' }}>
-            <div style={{ padding: '14px 16px', backgroundColor: '#f8fafc', borderBottom: '0.667px solid #e4e7ec', fontWeight: 600, fontSize: '13px' }}>
-              Danh sách Purchase Orders
-            </div>
-            {pos.length === 0 ? (
-              <div style={{ padding: '32px', textAlign: 'center', color: '#8a929e', fontSize: '13px' }}>
-                Chưa có PO nào được phát hành.
-              </div>
-            ) : (
-              pos.map((po) => (
-                <div key={po.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderBottom: '0.667px solid #f0f2f5' }}>
-                  <div>
-                    <div style={{ fontSize: '14px', fontWeight: 600, color: '#12161c' }}>{po.poNumber || po.id}</div>
-                    <div style={{ fontSize: '12px', color: '#8a929e' }}>Số lượng: {po.quantity} · Đơn vị nhận: Kho IT</div>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '15px', fontWeight: 700, color: '#12161c' }}>{Number(po.totalAmount).toLocaleString()}đ</div>
-                      <span className={`badge ${po.status === 'RECEIVED' ? 'badge-approved' : 'badge-sourcing'}`}>
-                        {po.status}
-                      </span>
-                    </div>
-                    {user.role === 'FINANCE' && po.status === 'RECEIVED' && (
-                      <button onClick={() => handleClosePR(po.purchaseRequestId)} className="btn btn-secondary btn-sm">
-                        Đóng PR (HD-07)
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
+        <PurchaseOrdersView
+          user={user}
+          onNavigateTab={(tab) => setCurrentTab(tab as NavItemKey)}
+        />
       )}
 
       {/* SCREEN 8: Audit Trail (Rule 29) */}

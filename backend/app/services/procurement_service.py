@@ -1688,6 +1688,7 @@ class ProcurementService:
             where={"id": created_po_id},
             include={
                 "quotation": {"include": {"supplier": True}},
+                "purchaseRequest": True,
                 "creator": True,
             },
         )
@@ -1704,6 +1705,7 @@ class ProcurementService:
             "poNumber": po_record.poNumber,
             "purchaseRequestId": po_record.purchaseRequestId,
             "prId": po_record.purchaseRequestId,
+            "prTitle": po_record.purchaseRequest.title if po_record.purchaseRequest else None,
             "quotationId": po_record.quotationId,
             "creatorId": po_record.creatorId,
             "creatorEmail": po_record.creator.email if po_record.creator else None,
@@ -1725,6 +1727,7 @@ class ProcurementService:
         pos = await prisma.purchaseorder.find_many(
             include={
                 "quotation": {"include": {"supplier": True}},
+                "purchaseRequest": True,
                 "creator": True,
             },
             order={"created_at": "desc"},
@@ -1740,6 +1743,7 @@ class ProcurementService:
                 "poNumber": p.poNumber,
                 "purchaseRequestId": p.purchaseRequestId,
                 "prId": p.purchaseRequestId,
+                "prTitle": p.purchaseRequest.title if p.purchaseRequest else None,
                 "quotationId": p.quotationId,
                 "creatorId": p.creatorId,
                 "supplierId": p.quotation.supplierId if p.quotation else None,

@@ -28,6 +28,7 @@ interface ComparisonViewProps {
   onBack: () => void;
   onCollectQuotations: (pr: any) => void;
   onViewRequest?: (pr: any) => void;
+  onOpenPO?: (po?: any) => void;
 }
 
 export const ComparisonView: React.FC<ComparisonViewProps> = ({
@@ -37,6 +38,7 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
   onBack,
   onCollectQuotations,
   onViewRequest,
+  onOpenPO,
 }) => {
   const [pr, setPr] = useState<any>(initialPrData || null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -50,6 +52,8 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
   const [aiLoading, setAiLoading] = useState<boolean>(false);
   const [aiResult, setAiResult] = useState<any | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
+  const [existingPO, setExistingPO] = useState<any | null>(null);
+  const [creatingPO, setCreatingPO] = useState<boolean>(false);
 
   const handleAskAssistant = async () => {
     setAiLoading(true);
@@ -68,6 +72,37 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
       setAiError(err.message || 'Không thể lấy đề xuất từ Trợ lý AI.');
     } finally {
       setAiLoading(false);
+    }
+  };
+
+  const handleCreatePO = async () => {
+    if (!selectedQuoteId) {
+      setToastMessage({
+        type: 'warning',
+        text: 'Vui lòng chọn một nhà cung cấp / báo giá trước khi tạo Purchase Order.'
+      });
+      return;
+    }
+    setCreatingPO(true);
+    try {
+      const po = await api.createPO({
+        purchaseRequestId: pr?.id || prId,
+        quotationId: selectedQuoteId,
+      });
+      setExistingPO(po);
+      setPr((prev: any) => (prev ? { ...prev, status: 'PO_CREATED' } : { id: prId, status: 'PO_CREATED' }));
+      setToastMessage({
+        type: 'success',
+        text: `Đã tạo Purchase Order thành công: ${po.poNumber || po.id}!`
+      });
+    } catch (err: any) {
+      console.error('Failed to create PO:', err);
+      setToastMessage({
+        type: 'warning',
+        text: err.message || 'Không thể tạo Purchase Order.'
+      });
+    } finally {
+      setCreatingPO(false);
     }
   };
 
@@ -91,12 +126,26 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
         }
       }
 
+      // Check if PO exists for this PR
+      try {
+        const pos = await api.listPOs();
+        const matched = pos.find((p: any) => p.purchaseRequestId === prId || p.prId === prId);
+        if (matched) {
+          setExistingPO(matched);
+          if (matched.quotationId) {
+            setSelectedQuoteId(matched.quotationId);
+          }
+        }
+      } catch (e) {
+        console.warn('Could not load POs for PR:', e);
+      }
+
       // 2. Fetch Comparison from Backend Authority (POST /api/quotations/compare)
       const res = await api.compareQuotations(prId);
       const quotes = res?.comparisons || (Array.isArray(res) ? res : []);
       setComparisons(quotes);
       if (quotes.length > 0) {
-        setSelectedQuoteId(quotes[0].id);
+        setSelectedQuoteId((prev) => prev || quotes[0].id);
       }
     } catch (err: any) {
       console.warn('Error loading comparison:', err);
@@ -159,6 +208,8 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
   });
 
   const anomalyQuotes = comparisons.filter((c) => c.isAnomaly);
+  const isPOIssued = Boolean(existingPO || pr?.status === 'PO_CREATED');
+  const awardedQuote = comparisons.find((q) => q.id === selectedQuoteId) || comparisons[0];
 
   if (loading) {
     return (
@@ -426,6 +477,22 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
           <span style={{ fontSize: '12px', color: '#8a929e' }}>
             {pr?.id || prId}
           </span>
+          {isPOIssued && (
+            <span 
+              data-testid="po-issued-badge"
+              style={{
+                backgroundColor: '#eef2ff',
+                color: '#3b45ad',
+                border: '0.667px solid #c7d2fe',
+                borderRadius: '4px',
+                padding: '2px 8px',
+                fontSize: '12px',
+                fontWeight: 600,
+              }}
+            >
+              PO issued
+            </span>
+          )}
         </div>
 
         <h1 
@@ -534,27 +601,27 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
             <div style={{ width: '32px', height: '1px', backgroundColor: '#b6e2c7', margin: '0 4px' }} />
           </div>
 
-          {/* Step 4: Comparison (ACTIVE) */}
+          {/* Step 4: Comparison */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <div 
               style={{
                 width: '20px',
                 height: '20px',
                 borderRadius: '50%',
-                backgroundColor: '#4a56d2',
-                border: '0.667px solid #4a56d2',
+                backgroundColor: isPOIssued ? '#e9f7ef' : '#4a56d2',
+                border: `0.667px solid ${isPOIssued ? '#b6e2c7' : '#4a56d2'}`,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#ffffff',
+                color: isPOIssued ? '#16603b' : '#ffffff',
                 fontSize: '11px',
                 fontWeight: 600,
               }}
             >
-              4
+              {isPOIssued ? <Check size={11} color="#16603b" strokeWidth={3} /> : '4'}
             </div>
-            <span style={{ fontSize: '11px', color: '#12161c', fontWeight: 600 }}>Comparison</span>
-            <div style={{ width: '32px', height: '1px', backgroundColor: '#e4e7ec', margin: '0 4px' }} />
+            <span style={{ fontSize: '11px', color: isPOIssued ? '#5a6472' : '#12161c', fontWeight: isPOIssued ? 400 : 600 }}>Comparison</span>
+            <div style={{ width: '32px', height: '1px', backgroundColor: isPOIssued ? '#b6e2c7' : '#e4e7ec', margin: '0 4px' }} />
           </div>
 
           {/* Step 5: Purchase order */}
@@ -564,19 +631,19 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
                 width: '20px',
                 height: '20px',
                 borderRadius: '50%',
-                backgroundColor: '#ffffff',
-                border: '0.667px solid #e4e7ec',
+                backgroundColor: isPOIssued ? '#4a56d2' : '#ffffff',
+                border: `0.667px solid ${isPOIssued ? '#4a56d2' : '#e4e7ec'}`,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#8a929e',
+                color: isPOIssued ? '#ffffff' : '#8a929e',
                 fontSize: '11px',
                 fontWeight: 600,
               }}
             >
               5
             </div>
-            <span style={{ fontSize: '11px', color: '#8a929e' }}>Purchase order</span>
+            <span style={{ fontSize: '11px', color: isPOIssued ? '#12161c' : '#8a929e', fontWeight: isPOIssued ? 600 : 400 }}>Purchase order</span>
             <div style={{ width: '32px', height: '1px', backgroundColor: '#e4e7ec', margin: '0 4px' }} />
           </div>
 
@@ -1563,126 +1630,222 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({
         </div>
 
         <div style={{ padding: '20px' }}>
-          <p style={{ fontSize: '12px', fontWeight: 600, color: '#12161c', margin: '0 0 12px 0' }}>
-            Choose the supplier to award
-          </p>
+          {isPOIssued ? (
+            <div>
+              <div
+                data-testid="awarded-supplier-card"
+                style={{
+                  border: '0.667px solid #3b45ad',
+                  borderRadius: '6px',
+                  backgroundColor: '#f8fafc',
+                  padding: '16px 20px',
+                  marginBottom: '20px',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: '15px', fontWeight: 600, color: '#12161c' }}>
+                      {awardedQuote?.supplierName || awardedQuote?.supplier?.name || existingPO?.supplierName || 'Awarded Supplier'} selected
+                    </span>
+                    <span
+                      data-testid="matches-assistant-badge"
+                      style={{
+                        backgroundColor: '#eef2ff',
+                        color: '#3b45ad',
+                        border: '0.667px solid #c7d2fe',
+                        borderRadius: '4px',
+                        padding: '2px 8px',
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                      }}
+                    >
+                      <Sparkles size={11} />
+                      <span>Matches the assistant recommendation</span>
+                    </span>
+                  </div>
+                </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {comparisons.map((q) => {
-              const isSelected = selectedQuoteId === q.id;
-              const isExpired = checkExpiryStatus(q.validUntil)?.isExpired;
-              return (
-                <label
-                  key={q.id}
+                <div style={{ fontSize: '12px', color: '#5a6472', marginBottom: '8px' }}>
+                  {user?.name || 'Procurement User'} · {awardedQuote?.id || selectedQuoteId}
+                </div>
+
+                <div style={{ fontSize: '13px', color: '#334155', fontStyle: 'italic', marginBottom: '12px' }}>
+                  "Best value among eligible quotes. Matches the assistant recommendation."
+                </div>
+
+                <div style={{ fontSize: '12px', color: '#16603b', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <CheckCircle2 size={14} color="#16603b" />
+                  <span>Purchase order {existingPO?.poNumber || ''} has been issued ({formatVND(existingPO?.totalAmount || awardedQuote?.totalAmount)}).</span>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+                <button
+                  onClick={onBack}
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    padding: '14px 16px',
-                    border: `0.667px solid ${isSelected ? '#3b45ad' : '#e4e7ec'}`,
-                    borderRadius: '6px',
-                    backgroundColor: isSelected ? '#f5f7ff' : '#ffffff',
-                    cursor: isExpired ? 'not-allowed' : 'pointer',
-                    opacity: isExpired ? 0.6 : 1,
+                    padding: '8px 16px',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    color: '#5a6472',
+                    backgroundColor: '#ffffff',
+                    border: '0.667px solid #e4e7ec',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
                   }}
                 >
-                  <input
-                    type="radio"
-                    name="selectedSupplier"
-                    checked={isSelected}
-                    disabled={isExpired}
-                    onChange={() => setSelectedQuoteId(q.id)}
-                    style={{ accentColor: '#3b45ad' }}
-                  />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ fontSize: '14px', fontWeight: 500, color: '#12161c' }}>
-                        {q.supplierName || q.supplier?.name}
-                      </span>
-                      {aiResult && (aiResult.recommended_quotation_id === q.id || aiResult.recommended_supplier_name === (q.supplierName || q.supplier?.name)) && (
-                        <span 
-                          data-testid="ai-recommended-badge"
-                          style={{
-                            backgroundColor: '#eef2ff',
-                            color: '#4338ca',
-                            border: '0.667px solid #c7d2fe',
-                            borderRadius: '4px',
-                            padding: '1px 6px',
-                            fontSize: '11px',
-                            fontWeight: 600,
-                          }}
-                        >
-                          AI recommended
-                        </span>
-                      )}
-                      {isExpired && (
-                        <span style={{ fontSize: '11px', color: '#8e1e1e', backgroundColor: '#fdecec', padding: '1px 6px', borderRadius: '4px' }}>
-                          Expired
-                        </span>
-                      )}
-                    </div>
-                    <div style={{ fontSize: '12px', color: '#5a6472', marginTop: '2px' }}>
-                      {formatVND(q.totalAmount)} landed · {q.deliveryDays} days · {q.warrantyTerms || '12 tháng chính hãng'}
-                    </div>
-                  </div>
-                </label>
-              );
-            })}
-          </div>
+                  Back
+                </button>
+                <button
+                  data-testid="open-po-btn"
+                  onClick={() => onOpenPO ? onOpenPO(existingPO) : onBack()}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '8px 20px',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    color: '#ffffff',
+                    backgroundColor: '#3b45ad',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <span>Open purchase order</span>
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div>
+              <p style={{ fontSize: '12px', fontWeight: 600, color: '#12161c', margin: '0 0 12px 0' }}>
+                Choose the supplier to award
+              </p>
 
-          {/* Human-in-the-loop advisory notice (Figma 9:5814) */}
-          <div 
-            style={{ 
-              marginTop: '14px', 
-              fontSize: '12px', 
-              color: '#8a929e', 
-              fontStyle: 'italic',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
-          >
-            <Info size={13} color="#8a929e" />
-            <span>Only a person can complete this step. The assistant has no ability to award a request.</span>
-          </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {comparisons.map((q) => {
+                  const isSelected = selectedQuoteId === q.id;
+                  const isExpired = checkExpiryStatus(q.validUntil)?.isExpired;
+                  return (
+                    <label
+                      key={q.id}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        padding: '14px 16px',
+                        border: `0.667px solid ${isSelected ? '#3b45ad' : '#e4e7ec'}`,
+                        borderRadius: '6px',
+                        backgroundColor: isSelected ? '#f5f7ff' : '#ffffff',
+                        cursor: isExpired ? 'not-allowed' : 'pointer',
+                        opacity: isExpired ? 0.6 : 1,
+                      }}
+                    >
+                      <input
+                        type="radio"
+                        name="selectedSupplier"
+                        data-testid={`quote-radio-${q.id}`}
+                        checked={isSelected}
+                        disabled={isExpired}
+                        onChange={() => setSelectedQuoteId(q.id)}
+                        style={{ accentColor: '#3b45ad' }}
+                      />
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ fontSize: '14px', fontWeight: 500, color: '#12161c' }}>
+                            {q.supplierName || q.supplier?.name}
+                          </span>
+                          {aiResult && (aiResult.recommended_quotation_id === q.id || aiResult.recommended_supplier_name === (q.supplierName || q.supplier?.name)) && (
+                            <span 
+                              data-testid="ai-recommended-badge"
+                              style={{
+                                backgroundColor: '#eef2ff',
+                                color: '#4338ca',
+                                border: '0.667px solid #c7d2fe',
+                                borderRadius: '4px',
+                                padding: '1px 6px',
+                                fontSize: '11px',
+                                fontWeight: 600,
+                              }}
+                            >
+                              AI recommended
+                            </span>
+                          )}
+                          {isExpired && (
+                            <span style={{ fontSize: '11px', color: '#8e1e1e', backgroundColor: '#fdecec', padding: '1px 6px', borderRadius: '4px' }}>
+                              Expired
+                            </span>
+                          )}
+                        </div>
+                        <div style={{ fontSize: '12px', color: '#5a6472', marginTop: '2px' }}>
+                          {formatVND(q.totalAmount)} landed · {q.deliveryDays} days · {q.warrantyTerms || '12 tháng chính hãng'}
+                        </div>
+                      </div>
+                    </label>
+                  );
+                })}
+              </div>
 
-          <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-            <button
-              onClick={onBack}
-              style={{
-                padding: '8px 16px',
-                fontSize: '13px',
-                fontWeight: 600,
-                color: '#5a6472',
-                backgroundColor: '#ffffff',
-                border: '0.667px solid #e4e7ec',
-                borderRadius: '4px',
-                cursor: 'pointer',
-              }}
-            >
-              Back
-            </button>
-            <button
-              onClick={() => {
-                setToastMessage({
-                  type: 'info',
-                  text: 'Tạo đơn đặt hàng (Purchase Order) sẽ được kích hoạt tại Phase 5 sau khi hoàn tất so sánh & phân tích AI.'
-                });
-              }}
-              style={{
-                padding: '8px 18px',
-                fontSize: '13px',
-                fontWeight: 600,
-                color: '#ffffff',
-                backgroundColor: '#3b45ad',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-              }}
-            >
-              Tiến hành tạo PO
-            </button>
-          </div>
+              {/* Human-in-the-loop advisory notice (Figma 9:5814) */}
+              <div 
+                style={{ 
+                  marginTop: '14px', 
+                  fontSize: '12px', 
+                  color: '#8a929e', 
+                  fontStyle: 'italic',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <Info size={13} color="#8a929e" />
+                <span>Only a person can complete this step. The assistant has no ability to award a request.</span>
+              </div>
+
+              <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+                <button
+                  onClick={onBack}
+                  style={{
+                    padding: '8px 16px',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    color: '#5a6472',
+                    backgroundColor: '#ffffff',
+                    border: '0.667px solid #e4e7ec',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Back
+                </button>
+                <button
+                  data-testid="create-po-btn"
+                  disabled={creatingPO || !selectedQuoteId}
+                  onClick={handleCreatePO}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '8px 20px',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    color: '#ffffff',
+                    backgroundColor: creatingPO || !selectedQuoteId ? '#9ca3af' : '#3b45ad',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: creatingPO || !selectedQuoteId ? 'not-allowed' : 'pointer',
+                  }}
+                >
+                  {creatingPO && <Loader2 size={14} className="animate-spin" />}
+                  <span>Create purchase order</span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
