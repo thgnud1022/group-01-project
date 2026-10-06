@@ -3,12 +3,22 @@ import re
 from pydantic_settings import BaseSettings
 
 
+def _clean_supabase_url(raw_url: str) -> str:
+    cleaned = raw_url.strip().strip("'\"").strip()
+    if cleaned and not cleaned.startswith("http://") and not cleaned.startswith("https://"):
+        cleaned = f"https://{cleaned}"
+    return cleaned.rstrip("/")
+
+
 def _resolve_default_supabase_url() -> str:
+    raw_env = os.getenv("SUPABASE_URL")
+    if raw_env and raw_env.strip():
+        return _clean_supabase_url(raw_env)
     db_url = os.getenv("DATABASE_URL", "")
-    match = re.search(r"@db\.([a-z0-9_-]+)\.supabase\.co", db_url)
+    match = re.search(r"@(?:db\.|aws-[0-9]+-[a-z0-9-]+\.pooler\.)([a-z0-9_-]+)\.supabase\.co", db_url)
     if match:
         return f"https://{match.group(1)}.supabase.co"
-    return os.getenv("SUPABASE_URL", "https://sthjkfssmvoswocnttrw.supabase.co")
+    return "https://sthjkfssmvoswocnttrw.supabase.co"
 
 
 _base_supabase_url = _resolve_default_supabase_url()
@@ -16,9 +26,9 @@ _base_supabase_url = _resolve_default_supabase_url()
 
 class Settings(BaseSettings):
     DATABASE_URL: str = os.getenv("DATABASE_URL", "postgresql://app:app-local-password@localhost:5432/procurement_db")
-    SUPABASE_URL: str = os.getenv("SUPABASE_URL", _base_supabase_url)
-    SUPABASE_JWKS_URL: str = os.getenv("SUPABASE_JWKS_URL", f"{_base_supabase_url.rstrip('/')}/auth/v1/.well-known/jwks.json")
-    JWT_ISSUER: str = os.getenv("JWT_ISSUER", f"{_base_supabase_url.rstrip('/')}/auth/v1")
+    SUPABASE_URL: str = _base_supabase_url
+    SUPABASE_JWKS_URL: str = os.getenv("SUPABASE_JWKS_URL", f"{_base_supabase_url}/auth/v1/.well-known/jwks.json")
+    JWT_ISSUER: str = os.getenv("JWT_ISSUER", f"{_base_supabase_url}/auth/v1")
     JWT_AUDIENCE: str = os.getenv("JWT_AUDIENCE", "authenticated")
     JWT_ALGORITHM: str = "ES256"
 
