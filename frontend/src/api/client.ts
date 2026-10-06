@@ -62,7 +62,13 @@ class ApiClient {
       headers.set('Authorization', `Bearer ${accessToken}`);
     }
 
-    const response = await fetch(endpoint, {
+    const rawApiUrl = import.meta.env.VITE_API_URL;
+    const baseUrl = rawApiUrl 
+      ? rawApiUrl.replace(/\/api\/?$/, '') 
+      : 'https://group-01-project-production.up.railway.app';
+    const targetUrl = endpoint.startsWith('http') ? endpoint : `${baseUrl}${endpoint}`;
+
+    const response = await fetch(targetUrl, {
       ...options,
       headers,
     });
