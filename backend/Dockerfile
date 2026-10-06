@@ -11,8 +11,10 @@ COPY prisma prisma/
 RUN prisma generate
 
 COPY app app/
+COPY start.sh .
+RUN chmod +x start.sh
 
 ENV PORT=8080
 EXPOSE 8080
 
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8080}"]
+CMD ["./start.sh"]
