@@ -1,0 +1,15 @@
+[phases.setup]
+nixPkgs = ["python311", "nodejs"]
+
+[phases.install]
+cmds = [
+  "if [ -f requirements.txt ]; then pip install -r requirements.txt; elif [ -f backend/requirements.txt ]; then pip install -r backend/requirements.txt; fi"
+]
+
+[phases.build]
+cmds = [
+  "if [ -d backend/prisma ]; then cd backend && prisma generate && cd ..; else prisma generate; fi"
+]
+
+[start]
+cmd = "if [ -d backend ]; then cd backend; fi && python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT"
