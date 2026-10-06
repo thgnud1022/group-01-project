@@ -1,9 +1,0 @@
-{
-  "$schema": "https://railway.app/railway.schema.json",
-  "build": {
-    "buildCommand": "export PATH=\"$HOME/.local/bin:/root/.local/bin:$PATH\" && pip install -r requirements.txt && prisma generate"
-  },
-  "deploy": {
-    "startCommand": "export PATH=\"$HOME/.local/bin:/root/.local/bin:$PATH\" && python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT"
-  }
-}
