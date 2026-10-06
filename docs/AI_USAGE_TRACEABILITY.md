@@ -201,20 +201,20 @@ $$\text{AI Activity} \longrightarrow \text{Artifact} \longrightarrow \text{User 
     - Quyền hạn con người: Con người phê duyệt repository GitHub, phân quyền truy cập và kích hoạt kết nối Railway / Vercel từ GitHub source repository `final-delivery`.
     - Production Code Changes = NONE; Database / Schema Changes = NONE; Git Push = FINAL-DELIVERY & V1.0.0-FINAL ONLY; Force Push = NOT PERFORMED.
 
-21. **Railway Backend Deployment from GitHub (Deliverable 3.2 / AI-087):** `TECHNICAL: BLOCKED (AWAITING HUMAN PROVISIONING ON RAILWAY) | COURSE 3.2: MISSING PUBLIC BACKEND URL` — Đã hoàn tất thẩm định điều kiện tiên quyết về toàn vẹn mã nguồn, xác nhận zero diff giữa release tag `v1.0.0-final` và HEAD, kiểm định lệnh build/start backend và các biến môi trường bắt buộc cho Railway. Truy vết kỹ thuật: `AI-087` $\rightarrow$ Railway Backend Deployment $\rightarrow$ Deliverable 3.2 $\rightarrow$ Release Integrity Check (PASS) $\rightarrow$ Railway Config Audit $\rightarrow$ Human Confirmation $\rightarrow$ Deployment Blocked Pending Provisioning.
+21. **Railway Backend Deployment from GitHub (Deliverable 3.2 / AI-087):** `TECHNICAL: PROVISIONED & CONFIGURED | COURSE 3.2: BACKEND SERVICE CREATED ON RAILWAY` — Đã hoàn tất thẩm định điều kiện tiên quyết về toàn vẹn mã nguồn, xác nhận zero diff giữa release tag `v1.0.0-final` và HEAD, cấu hình dịch vụ Railway Web Service kết nối GitHub repository `thgnud1022/group-01-project` nhánh `final-delivery`. Bổ sung `backend/requirements.txt` nhằm tương thích chuẩn xác với Railpack builder, đảm bảo `uvicorn` và `prisma` khả dụng trên container chạy cuối cùng. Truy vết kỹ thuật: `AI-087` $\rightarrow$ Railway Backend Deployment $\rightarrow$ Deliverable 3.2 $\rightarrow$ Release Integrity Check (PASS) $\rightarrow$ Railway Config Audit $\rightarrow$ Human Service Provisioning $\rightarrow$ Domain Generated (`https://group-01-project-production.up.railway.app`).
     - Thẩm định toàn vẹn mã nguồn phát hành (Release Integrity Precondition):
       - Lệnh diff: `git diff "v1.0.0-final..HEAD" -- backend/app frontend/src backend/prisma`.
       - Kết quả: **Production code difference = NONE**. Toàn bộ mã nguồn backend, frontend và Prisma schema đồng nhất 100% với release snapshot `v1.0.0-final` (`9de899d8d45c6f1c5dc42eb9b29abad23a5ebc29`).
     - Thẩm định cấu hình Railway Build & Start:
       - Source repo: GitHub `thgnud1022/group-01-project`, branch `final-delivery`, Root Directory: `backend`.
-      - Build Command: `pip install . && prisma generate`.
+      - Build Command: `pip install -r requirements.txt && prisma generate`.
       - Start Command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`.
       - Biến môi trường bắt buộc: `DATABASE_URL` (Supabase PostgreSQL pooler/session), `SUPABASE_URL` (`https://sthjkfssmvoswocnttrw.supabase.co`), `PORT` (Railway tự cấp).
     - Trạng thái triển khai và ranh giới hệ thống:
-      - Trạng thái: **DEPLOYMENT BLOCKED** do chưa khởi tạo service trên Railway.
-      - Public Backend URL: **MISSING / PENDING PROVISIONING**.
+      - Trạng thái: **PROVISIONED**. Dịch vụ `group-01-project` đã được khởi tạo và cấu hình.
+      - Public Backend URL: `https://group-01-project-production.up.railway.app`.
       - CSDL Supabase PostgreSQL: Bảo toàn 100%, kết nối an toàn, 0 thao tác phá hủy.
-    - Kết luận kiểm định: Technical Readiness đạt **BLOCKED (AWAITING HUMAN PROVISIONING ON RAILWAY)**; Course Deliverable 3.2 tiếp tục ở trạng thái **TAG READY / PUBLIC DEMO STILL MISSING**.
+    - Kết luận kiểm định: Technical Readiness đạt **PROVISIONED**; Course Deliverable 3.2 đạt trạng thái **BACKEND URL GENERATED / CONFIGURING DEPLOYMENT RUNTIME**.
     - Quyền hạn con người: Con người trực tiếp tạo service trên Railway Web Dashboard, kết nối GitHub repository `thgnud1022/group-01-project`, chọn branch `final-delivery`, đặt Root Directory `backend`, cấu hình biến môi trường (`DATABASE_URL`, `SUPABASE_URL`), thực hiện Generate Domain và cung cấp URL công khai.
     - Production Code Changes = NONE; Database / Schema Changes = NONE; Git Push = FINAL-DELIVERY ONLY; Force Push = NOT PERFORMED.
 

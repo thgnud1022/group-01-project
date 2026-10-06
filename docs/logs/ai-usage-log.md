@@ -385,7 +385,8 @@ Tài liệu này ghi nhận nhật ký sử dụng AI (Gemini / Antigravity) tro
      - Tuyệt đối không thực hiện force push (`--force`), không push `main` hay các branch khác.
   5. Đối soát hậu kiểm (Post-Push Verification): Kiểm tra `git ls-remote` xác nhận branch `final-delivery` và tag `v1.0.0-final` đã hiện diện trên remote GitHub.
 - **Artifact:** GitHub source repository (`origin/final-delivery`), release tag `v1.0.0-final`.
-- **Verification:** `git status`, `git ls-files`, `git diff`, `git ls-remote --heads origin final-delivery`, `git ls-remote --tags origin v1.0.0-final`; 0 mã nguồn production bị sửa đổi; 0 schema database thay đổi; không viết lại lịch sử Git (No history rewrite); force push = NOT PERFORMED.
+- **Verification:** `git status`, `git ls-files`, `git diff`, `git ls-remote --heads origin final-delivery`, `git ls-remote --tags origin v1.0.0-final`; 0 mã nguồn production bị sửa đổi; 0 schema database thay đổi; không viết lại lịch sử Git (No history rew
+rite); force push = NOT PERFORMED.
 - **Trách nhiệm Con người (Human Responsibility):** **Con người phê duyệt GitHub repository chính thức, kiểm soát chế độ hiển thị (public/private), xác nhận quyền truy cập và chọn `final-delivery` làm nguồn triển khai chính thức cho Railway và Vercel.**
 
 ### AI-087 — Railway Backend Deployment from GitHub (Deliverable 3.2)
