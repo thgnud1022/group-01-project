@@ -188,6 +188,19 @@ $$\text{AI Activity} \longrightarrow \text{Artifact} \longrightarrow \text{User 
    - Quyền hạn con người: Con người quyết định phương án: (1) Cài đặt Railway CLI và login cục bộ, HOẶC (2) Sử dụng Web Dashboard của Railway để import/connect GitHub repository và deploy Web Service; cấu hình biến môi trường (`DATABASE_URL`, `SUPABASE_URL`) và kích hoạt triển khai dịch vụ.
    - Production Code Changes = NONE; Database / Schema Changes = NONE; Git Push = NOT PERFORMED; Deploy Production = BLOCKED (CHƯA THỰC HIỆN).
 
+20. **Controlled GitHub Push / Full Repository Source Publication (Deliverable 3.1 & 3.2 / AI-086):** `SOURCE REPOSITORY: READY | RELEASE TAG: PUSHED | PUBLIC DEPLOYMENT: READY FOR PROVISIONING` — Đã hoàn tất thẩm định an toàn bảo mật, kiểm tra tính bất biến của release tag và thực thi đẩy toàn bộ repository lên GitHub chính thức cho branch `final-delivery` cùng release tag `v1.0.0-final`. Truy vết kỹ thuật: `AI-086` $\rightarrow$ Controlled GitHub Push $\rightarrow$ Deliverable 3.1 & 3.2 $\rightarrow$ Secret Audit (PASS) $\rightarrow$ Tag Verification (`9de899d8...`) $\rightarrow$ Push `origin/final-delivery` $\rightarrow$ Push `origin v1.0.0-final`.
+    - Thẩm định an toàn bí mật (Secret Security Audit):
+      - Kiểm tra file tracked: `git ls-files` không có bất kỳ file `.env`, credentials, private key, token nào; chỉ chứa `.env.example` với giá trị placeholder mẫu.
+      - File `.env` thực tế được `.gitignore` bảo vệ tuyệt đối, working tree sạch hoàn toàn trước khi push.
+    - Thẩm định Release Tag:
+      - `v1.0.0-final` trỏ chính xác commit `9de899d8d45c6f1c5dc42eb9b29abad23a5ebc29`. Tag không bị thay đổi, di chuyển hay tạo lại.
+    - Thực thi Push có kiểm soát (Controlled Push):
+      - Thực hiện lệnh: `git push -u origin final-delivery` và `git push origin v1.0.0-final`.
+      - Tuyệt đối không dùng `--force`, không ghi đè lịch sử (No history rewrite), không push branch `main`/`master`.
+    - Kết luận kiểm định: Deliverable 3.1 (Source Repository) đạt trạng thái **READY**; Deliverable 3.2 (Release Tag) đạt trạng thái **TAG PUSHED / PUBLIC DEMO READY FOR PROVISIONING**. Nguồn source cho Railway và Vercel sẵn sàng tại branch `final-delivery`.
+    - Quyền hạn con người: Con người phê duyệt repository GitHub, phân quyền truy cập và kích hoạt kết nối Railway / Vercel từ GitHub source repository `final-delivery`.
+    - Production Code Changes = NONE; Database / Schema Changes = NONE; Git Push = FINAL-DELIVERY & V1.0.0-FINAL ONLY; Force Push = NOT PERFORMED.
+
 ---
 
 ## 4. Báo cáo kiểm chứng Final Full Lifecycle E2E Status

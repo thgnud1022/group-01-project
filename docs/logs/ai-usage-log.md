@@ -372,6 +372,22 @@ Tài liệu này ghi nhận nhật ký sử dụng AI (Gemini / Antigravity) tro
 - **Verification:** Kiểm tra terminal command `railway --version`, `git diff`; xác nhận 0 mã nguồn production bị sửa đổi; 0 schema database thay đổi; lệnh `git push` tuyệt đối không thực hiện; CSDL Supabase an toàn 100%.
 - **Trách nhiệm Con người (Human Responsibility):** **Con người sở hữu tài khoản Railway, quyết định phương thức deploy (cài đặt CLI cục bộ hoặc sử dụng Web Dashboard của Railway kết nối GitHub), cung cấp credentials/secrets và kích hoạt triển khai dịch vụ.**
 
+### AI-086 — Controlled GitHub Push / Full Repository Source Publication (Deliverable 3.1 & 3.2)
+- **AI Activity:** Controlled GitHub Push / Full Repository Source Publication
+- **Input / Context:** `final-delivery` repository, release tag `v1.0.0-final` (`9de899d8d45c6f1c5dc42eb9b29abad23a5ebc29`), remote `origin` (`https://github.com/thgnud1022/group-01-project.git`).
+- **AI Assistance:**
+  1. Kiểm tra toàn diện hiện trạng Git (Git State Audit): Branch hiện tại `final-delivery`, remote `origin` trỏ `https://github.com/thgnud1022/group-01-project.git`, working tree sạch (clean).
+  2. Thẩm định an toàn bí mật (Secret Security Audit): Quét toàn bộ repository và danh sách file tracked trong Git (`git ls-files`); xác nhận 0 file secret/credential/private key/token nào bị theo dõi; chỉ duy nhất các file mẫu an toàn `.env.example` (chứa placeholder) được lưu vết.
+  3. Thẩm định bất biến Release Tag: Kiểm tra `git rev-parse "v1.0.0-final^{commit}"` $\rightarrow$ bảo toàn chính xác target commit `9de899d8d45c6f1c5dc42eb9b29abad23a5ebc29`; không sửa đổi, không force tag, không di chuyển tag.
+  4. Thực thi Controlled GitHub Push:
+     - Push branch `final-delivery` lên `origin/final-delivery` (`git push -u origin final-delivery`).
+     - Push release tag `v1.0.0-final` lên `origin` (`git push origin v1.0.0-final`).
+     - Tuyệt đối không thực hiện force push (`--force`), không push `main` hay các branch khác.
+  5. Đối soát hậu kiểm (Post-Push Verification): Kiểm tra `git ls-remote` xác nhận branch `final-delivery` và tag `v1.0.0-final` đã hiện diện trên remote GitHub.
+- **Artifact:** GitHub source repository (`origin/final-delivery`), release tag `v1.0.0-final`.
+- **Verification:** `git status`, `git ls-files`, `git diff`, `git ls-remote --heads origin final-delivery`, `git ls-remote --tags origin v1.0.0-final`; 0 mã nguồn production bị sửa đổi; 0 schema database thay đổi; không viết lại lịch sử Git (No history rewrite); force push = NOT PERFORMED.
+- **Trách nhiệm Con người (Human Responsibility):** **Con người phê duyệt GitHub repository chính thức, kiểm soát chế độ hiển thị (public/private), xác nhận quyền truy cập và chọn `final-delivery` làm nguồn triển khai chính thức cho Railway và Vercel.**
+
 ---
 
 ## 4. Retrospective (Tổng kết Bài học Kinh nghiệm & Quản trị Rủi ro AI)
