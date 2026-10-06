@@ -104,6 +104,16 @@ async def get_current_identity(
 
     user = await prisma.user.find_unique(where={"authUserId": auth_sub.strip()})
     if not user:
+        token_email = claims.get("email")
+        if token_email and isinstance(token_email, str) and token_email.strip():
+            user_by_email = await prisma.user.find_unique(where={"email": token_email.strip().lower()})
+            if user_by_email:
+                user = await prisma.user.update(
+                    where={"id": user_by_email.id},
+                    data={"authUserId": auth_sub.strip()}
+                )
+
+    if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f"Không tìm thấy hồ sơ người dùng ứng dụng được liên kết với Auth User ID: '{auth_sub}'. Truy cập bị từ chối.",
