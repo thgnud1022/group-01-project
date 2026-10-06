@@ -12,13 +12,9 @@ def _clean_supabase_url(raw_url: str) -> str:
 
 def _resolve_default_supabase_url() -> str:
     raw_env = os.getenv("SUPABASE_URL")
-    if raw_env and raw_env.strip():
+    if raw_env and raw_env.strip() and "sthjkfssmvoswocnttrw" not in raw_env:
         return _clean_supabase_url(raw_env)
-    db_url = os.getenv("DATABASE_URL", "")
-    match = re.search(r"@(?:db\.|aws-[0-9]+-[a-z0-9-]+\.pooler\.)([a-z0-9_-]+)\.supabase\.co", db_url)
-    if match:
-        return f"https://{match.group(1)}.supabase.co"
-    return "https://sthjkfssmvoswocnttrw.supabase.co"
+    return "https://oogcmsouczrmbwughnfb.supabase.co"
 
 
 _base_supabase_url = _resolve_default_supabase_url()

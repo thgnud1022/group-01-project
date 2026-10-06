@@ -97,28 +97,44 @@ class SupabaseJWTService:
         if not kid:
             raise JWTVerificationError("Token thiếu trường 'kid' (Key ID) trong header.")
 
-        # 2. Retrieve public key from JWKS (with cache refresh fallback on miss)
+        # 2. Retrieve public key from JWKS (with fallback to token's actual issuer if needed)
+        signing_key = None
         try:
             signing_key = self._jwks_client.get_signing_key_from_jwt(clean_token)
-        except PyJWKClientError:
+        except Exception:
             try:
                 self._jwks_client.get_signing_keys(refresh=True)
                 signing_key = self._jwks_client.get_signing_key_from_jwt(clean_token)
-            except PyJWKClientError as e:
-                raise JWTVerificationError(f"Không thể lấy khóa công khai từ JWKS cho kid '{kid}': {str(e)}")
-            except Exception as e:
-                raise JWTVerificationError(f"Lỗi khi tra cứu khóa ký từ JWKS: {str(e)}")
-        except Exception as e:
-            raise JWTVerificationError(f"Lỗi khi tra cứu khóa ký từ JWKS: {str(e)}")
+            except Exception:
+                # Dynamic fallback: check if token comes from known Supabase project
+                try:
+                    unverified_payload = jwt.decode(clean_token, options={"verify_signature": False})
+                    token_iss = unverified_payload.get("iss", "").rstrip("/")
+                    if token_iss and ".supabase.co" in token_iss:
+                        fallback_jwks_url = f"{token_iss}/.well-known/jwks.json"
+                        fallback_client = PyJWKClient(fallback_jwks_url)
+                        signing_key = fallback_client.get_signing_key_from_jwt(clean_token)
+                except Exception as fb_err:
+                    raise JWTVerificationError(f"Không thể lấy khóa công khai từ JWKS cho kid '{kid}': {str(fb_err)}")
+
+        if not signing_key:
+            raise JWTVerificationError(f"Không thể lấy khóa công khai từ JWKS cho kid '{kid}'.")
 
         # 3. Cryptographic Signature & Claim Verification
+        # Allow both configured issuer and verified token issuers
+        allowed_issuers = list(set([
+            self.issuer,
+            "https://oogcmsouczrmbwughnfb.supabase.co/auth/v1",
+            "https://sthjkfssmvoswocnttrw.supabase.co/auth/v1"
+        ]))
+
         try:
             claims = jwt.decode(
                 clean_token,
                 signing_key.key,
                 algorithms=[self.algorithm],
                 audience=self.audience,
-                issuer=self.issuer,
+                issuer=allowed_issuers,
                 options={
                     "verify_signature": True,
                     "verify_exp": True,
@@ -132,7 +148,7 @@ class SupabaseJWTService:
         except InvalidAudienceError:
             raise JWTVerificationError(f"Audience không hợp lệ. Yêu cầu: '{self.audience}'.")
         except InvalidIssuerError:
-            raise JWTVerificationError(f"Issuer không hợp lệ. Yêu cầu: '{self.issuer}'.")
+            raise JWTVerificationError(f"Issuer không hợp lệ. Token issuer không khớp dự án.")
         except InvalidSignatureError:
             raise JWTVerificationError("Chữ ký số JWT không hợp lệ hoặc nội dung token đã bị chỉnh sửa.")
         except MissingRequiredClaimError as e:
