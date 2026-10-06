@@ -391,27 +391,26 @@ rite); force push = NOT PERFORMED.
 
 ### AI-087 — Railway Backend Deployment from GitHub (Deliverable 3.2)
 - **AI Activity:** Railway Backend Deployment from GitHub
-- **Input / Context:** GitHub repository `thgnud1022/group-01-project`, branch `final-delivery`, release tag `v1.0.0-final` (`9de899d8d45c6f1c5dc42eb9b29abad23a5ebc29`), HEAD commit `84270de985c1972bf108b97d40cdca1d53ab48db`.
+- **Input / Context:** GitHub repository `thgnud1022/group-01-project`, branch `final-delivery`, release tag `v1.0.0-final` (`9de899d8d45c6f1c5dc42eb9b29abad23a5ebc29`), HEAD commit `b98db4b849f4325804abecd741f59eaebb6c2b18`.
 - **AI Assistance:**
   1. Thẩm định toàn vẹn mã nguồn phát hành (Release Integrity Audit): Kiểm tra `git diff "v1.0.0-final..HEAD" -- backend/app frontend/src backend/prisma` $\rightarrow$ Kết quả: **EMPTY (0 production code differences)**. Mã nguồn backend, frontend và schema CSDL hoàn toàn đồng nhất 100% với release tag `v1.0.0-final`.
   2. Thẩm định cấu hình triển khai Railway (Build & Start Configuration Audit):
      - Source: GitHub `thgnud1022/group-01-project`, branch `final-delivery`.
      - Root Directory: `backend` (chỉ build backend, không build frontend hay docs).
      - Kiến trúc: Python + FastAPI + Uvicorn + Prisma Client Python.
-     - Build Command: `pip install . && prisma generate`.
+     - Build Command: `pip install -r requirements.txt && prisma generate`.
      - Start Command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`.
      - Biến môi trường bắt buộc: `DATABASE_URL` (kết nối Supabase PostgreSQL), `SUPABASE_URL` (`https://sthjkfssmvoswocnttrw.supabase.co`), `PORT` (do Railway cấp phát tự động).
      - Biến môi trường tùy chọn: `GEMINI_API_KEY` (hoặc `LLM_API_KEY`; nếu không có, hệ thống kích hoạt Heuristic Fallback).
-  3. Kiểm tra công cụ và trạng thái dịch vụ Railway:
-     - Railway CLI: `railway 5.63.3` (chưa đăng nhập / `Unauthorized`).
-     - Tương tác Human-in-the-loop: Con người xác nhận chưa khởi tạo service trên Railway.
-     - Trạng thái kỹ thuật: **DEPLOYMENT BLOCKED (AWAITING HUMAN PROVISIONING ON RAILWAY)**.
-     - Public Backend URL: **MISSING / PENDING PROVISIONING**.
+  3. Ghi nhận dịch vụ và xử lý tương thích môi trường chạy (Runtime Compatibility):
+     - Dịch vụ Railway: `group-01-project` (Web Service kết nối GitHub `thgnud1022/group-01-project`).
+     - Public Domain: `https://group-01-project-production.up.railway.app`.
+     - Khắc phục lỗi thiếu gói thực thi: Bổ sung `backend/requirements.txt` chuẩn hóa cho Railpack builder để tự động đưa `uvicorn` và `prisma` vào biến môi trường `$PATH` của container chạy.
+     - Toàn vẹn mã nguồn: 0 thay đổi mã nguồn nghiệp vụ tại `backend/app/**`, `frontend/src/**`, `backend/prisma/**`.
      - CSDL Supabase PostgreSQL: Bảo toàn 100%, không bị ảnh hưởng, không chạy lệnh drop, reset hay migration nào.
-  4. Cung cấp hướng dẫn chi tiết từng bước cho con người để tạo Railway service kết nối GitHub repository và cấu hình biến môi trường.
-- **Artifact:** Báo cáo kiểm định cấu hình triển khai Railway (AI-087).
-- **Verification:** `git diff`, kiểm tra CLI và phản hồi con người; 0 mã nguồn production bị sửa đổi; 0 schema database thay đổi; không viết lại lịch sử Git; CSDL Supabase an toàn 100%.
-- **Trách nhiệm Con người (Human Responsibility):** **Con người sở hữu tài khoản Railway, trực tiếp kết nối GitHub repository `thgnud1022/group-01-project`, chọn branch `final-delivery`, đặt Root Directory là `backend`, cấu hình biến môi trường bí mật (`DATABASE_URL`, `SUPABASE_URL`), thực hiện Generate Domain và cung cấp Public Backend URL để hoàn tất kiểm tra healthcheck.**
+- **Artifact:** `backend/requirements.txt`, tài liệu nhật ký AI-087.
+- **Verification:** `git diff "v1.0.0-final..HEAD" -- backend/app frontend/src backend/prisma` = EMPTY; 0 mã nguồn production bị sửa đổi; 0 schema database thay đổi; không viết lại lịch sử Git; CSDL Supabase an toàn 100%.
+- **Trách nhiệm Con người (Human Responsibility):** **Con người sở hữu tài khoản Railway, trực tiếp kết nối GitHub repository `thgnud1022/group-01-project`, chọn branch `final-delivery`, đặt Root Directory là `backend`, cấu hình biến môi trường bí mật (`DATABASE_URL`, `SUPABASE_URL`), thực hiện Generate Domain và cung cấp Public Backend URL để hoàn tất kiểm tra.**
 
 ---
 
