@@ -51,9 +51,9 @@ export const CollectQuotationsView: React.FC<CollectQuotationsViewProps> = ({
 
   // Form State
   const [selectedSupplierId, setSelectedSupplierId] = useState<string>('');
-  const [quantity, setQuantity] = useState<number>(1);
-  const [unitPrice, setUnitPrice] = useState<number>(0);
-  const [totalAmount, setTotalAmount] = useState<number>(0);
+  const [quantity, setQuantity] = useState<number | ''>(1);
+  const [unitPrice, setUnitPrice] = useState<number | ''>('');
+  const [totalAmount, setTotalAmount] = useState<number | ''>('');
   const [deliveryDays, setDeliveryDays] = useState<number>(3);
   const [warrantyTerms, setWarrantyTerms] = useState<string>('12 tháng chính hãng');
   const [fileUrl, setFileUrl] = useState<string>('quotes/bao-gia.pdf');
@@ -140,18 +140,24 @@ export const CollectQuotationsView: React.FC<CollectQuotationsViewProps> = ({
   };
 
   // Handle unit price change & auto recalculate totalAmount
-  const handleUnitPriceChange = (val: number) => {
+  const handleUnitPriceChange = (val: number | '') => {
     setUnitPrice(val);
-    if (quantity > 0) {
-      setTotalAmount(val * quantity);
+    const numQty = typeof quantity === 'number' ? quantity : (Number(quantity) || 0);
+    if (typeof val === 'number' && numQty > 0) {
+      setTotalAmount(val * numQty);
+    } else if (val === '') {
+      setTotalAmount('');
     }
   };
 
   // Handle quantity change
-  const handleQuantityChange = (val: number) => {
+  const handleQuantityChange = (val: number | '') => {
     setQuantity(val);
-    if (unitPrice > 0) {
-      setTotalAmount(val * unitPrice);
+    const numPrice = typeof unitPrice === 'number' ? unitPrice : (Number(unitPrice) || 0);
+    if (typeof val === 'number' && numPrice > 0) {
+      setTotalAmount(val * numPrice);
+    } else if (val === '') {
+      setTotalAmount('');
     }
   };
 
@@ -161,16 +167,24 @@ export const CollectQuotationsView: React.FC<CollectQuotationsViewProps> = ({
     setFormError(null);
     setFormSuccess(null);
 
+    const numericQty = typeof quantity === 'number' ? quantity : Number(quantity);
+    const numericPrice = typeof unitPrice === 'number' ? unitPrice : Number(unitPrice);
+    const numericTotal = typeof totalAmount === 'number' ? totalAmount : Number(totalAmount);
+
     // Client-side validations
     if (!selectedSupplierId) {
       setFormError('Vui lòng chọn một nhà cung cấp ở Mục 01.');
       return;
     }
-    if (quantity <= 0) {
+    if (!numericQty || numericQty <= 0) {
       setFormError('Số lượng báo giá phải lớn hơn 0.');
       return;
     }
-    if (totalAmount <= 0) {
+    if (!numericPrice || numericPrice <= 0) {
+      setFormError('Đơn giá chào phải lớn hơn 0 ₫.');
+      return;
+    }
+    if (!numericTotal || numericTotal <= 0) {
       setFormError('Tổng giá trị báo giá phải lớn hơn 0 ₫.');
       return;
     }
@@ -184,8 +198,8 @@ export const CollectQuotationsView: React.FC<CollectQuotationsViewProps> = ({
       const created = await api.createQuotation({
         purchaseRequestId: prId,
         supplierId: selectedSupplierId,
-        totalAmount: Number(totalAmount),
-        quantity: Number(quantity),
+        totalAmount: numericTotal,
+        quantity: numericQty,
         deliveryDays: Number(deliveryDays),
         warrantyTerms: warrantyTerms.trim() || undefined,
         fileUrl: fileUrl.trim() || 'quotes/default.pdf',
@@ -197,8 +211,8 @@ export const CollectQuotationsView: React.FC<CollectQuotationsViewProps> = ({
 
       // Reset form fields
       setSelectedSupplierId('');
-      setUnitPrice(0);
-      setTotalAmount(0);
+      setUnitPrice('');
+      setTotalAmount('');
     } catch (err: any) {
       console.error('Create quotation error:', err);
       setFormError(err.message || 'Không thể lưu báo giá vào hệ thống.');
@@ -616,7 +630,10 @@ export const CollectQuotationsView: React.FC<CollectQuotationsViewProps> = ({
                       type="number"
                       min={1}
                       value={unitPrice}
-                      onChange={(e) => handleUnitPriceChange(Number(e.target.value))}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        handleUnitPriceChange(val === '' ? '' : Number(val));
+                      }}
                       placeholder="e.g. 8500000"
                       required
                       style={{
@@ -642,7 +659,11 @@ export const CollectQuotationsView: React.FC<CollectQuotationsViewProps> = ({
                       type="number"
                       min={1}
                       value={totalAmount}
-                      onChange={(e) => setTotalAmount(Number(e.target.value))}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setTotalAmount(val === '' ? '' : Number(val));
+                      }}
+                      placeholder="e.g. 8500000"
                       required
                       style={{
                         width: '100%',

@@ -409,8 +409,8 @@ export const NewRequestView: React.FC<NewRequestViewProps> = ({
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '6px',
-                    backgroundColor: noteText && !noteText.startsWith('e.g.') ? '#4a56d2' : '#cdd2da',
-                    color: noteText && !noteText.startsWith('e.g.') ? '#ffffff' : '#5a6472',
+                    backgroundColor: '#4a56d2',
+                    color: '#ffffff',
                     border: 'none',
                     borderRadius: '4px',
                     height: '28px',
@@ -418,8 +418,11 @@ export const NewRequestView: React.FC<NewRequestViewProps> = ({
                     fontSize: '12px',
                     fontWeight: 600,
                     cursor: isAiLoading ? 'wait' : 'pointer',
+                    boxShadow: '0 1px 2px rgba(74, 86, 210, 0.2)',
                     transition: 'background-color 0.15s ease',
                   }}
+                  onMouseOver={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#3b46b8'; }}
+                  onMouseOut={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#4a56d2'; }}
                   data-testid="structure-note-btn"
                 >
                   {isAiLoading ? <RefreshCw size={14} className="animate-spin" /> : <Sparkles size={14} />}
