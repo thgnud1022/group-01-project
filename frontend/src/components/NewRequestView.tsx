@@ -6,6 +6,7 @@ import {
   Check, 
   X, 
   AlertCircle,
+  AlertTriangle,
   Settings,
   ArrowRight,
   RefreshCw,
@@ -99,6 +100,7 @@ export const NewRequestView: React.FC<NewRequestViewProps> = ({
   // Submitting state
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
 
   // Calculate estimated total
   const estimatedTotal = useMemo(() => {
@@ -187,10 +189,41 @@ export const NewRequestView: React.FC<NewRequestViewProps> = ({
     );
   };
 
-  // Submit to real backend
+  // Submit to real backend with full validation
   const handleSubmit = async () => {
-    setIsSubmitting(true);
+    setHasAttemptedSubmit(true);
     setSubmitError(null);
+
+    // Validate all mandatory fields marked with *
+    const missing: string[] = [];
+    if (!title.trim()) missing.push('Request title');
+    if (!category.trim()) missing.push('Category');
+    if (!department.trim()) missing.push('Department');
+    if (!costCentre.trim()) missing.push('Cost centre');
+    if (!requiredBy.trim()) missing.push('Required by');
+    if (!deliveryLocation.trim()) missing.push('Delivery location');
+    if (!justification.trim()) missing.push('Business justification');
+
+    if (items.length === 0) {
+      missing.push('Line items (at least 1 item)');
+    } else {
+      if (items.some((it) => !it.itemName.trim())) {
+        missing.push('Item description');
+      }
+      if (items.some((it) => !it.quantity || Number(it.quantity) <= 0)) {
+        missing.push('Quantity must be > 0');
+      }
+      if (items.some((it) => !it.estimatedUnitPrice || Number(it.estimatedUnitPrice) <= 0)) {
+        missing.push('Estimated unit price must be > 0 ₫');
+      }
+    }
+
+    if (missing.length > 0) {
+      setSubmitError(`Không thể gửi yêu cầu: Vui lòng điền đầy đủ các thông tin bắt buộc (*): ${missing.join(', ')}.`);
+      return;
+    }
+
+    setIsSubmitting(true);
 
     // Map department to departmentId
     let deptId = 'DEPT-IT';
@@ -201,11 +234,11 @@ export const NewRequestView: React.FC<NewRequestViewProps> = ({
     try {
       const response = await api.createPR({
         departmentId: deptId,
-        title: title || 'Laptops for engineering onboarding',
+        title: title.trim(),
         items: items.map((it) => ({
-          itemName: it.itemName || 'Thiết bị tiêu chuẩn',
-          quantity: Number(it.quantity) || 1,
-          estimatedUnitPrice: Number(it.estimatedUnitPrice) || 1000000,
+          itemName: it.itemName.trim(),
+          quantity: Number(it.quantity),
+          estimatedUnitPrice: Number(it.estimatedUnitPrice),
         })),
       });
 
@@ -215,16 +248,16 @@ export const NewRequestView: React.FC<NewRequestViewProps> = ({
       if (onErrorState) {
         onErrorState({
           id: 'PR-2026-034',
-          title: title || 'Server rack rails and cable management',
+          title: title.trim(),
           creatorName: user?.name || 'Trương Bảo Long',
-          departmentName: department || 'Engineering',
-          category: category || 'IT Equipment',
-          costCentre: costCentre || 'CC-ENG-2200',
-          requiredBy: requiredBy || '25 Sept 2026',
-          deliveryLocation: deliveryLocation || 'HQ Hanoi · Floor 6 · Goods-in',
-          justification: justification || 'Required for the rack consolidation in September.',
+          departmentName: department,
+          category: category,
+          costCentre: costCentre,
+          requiredBy: requiredBy,
+          deliveryLocation: deliveryLocation,
+          justification: justification,
           items: items,
-          estimatedTotal: estimatedTotal || 14400000,
+          estimatedTotal: estimatedTotal,
           errorMessage: err.message,
         });
       }
@@ -588,7 +621,7 @@ export const NewRequestView: React.FC<NewRequestViewProps> = ({
                     height: '37px',
                     padding: '0 10px',
                     backgroundColor: '#ffffff',
-                    border: '0.667px solid #e4e7ec',
+                    border: hasAttemptedSubmit && !title.trim() ? '1.5px solid #e03131' : '0.667px solid #e4e7ec',
                     borderRadius: '4px',
                     fontSize: '14px',
                     color: '#12161c',
@@ -613,7 +646,7 @@ export const NewRequestView: React.FC<NewRequestViewProps> = ({
                       height: '37px',
                       padding: '0 10px',
                       backgroundColor: '#ffffff',
-                      border: '0.667px solid #e4e7ec',
+                      border: hasAttemptedSubmit && !category.trim() ? '1.5px solid #e03131' : '0.667px solid #e4e7ec',
                       borderRadius: '4px',
                       fontSize: '14px',
                       color: category ? '#12161c' : '#8a929e',
@@ -642,7 +675,7 @@ export const NewRequestView: React.FC<NewRequestViewProps> = ({
                       height: '37px',
                       padding: '0 10px',
                       backgroundColor: '#ffffff',
-                      border: '0.667px solid #e4e7ec',
+                      border: hasAttemptedSubmit && !department.trim() ? '1.5px solid #e03131' : '0.667px solid #e4e7ec',
                       borderRadius: '4px',
                       fontSize: '14px',
                       color: department ? '#12161c' : '#8a929e',
@@ -676,7 +709,7 @@ export const NewRequestView: React.FC<NewRequestViewProps> = ({
                       height: '37px',
                       padding: '0 10px',
                       backgroundColor: '#ffffff',
-                      border: '0.667px solid #e4e7ec',
+                      border: hasAttemptedSubmit && !costCentre.trim() ? '1.5px solid #e03131' : '0.667px solid #e4e7ec',
                       borderRadius: '4px',
                       fontSize: '14px',
                       color: '#12161c',
@@ -702,7 +735,7 @@ export const NewRequestView: React.FC<NewRequestViewProps> = ({
                         height: '37px',
                         padding: '0 36px 0 10px',
                         backgroundColor: '#ffffff',
-                        border: showCalendar ? '0.667px solid #3b5bdb' : '0.667px solid #e4e7ec',
+                        border: hasAttemptedSubmit && !requiredBy.trim() ? '1.5px solid #e03131' : (showCalendar ? '0.667px solid #3b5bdb' : '0.667px solid #e4e7ec'),
                         borderRadius: '4px',
                         fontSize: '14px',
                         color: '#12161c',
@@ -857,7 +890,7 @@ export const NewRequestView: React.FC<NewRequestViewProps> = ({
                     height: '37px',
                     padding: '0 10px',
                     backgroundColor: '#ffffff',
-                    border: '0.667px solid #e4e7ec',
+                    border: hasAttemptedSubmit && !deliveryLocation.trim() ? '1.5px solid #e03131' : '0.667px solid #e4e7ec',
                     borderRadius: '4px',
                     fontSize: '14px',
                     color: '#12161c',
@@ -887,7 +920,7 @@ export const NewRequestView: React.FC<NewRequestViewProps> = ({
                     width: '100%',
                     padding: '8px 10px',
                     backgroundColor: '#ffffff',
-                    border: '0.667px solid #e4e7ec',
+                    border: hasAttemptedSubmit && !justification.trim() ? '1.5px solid #e03131' : '0.667px solid #e4e7ec',
                     borderRadius: '4px',
                     fontSize: '14px',
                     lineHeight: '22px',
@@ -976,7 +1009,7 @@ export const NewRequestView: React.FC<NewRequestViewProps> = ({
                         height: '37px',
                         padding: '0 10px',
                         backgroundColor: '#ffffff',
-                        border: '0.667px solid #e4e7ec',
+                        border: hasAttemptedSubmit && !it.itemName.trim() ? '1.5px solid #e03131' : '0.667px solid #e4e7ec',
                         borderRadius: '4px',
                         fontSize: '14px',
                         color: '#12161c',
@@ -1001,7 +1034,7 @@ export const NewRequestView: React.FC<NewRequestViewProps> = ({
                         height: '37px',
                         padding: '0 8px',
                         backgroundColor: '#ffffff',
-                        border: '0.667px solid #e4e7ec',
+                        border: hasAttemptedSubmit && (!it.quantity || it.quantity <= 0) ? '1.5px solid #e03131' : '0.667px solid #e4e7ec',
                         borderRadius: '4px',
                         fontSize: '14px',
                         color: '#12161c',
@@ -1032,7 +1065,7 @@ export const NewRequestView: React.FC<NewRequestViewProps> = ({
                         height: '37px',
                         padding: '0 8px',
                         backgroundColor: '#ffffff',
-                        border: '0.667px solid #e4e7ec',
+                        border: hasAttemptedSubmit && (!it.estimatedUnitPrice || it.estimatedUnitPrice <= 0) ? '1.5px solid #e03131' : '0.667px solid #e4e7ec',
                         borderRadius: '4px',
                         fontSize: '14px',
                         color: '#12161c',
@@ -1348,6 +1381,26 @@ export const NewRequestView: React.FC<NewRequestViewProps> = ({
 
           {/* Action buttons */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {submitError && (
+              <div
+                style={{
+                  backgroundColor: '#fdf2f2',
+                  border: '0.667px solid #f8b4b4',
+                  borderRadius: '4px',
+                  padding: '10px 12px',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '8px',
+                  fontSize: '12px',
+                  color: '#9b1c1c',
+                  lineHeight: '18px',
+                }}
+                data-testid="submit-error-banner"
+              >
+                <AlertTriangle size={16} color="#9b1c1c" style={{ flexShrink: 0, marginTop: '1px' }} />
+                <span>{submitError}</span>
+              </div>
+            )}
             <button
               type="button"
               onClick={handleSubmit}
