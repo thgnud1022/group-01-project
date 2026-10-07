@@ -414,6 +414,49 @@ rite); force push = NOT PERFORMED.
 - **Verification:** `curl https://group-01-project-production.up.railway.app/api/health` = 200 OK; `curl https://group-01-project-production.up.railway.app/docs` = 200 OK; `git diff "v1.0.0-final..HEAD" -- backend/app frontend/src backend/prisma` = EMPTY; 0 mã nguồn production bị sửa đổi; 0 schema database thay đổi; không viết lại lịch sử Git; CSDL Supabase an toàn 100%.
 - **Trách nhiệm Con người (Human Responsibility):** **Con người sở hữu tài khoản Railway, trực tiếp kết nối GitHub repository `thgnud1022/group-01-project`, chọn branch `final-delivery`, đặt Root Directory là `backend`, cấu hình biến môi trường bí mật (`DATABASE_URL`, `SUPABASE_URL`), thực hiện Generate Domain và xác nhận Public Backend URL đã hoạt động.**
 
+### AI-089 — Public Release Smoke Test — Vercel + Railway + Supabase (Deliverable 3.2)
+- **AI Activity:** Public Release Smoke Test — Vercel + Railway + Supabase
+- **Input / Context:**
+  - Vercel Frontend URL: `https://group-01-project.vercel.app`
+  - Railway Backend URL: `https://group-01-project-production.up.railway.app`
+  - Supabase Database & Auth: `https://oogcmsouczrmbwughnfb.supabase.co`
+  - Release Tag: `v1.0.0-final` (`9de899d8d45c6f1c5dc42eb9b29abad23a5ebc29`)
+  - Branch: `final-delivery`
+- **AI Assistance & Execution:**
+  1. **Toàn vẹn Git & Release Tag:** Kiểm tra `git rev-parse "v1.0.0-final^{commit}"` = `9de899d8d45c6f1c5dc42eb9b29abad23a5ebc29`. Không sửa, không xóa, không di chuyển tag, không force push.
+  2. **Frontend Public Smoke:** Kiểm tra `https://group-01-project.vercel.app` $\rightarrow$ HTTP 200 OK, SPA HTML tải hoàn tất, nạp tài nguyên `index-B68zlvqa.js` thành công, không màn hình trắng.
+  3. **Backend Public Smoke & DB Connection:** Kiểm tra `GET https://group-01-project-production.up.railway.app/api/health` $\rightarrow$ **HTTP 200 OK**:
+     `{"status":"ok","database":"PostgreSQL Connected (Prisma)","db_details":{"healthy":true,"connected":true,"database":"PostgreSQL (Supabase)","query_result":[{"health_check":1}]},"ai_service":"Active (Mock Fast Fallback)"}`.
+  4. **API Routing & CORS:** Header `Access-Control-Allow-Origin: https://group-01-project.vercel.app` và `Access-Control-Allow-Credentials: true` được backend chấp nhận cho preflight OPTIONS và API requests.
+  5. **Authentication Verification:** Thực hiện đăng nhập 4 tài khoản Supabase Auth thật (`employee`, `manager`, `procurement`, `admin` qua password `password123`) $\rightarrow$ nhận JWT hợp lệ $\rightarrow$ gọi `/api/auth/me` thành công với HTTP 200 (xác minh định danh phân vai trò máy chủ).
+  6. **Server-Side RBAC Enforcement:**
+     - Truy cập bảo vệ không token $\rightarrow$ **HTTP 401 Unauthorized** (bảo vệ nghiêm ngặt).
+     - Role EMPLOYEE cố tình phê duyệt PR $\rightarrow$ **HTTP 403 Forbidden** (bảo vệ server-side phân quyền, không bypass).
+  7. **Critical Happy Path Smoke Test:**
+     - Employee tạo PR: `PR-2026-039` $\rightarrow$ HTTP 200, `status = PENDING_MANAGER_APPROVAL`.
+     - Manager phê duyệt: `POST /api/pr/PR-2026-039/approve` $\rightarrow$ HTTP 200, `status = APPROVED`.
+     - Procurement thu thập báo giá: `POST /api/quotations` $\rightarrow$ HTTP 200, tạo `Quote ce7ca006-...`.
+     - Human Award & Khởi tạo PO: `POST /api/po` $\rightarrow$ HTTP 200, sinh `PO-NUM-2026-20261007-FB29BE37`, `status = PO_CREATED`.
+     - Goods Receiving: `POST /api/receiving` $\rightarrow$ HTTP 200, nhận 1/1 đơn vị, đính kèm chứng từ giao nhận.
+     - Final PR Close & Quyết toán: `POST /api/pr/PR-2026-039/close` $\rightarrow$ HTTP 200, `status = CLOSED`.
+  8. **Failure Path Guard Verification:** Thử nghiệm đóng PR trước khi nhận hàng $\rightarrow$ Backend chặn đứng với **HTTP 400 Bad Request** (`Không thể đóng PR: Hàng chưa được nhận đủ`).
+  9. **Kiểm chứng Lưu vết CSDL (Persistence):** Re-fetch PR `PR-2026-039` sau khi đóng $\rightarrow$ HTTP 200, trạng thái `CLOSED`, dữ liệu hoàn toàn bền vững trong Supabase PostgreSQL.
+- **Output:** Biên bản xác minh Public Release Smoke Test `scratch/ai089_public_smoke.py`, log thực thi 100% PASS trên live stack.
+- **Verification:**
+  - Frontend: `https://group-01-project.vercel.app` (HTTP 200 PASS)
+  - Backend: `https://group-01-project-production.up.railway.app` (HTTP 200 PASS)
+  - /api/health: PASS (db: PostgreSQL Connected)
+  - Authentication: PASS (/api/auth/me 200 OK)
+  - RBAC: PASS (Unauth 401, Forbidden 403)
+  - Happy Path: PASS (Tạo PR $\rightarrow$ Duyệt $\rightarrow$ Báo giá $\rightarrow$ PO $\rightarrow$ Nhận hàng $\rightarrow$ Đóng PR)
+  - Failure Path: PASS (Chặn đóng PR khi chưa nhận hàng: 400)
+  - Persistence: PASS (Lưu vết CSDL thành công)
+  - Gemini Live: UNVERIFIED (Fallback Heuristic: ACTIVE)
+- **Trách nhiệm Con người (Human Responsibility):** **Human sở hữu cloud accounts (Vercel, Railway, Supabase), quản lý các biến môi trường bí mật, kiểm soát việc phân quyền và nghiệm thu bản phát hành chính thức.**
+- **Production Code Changes:** NONE.
+- **Database/Schema Changes:** NONE.
+- **Tag Changed:** NO (Bảo toàn nguyên vẹn `v1.0.0-final` tại `9de899d8d45c6f1c5dc42eb9b29abad23a5ebc29`).
+
 ---
 
 ## 4. Retrospective (Tổng kết Bài học Kinh nghiệm & Quản trị Rủi ro AI)
