@@ -456,7 +456,7 @@ Thực hiện thẩm định mức độ tuân thủ chuẩn đầu ra và yêu 
 | **2.10** | API Contract | Endpoints, auth, request, response, error | `docs/05-technical/API.md`<br>FastAPI `/docs` (OpenAPI) | 19 endpoints chuẩn RESTful, Pydantic schemas, Swagger UI | Nguyễn Thị Thùy Dung / Giang | **PASS** | Tài liệu hợp đồng API đầy đủ, kiểm chứng qua test suites. |
 | **2.11** | Story Specs + Traceability v1 | REQ $\rightarrow$ Story $\rightarrow$ Screen $\rightarrow$ API $\rightarrow$ Task | `docs/06-testing/traceability-matrix.md`<br>`docs/AI_USAGE_TRACEABILITY.md` | Bảng ma trận ánh xạ 10 stories với tasks và test | Nguyễn Trương Thùy Dương | **PASS** | Không có orphan story, liên kết thông suốt. |
 | **3.1** | Source Repository | Clean structure, branch, commits, no secrets | Local Git repo & GitHub remote `thgnud1022/group-01-project` | Branch `final-delivery`, commit HEAD `cc84847`, `.env` an toàn | Trần Thị Kiều Giang | **PASS** | Cấu trúc chuẩn, không rò rỉ secret, commit có quy chuẩn. |
-| **3.2** | Release chạy được | Demo URL + tag `v1.0.0-final`, chạy từ release | Local stack chạy qua `npm run dev` / FastAPI | `git tag -l` rỗng; chưa deploy public URL | Trần Thị Kiều Giang / Nhóm | **MISSING EVIDENCE** | **GAP CRITICAL:** Cần tạo tag `v1.0.0-final` trên Git và chuẩn bị phương án deploy public (Render/Vercel/Railway) hoặc demo local chuẩn mực. |
+| **3.2** | Release chạy được | Demo URL + tag `v1.0.0-final`, chạy từ release | Public Frontend: `https://group-01-project.vercel.app`<br>Public Backend: `https://group-01-project-production.up.railway.app`<br>Git Tag: `v1.0.0-final` (`9de899d8d45c6f1c5dc42eb9b29abad23a5ebc29`) | AI-089 Public Smoke Suite (`scratch/ai089_public_smoke.py`): Frontend 200, Backend /api/health 200, Supabase DB connected, Auth 200, RBAC guards (401/403), Happy Path (PR-2026-039 CLOSED), Failure Path (400), Persistence verified | Trần Thị Kiều Giang / Nhóm | **COMPLETE** | Đã triển khai công khai trên Vercel + Railway, gắn tag Git `v1.0.0-final` bất biến, kiểm chứng đầy đủ 100% qua kịch bản khói AI-089. |
 | **3.3** | Authentication + Authorization | Login, session, token, roles, denied cases | `backend/app/core/auth.py`, `rbac.py` | Supabase JWT ES256, RBAC 19 endpoints, 28/28 tests PASS (`test_rbac.py`) | Nguyễn Thị Thùy Dung | **PASS** | Bảo vệ máy chủ fail-closed, No Self-Approval (GOV-01). |
 | **3.4** | Business Workflow | Happy path + failure paths, E2E evidence | `frontend/scripts/test_final_full_lifecycle_e2e.js` | 14/14 steps PASS, 8 screenshots, status guards, HD-04 & HD-07 | Trần Thị Thu Hà | **PASS** | Kiểm chứng cả luồng thành công và các nhánh chặn lỗi. |
 | **3.5** | AI Feature | Value, structured output, validation, fallback, dataset $\ge 20$ | `backend/app/services/ai_service.py`<br>`docs/evaluation/TASK-010-DATASET.json` | 24 evaluation cases (100% pass rubric), Fallback Heuristic 78%, Pydantic validation | Nguyễn Trúc Lam | **PASS WITH DISCLOSURE** | Hoạt động tốt ở chế độ Fallback; Live Gemini ghi nhận `UNVERIFIED`. Không tự động tạo PO. |
@@ -477,14 +477,14 @@ Thực hiện thẩm định mức độ tuân thủ chuẩn đầu ra và yêu 
 
 $$\begin{aligned}
 \textbf{Tổng số Deliverables bắt buộc:} &\quad \mathbf{32} \\
-\textbf{Đạt chuẩn có Bằng chứng Thực nghiệm (PASS):} &\quad \mathbf{22} \quad (68.75\%) \\
+\textbf{Đạt chuẩn có Bằng chứng Thực nghiệm (PASS / COMPLETE):} &\quad \mathbf{23} \quad (71.88\%) \\
 \textbf{Triển khai một phần (PARTIALLY IMPLEMENTED):} &\quad \mathbf{5} \quad (15.63\%) \\
-\textbf{Thiếu Bằng chứng Thực nghiệm (MISSING EVIDENCE):} &\quad \mathbf{4} \quad (12.50\%) \\
+\textbf{Thiếu Bằng chứng Thực nghiệm (MISSING EVIDENCE):} &\quad \mathbf{3} \quad (9.38\%) \\
 \textbf{Mâu thuẫn Tài liệu (INCONSISTENT):} &\quad \mathbf{1} \quad (3.12\%) \\
 \textbf{Chưa khởi động (NOT STARTED):} &\quad \mathbf{0} \quad (0.00\%)
 \end{aligned}$$
 
-*(Lưu ý: Tỷ lệ Evidence Coverage 68.75% là chỉ số đo lường mức độ hoàn thiện minh chứng nội bộ của nhóm phục vụ hoàn thiện hồ sơ, KHÔNG diễn giải thành điểm số học phần).*
+*(Lưu ý: Tỷ lệ Evidence Coverage 71.88% là chỉ số đo lường mức độ hoàn thiện minh chứng nội bộ của nhóm phục vụ hoàn thiện hồ sơ sau khi hoàn tất Deliverable 3.2 Public Release tại AI-089/AI-090, KHÔNG diễn giải thành điểm số học phần).*
 
 ---
 
@@ -579,8 +579,8 @@ Sinh viên → User Story Cốt lõi → Business/Tech Tasks → Code Files → 
 
 | Phân loại Mức độ | Hạng mục Deliverable | Khoảng trống Kỹ thuật / Tài liệu (Gap) | Căn cứ Bằng chứng (Evidence) | Hành động Bắt buộc Nhóm cần Thực hiện | Người phụ trách |
 |:---:|---|---|---|---|:---:|
+| **RESOLVED / COMPLETE** | **3.2 Release chạy được** | Đã hoàn thành Public Deployment và kiểm chứng E2E qua AI-089 | Frontend Vercel: `https://group-01-project.vercel.app`<br>Backend Railway: `https://group-01-project-production.up.railway.app`<br>Tag `v1.0.0-final` (`9de899d8d45c6f1c5dc42eb9b29abad23a5ebc29`) | Đã kiểm chứng 100% qua kịch bản khói AI-089 (HTTP 200, Supabase DB, RBAC, Happy path, Failure path 400). | Trần Thị Kiều Giang |
 | **CRITICAL BEFORE SUBMISSION** | **2.4 Usability Test** | Thiếu biên bản kiểm thử người dùng thật $\ge 3$ người | `docs/03-product/usability-findings.md` hiện rỗng | Tổ chức test trực tiếp trên 3 người dùng, ghi nhận biên bản quan sát và cải tiến giao diện. | Trần Thị Thu Hà / Cả nhóm |
-| **CRITICAL BEFORE SUBMISSION** | **3.2 Release chạy được** | Thiếu Git Release Tag `v1.0.0-final` và public Demo URL | `git tag -l` rỗng; chưa deploy cloud | Gắn tag `git tag v1.0.0-final`; chuẩn bị demo video hoặc deploy link lên Render/Vercel. | Trần Thị Kiều Giang |
 | **HIGH** | **2.6 Taiga Backlog** | Chưa có issues thực tế trên nền tảng Taiga | `docs/03-product/taiga-backlog.md` ghi TBD | Đăng ký project trên `tree.taiga.io`, nhập Epics/Stories/Tasks, cung cấp link công khai. | Nguyễn Trương Thùy Dương |
 | **HIGH** | **3.6 Code Review Evidence** | Thiếu biên bản / checklist Code Review mẫu | Chưa có file `code-review.md` trong repo | Lập file `docs/07-release/code-review.md` ghi nhận review checklist và phê duyệt giữa Dev/QA. | Trần Thị Thu Hà |
 | **HIGH** | **3.13 Release Notes** | Tài liệu `release-notes.md` cũ chứa nội dung mâu thuẫn | File ghi "Playwright" và "0% hallucination" | Soạn lại `docs/07-release/release-notes.md` đồng bộ chuẩn mực với Final QA Gate Report. | Nguyễn Trương Thùy Dương |
@@ -595,5 +595,5 @@ Sinh viên → User Story Cốt lõi → Business/Tech Tasks → Code Files → 
 
 $$\Large\textbf{COURSE COMPLIANCE = READY WITH GAPS}$$
 
-- **Đánh giá tổng thể:** Hệ thống kỹ thuật cốt lõi (Backend FastAPI, Database Supabase PostgreSQL, Authentication JWT ES256, Server-Side RBAC, 133/133 Tests PASS, 14/14 E2E Steps PASS) đạt trạng thái **RELEASE READY WITH KNOWN LIMITATIONS**.
-- **Điều kiện nghiệm thu học thuật:** Nhóm **CẦN BỔ SUNG KHẨN CẤP** 2 hạng mục Critical (`Usability Test` và gắn Git Tag `v1.0.0-final`) cùng các tài liệu minh chứng hỗ trợ (`Taiga URL`, `Code Review`, `Release Notes` chuẩn) theo danh mục tại Mục 22.5 trước khi hoàn thiện Báo cáo Đồ án, Slide Thuyết trình và bước vào phiên Vấn đáp (Viva) chính thức.
+- **Đánh giá tổng thể:** Hệ thống kỹ thuật cốt lõi (Backend FastAPI, Database Supabase PostgreSQL, Authentication JWT ES256, Server-Side RBAC, 133/133 Tests PASS, 14/14 E2E Steps PASS, Public Demo Vercel + Railway + Supabase) đạt trạng thái **RELEASE READY WITH KNOWN LIMITATIONS** (Deliverable 3.2 đã hoàn thành trọn vẹn).
+- **Điều kiện nghiệm thu học thuật:** Nhóm **CẦN BỔ SUNG KHẨN CẤP** 1 hạng mục Critical còn lại (`Usability Test` trên $\ge 3$ người dùng thật; trong khi `Release chạy được & Git Tag v1.0.0-final` đã hoàn thành 100% tại AI-089/AI-090) cùng các tài liệu minh chứng hỗ trợ (`Taiga URL`, `Code Review`, `Release Notes` chuẩn) theo danh mục tại Mục 22.5 trước khi hoàn thiện Báo cáo Đồ án, Slide Thuyết trình và bước vào phiên Vấn đáp (Viva) chính thức.

@@ -61,13 +61,28 @@ The following artifacts are explicitly required in the "DANH SÁCH ARTIFACT PH�
 All 32 deliverables listed in Section 2 require actual evidence. "Slide mô tả" is not accepted as evidence. 
 
 **Items That Cannot Be Claimed Complete Without Execution Evidence:**
-- 3.2 Release chạy được: "Ứng dụng release thực tế; dữ liệu demo; workflow chính" -> Demo URL + tag v1.0.0-final.
-- 3.3 Authentication + Authorization: "Demo allowed + denied action."
-- 3.4 Business Workflow: "Demo happy + failure path."
-- 3.5 AI Feature: "Demo 2 case pass + 1 edge/fallback."
-- 3.8 Automated Tests: "Chạy test hoặc mở CI pass."
+- **3.2 Release chạy được:** **COMPLETE**
+  - **Public Frontend URL:** `https://group-01-project.vercel.app`
+  - **Public Backend URL:** `https://group-01-project-production.up.railway.app`
+  - **Git Tag:** `v1.0.0-final` (`9de899d8d45c6f1c5dc42eb9b29abad23a5ebc29`)
+  - **Release Evidence (AI-089 Public Smoke Test):**
+    - Vercel frontend reachable (HTTP 200 OK, SPA asset loaded)
+    - Railway backend reachable (HTTP 200 OK)
+    - `/api/health` HTTP 200 OK (`status: ok`)
+    - Supabase PostgreSQL connected (`PostgreSQL Connected (Prisma)`)
+    - Authentication verified (Supabase Auth token -> `/api/auth/me` HTTP 200)
+    - RBAC denied unauthorized actions (HTTP 401 unauthenticated, HTTP 403 employee approve PR)
+    - Happy path verified (PR-2026-039 -> APPROVED -> quotation -> award -> PO -> receiving 1/1 -> CLOSED)
+    - Failure path verified (Close before receiving complete -> HTTP 400 -> "Không thể đóng PR: Hàng chưa được nhận đủ")
+    - Persistence verified (PR-2026-039 remains CLOSED in Supabase after re-fetch)
+- **3.3 Authentication + Authorization:** "Demo allowed + denied action." (VERIFIED: `/api/auth/me` allowed; unauthenticated 401, employee approve 403 denied).
+- **3.4 Business Workflow:** **VERIFIED**
+  - **Happy Path:** PASS (Verified scenarios PASS: Full cycle PR Creation -> Manager Approval -> Sourcing Quotation -> Human Award & PO -> Receiving -> Close PR & Budget Settlement)
+  - **Failure Path:** PASS (Verified failure guard: Close PR before receiving completion -> HTTP 400 blocked: "Không thể đóng PR: Hàng chưa được nhận đủ")
+- 3.5 AI Feature: "Demo 2 case pass + 1 edge/fallback." (Advisory Fallback Heuristic active; Gemini Live unverified).
+- 3.8 Automated Tests: "Chạy test hoặc mở CI pass." (133/133 backend pytest PASS, 14/14 browser E2E steps).
 - 3.10 Security + NFR Evidence: "Demo unauthorized/invalid case."
-- 3.11 CI/CD + Docker/Deployment: "Mở pipeline + deploy."
+- 3.11 CI/CD + Docker/Deployment: "Mở pipeline + deploy." (Railway deployment verified, Vercel frontend deployed).
 
 ## 4. AI Development Evidence
 
@@ -117,8 +132,7 @@ All 32 deliverables listed in Section 2 require actual evidence. "Slide mô tả
 
 ## 11. CI/CD / Docker / Deployment
 
-- **3.11 CI/CD + Docker/Deployment:** Build/test/deploy pipeline; env example; health check. Clean clone can be setup via README.
-- **3.2 Release chạy được:** URL + tag v1.0.0-final. Must not require local code editing to run.
+- **3.2 Release chạy được:** **COMPLETE** (Public URLs: Frontend `https://group-01-project.vercel.app`, Backend `https://group-01-project-production.up.railway.app` + Git Tag `v1.0.0-final` -> `9de899d8d45c6f1c5dc42eb9b29abad23a5ebc29`. Verified end-to-end via AI-089 Public Smoke Test).
 - **3.13 Release Notes + Changelog:** Version, scope, features, fixes, known issues, upgrade notes. Matches v1.0.0-final.
 
 ## 12. Traceability

@@ -457,6 +457,21 @@ rite); force push = NOT PERFORMED.
 - **Database/Schema Changes:** NONE.
 - **Tag Changed:** NO (Bảo toàn nguyên vẹn `v1.0.0-final` tại `9de899d8d45c6f1c5dc42eb9b29abad23a5ebc29`).
 
+### AI-090 — Official Course Release Evidence Update (Deliverable 3.2 & 3.4)
+- **AI Activity:** Official Course Release Evidence Update
+- **Input / Context:** AI-089 verified public deployment (Vercel Frontend `https://group-01-project.vercel.app`, Railway Backend `https://group-01-project-production.up.railway.app`, Supabase PostgreSQL & Auth, Git Tag `v1.0.0-final` trỏ vào `9de899d8d45c6f1c5dc42eb9b29abad23a5ebc29`).
+- **AI Assistance & Documentation Synchronization:**
+  1. **Cập nhật Deliverable 3.2 (Release chạy được):** Đồng bộ trạng thái **COMPLETE** trong [docs/OUTPUT_BAOCAO.md](file:///d:/LTUD/group-01-project-main/docs/OUTPUT_BAOCAO.md) và [docs/evidence/FINAL_QA_GATE_REPORT.md](file:///d:/LTUD/group-01-project-main/docs/evidence/FINAL_QA_GATE_REPORT.md) với đầy đủ thông tin Public Frontend, Public Backend, Git Tag và 9 minh chứng thực nghiệm AI-089.
+  2. **Cập nhật Deliverable 3.4 (Business Workflow):** Xác nhận trạng thái **VERIFIED** cho cả Happy Path (toàn bộ chuỗi mua sắm kết thúc tại PR `PR-2026-039` CLOSED) và Failure Path (chặn đứng hành vi đóng PR khi chưa nhận hàng với HTTP 400).
+  3. **Bảo toàn các giới hạn kỹ thuật (Preserve Known Limitations):** Không phóng đại chất lượng ("100% perfect", "zero hallucination"); ghi nhận minh bạch Gemini Live là `UNVERIFIED` và Heuristic Fallback là `ACTIVE`; Playwright là `NOT VERIFIED` và Puppeteer là browser runner thực tế; kiến trúc Frontend modular trong `App.tsx` là `PARTIALLY IMPLEMENTED`.
+  4. **Cập nhật bảng điểm nghẽn môn học:** Xóa bỏ Deliverable 3.2 khỏi danh mục Blocker; chuyển sang trạng thái `RESOLVED / COMPLETE`; nâng tỷ lệ bằng chứng thực nghiệm của dự án lên **71.88% (23/32 Deliverables)**.
+- **Output:** Hồ sơ nghiệm thu môn học đã cập nhật đầy đủ minh chứng phát hành công khai tại [docs/OUTPUT_BAOCAO.md](file:///d:/LTUD/group-01-project-main/docs/OUTPUT_BAOCAO.md) và [docs/evidence/FINAL_QA_GATE_REPORT.md](file:///d:/LTUD/group-01-project-main/docs/evidence/FINAL_QA_GATE_REPORT.md).
+- **Verification:** Đối soát liên kết thực tế: Frontend 200 OK, Backend /api/health 200 OK, Supabase PostgreSQL connected, Happy path PASS, Failure path PASS, Persistence PASS.
+- **Trách nhiệm Con người (Human Responsibility):** **Con người sở hữu việc phê duyệt nộp bài cuối cùng (final submission approval), nghiệm thu hồ sơ môn học và bảo vệ trước hội đồng chấm thi (viva defense).**
+- **Production Code Changes:** NONE.
+- **Database/Schema Changes:** NONE.
+- **Git Tag:** UNCHANGED (Bảo toàn `v1.0.0-final` tại `9de899d8d45c6f1c5dc42eb9b29abad23a5ebc29`).
+
 ---
 
 ## 4. Retrospective (Tổng kết Bài học Kinh nghiệm & Quản trị Rủi ro AI)
