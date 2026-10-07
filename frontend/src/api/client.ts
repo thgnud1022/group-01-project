@@ -63,10 +63,13 @@ class ApiClient {
     }
 
     const rawApiUrl = import.meta.env.VITE_API_URL;
-    const baseUrl = rawApiUrl 
-      ? rawApiUrl.replace(/\/api\/?$/, '') 
+    // Always call Railway backend directly from browser (bypasses Vercel proxy DNS issues)
+    // VITE_API_URL can override this for local dev
+    const baseUrl = rawApiUrl
+      ? rawApiUrl.replace(/\/api\/?$/, '')
       : 'https://group-01-project-production.up.railway.app';
     const targetUrl = endpoint.startsWith('http') ? endpoint : `${baseUrl}${endpoint}`;
+
 
     const response = await fetch(targetUrl, {
       ...options,
