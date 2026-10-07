@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   ArrowLeft, 
   Check, 
@@ -12,7 +12,10 @@ import {
   Clock, 
   ShieldCheck, 
   ChevronRight,
-  Sparkles
+  Sparkles,
+  Paperclip,
+  X,
+  Upload
 } from 'lucide-react';
 import { api, AuthenticatedUser } from '../api/client';
 
@@ -57,6 +60,10 @@ export const CollectQuotationsView: React.FC<CollectQuotationsViewProps> = ({
   const [deliveryDays, setDeliveryDays] = useState<number>(3);
   const [warrantyTerms, setWarrantyTerms] = useState<string>('12 tháng chính hãng');
   const [fileUrl, setFileUrl] = useState<string>('quotes/bao-gia.pdf');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [isManualPathEdit, setIsManualPathEdit] = useState<boolean>(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Submission State
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -158,6 +165,47 @@ export const CollectQuotationsView: React.FC<CollectQuotationsViewProps> = ({
       setTotalAmount(val * numPrice);
     } else if (val === '') {
       setTotalAmount('');
+    }
+  };
+
+  // Handle local file selection from computer
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setSelectedFile(file);
+      setFileUrl(`quotes/${file.name}`);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const file = e.dataTransfer.files[0];
+      setSelectedFile(file);
+      setFileUrl(`quotes/${file.name}`);
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setSelectedFile(null);
+    if (selectedSupplierId) {
+      setFileUrl(`quotes/bao-gia-${selectedSupplierId.toLowerCase()}.pdf`);
+    } else {
+      setFileUrl('quotes/bao-gia.pdf');
+    }
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -556,45 +604,170 @@ export const CollectQuotationsView: React.FC<CollectQuotationsViewProps> = ({
             ) : (
               /* Form when supplier is chosen */
               <form onSubmit={handleSubmitQuotation} noValidate>
-                {/* Simulated Dropzone File Area */}
-                <div
-                  style={{
-                    border: '1px solid #c3ccff',
-                    borderRadius: '8px',
-                    padding: '16px',
-                    backgroundColor: '#f8fafc',
-                    marginBottom: '16px',
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-                    <FileText size={20} color="#3b45ad" />
-                    <div>
-                      <div style={{ fontSize: '13px', fontWeight: 600, color: '#12161c' }}>
-                        Tệp báo giá đính kèm (File reference)
+                {/* Hidden Real File Input */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                  onChange={handleFileChange}
+                  style={{ display: 'none' }}
+                  data-testid="file-upload-input"
+                />
+
+                {/* Interactive File Upload Area */}
+                {selectedFile ? (
+                  /* File attached preview badge */
+                  <div
+                    style={{
+                      border: '1px solid #b2c5f7',
+                      borderRadius: '8px',
+                      padding: '14px 16px',
+                      backgroundColor: '#f4f7fe',
+                      marginBottom: '16px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '12px',
+                    }}
+                    data-testid="attached-file-badge"
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', overflow: 'hidden' }}>
+                      <div
+                        style={{
+                          width: '38px',
+                          height: '38px',
+                          borderRadius: '6px',
+                          backgroundColor: '#e0e7ff',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0,
+                        }}
+                      >
+                        <FileText size={20} color="#3b45ad" />
                       </div>
-                      <div style={{ fontSize: '11px', color: '#8a929e' }}>
-                        Gắn siêu dữ liệu đường dẫn tệp báo giá phục vụ kiểm tra và trích xuất
+                      <div style={{ overflow: 'hidden' }}>
+                        <div style={{ fontSize: '13px', fontWeight: 600, color: '#12161c', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                          {selectedFile.name}
+                        </div>
+                        <div style={{ fontSize: '11px', color: '#5a6472', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span>{(selectedFile.size / 1024).toFixed(1)} KB</span>
+                          <span>•</span>
+                          <span style={{ color: '#097945', fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                            <Check size={12} /> Đã đính kèm từ máy tính
+                          </span>
+                        </div>
                       </div>
                     </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        style={{
+                          padding: '5px 10px',
+                          fontSize: '12px',
+                          fontWeight: 500,
+                          color: '#3b45ad',
+                          backgroundColor: '#ffffff',
+                          border: '1px solid #c3ccff',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Đổi tệp
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleRemoveFile}
+                        style={{
+                          padding: '5px 8px',
+                          fontSize: '12px',
+                          color: '#9b1c1c',
+                          backgroundColor: '#ffffff',
+                          border: '1px solid #f8b4b4',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                        }}
+                        title="Gỡ tệp"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
                   </div>
-
-                  <input
-                    type="text"
-                    value={fileUrl}
-                    onChange={(e) => setFileUrl(e.target.value)}
-                    placeholder="quotes/bao-gia.pdf"
+                ) : (
+                  /* Dropzone when no file selected yet */
+                  <div
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    onClick={() => fileInputRef.current?.click()}
                     style={{
-                      width: '100%',
-                      height: '34px',
-                      padding: '0 10px',
-                      borderRadius: '4px',
-                      border: '0.667px solid #e4e7ec',
-                      fontSize: '13px',
-                      backgroundColor: '#ffffff',
-                      boxSizing: 'border-box',
+                      border: isDragging ? '2px dashed #3b45ad' : '1.5px dashed #c3ccff',
+                      borderRadius: '8px',
+                      padding: '18px 16px',
+                      backgroundColor: isDragging ? '#eef2ff' : '#f8fafc',
+                      marginBottom: '10px',
+                      textAlign: 'center',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
                     }}
-                    data-testid="input-quotation-file"
-                  />
+                    data-testid="file-upload-dropzone"
+                  >
+                    <UploadCloud size={28} color={isDragging ? '#3b45ad' : '#6b7280'} style={{ margin: '0 auto 6px auto', display: 'block' }} />
+                    <div style={{ fontSize: '13px', fontWeight: 600, color: '#12161c', marginBottom: '2px' }}>
+                      Nhấn để chọn tệp báo giá từ máy tính hoặc kéo thả vào đây
+                    </div>
+                    <div style={{ fontSize: '11px', color: '#6b7280', marginBottom: '6px' }}>
+                      Hỗ trợ PDF, Word (.docx), PNG, JPG · Tối đa 10 MB
+                    </div>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: '#3b45ad', backgroundColor: '#eef2ff', padding: '3px 10px', borderRadius: '12px' }}>
+                      <Paperclip size={12} />
+                      <span>Tệp mặc định: {fileUrl}</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Manual File Path Edit Toggle */}
+                <div style={{ marginBottom: '16px' }}>
+                  <button
+                    type="button"
+                    onClick={() => setIsManualPathEdit(!isManualPathEdit)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      padding: '0',
+                      fontSize: '11px',
+                      color: '#5a6472',
+                      cursor: 'pointer',
+                      textDecoration: 'underline',
+                    }}
+                  >
+                    {isManualPathEdit ? 'Ẩn đường dẫn tham chiếu' : '⚙️ Tùy chỉnh đường dẫn tham chiếu (URL / Path)'}
+                  </button>
+
+                  {isManualPathEdit && (
+                    <div style={{ marginTop: '6px' }}>
+                      <input
+                        type="text"
+                        value={fileUrl}
+                        onChange={(e) => setFileUrl(e.target.value)}
+                        placeholder="quotes/bao-gia.pdf"
+                        style={{
+                          width: '100%',
+                          height: '32px',
+                          padding: '0 10px',
+                          borderRadius: '4px',
+                          border: '0.667px solid #e4e7ec',
+                          fontSize: '12px',
+                          backgroundColor: '#ffffff',
+                          boxSizing: 'border-box',
+                        }}
+                        data-testid="input-quotation-file"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {/* Commercial Inputs */}
