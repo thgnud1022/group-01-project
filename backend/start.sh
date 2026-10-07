@@ -11,5 +11,10 @@ if [ -d "prisma" ]; then
     prisma generate || true
 fi
 
+# Seed authUserId bindings so every deploy has correct UUID -> User mapping.
+# This is idempotent and non-fatal — server starts regardless.
+echo "[STARTUP] Seeding authUserId bindings for application users..."
+python scripts/seed_auth_users.py || echo "[STARTUP] Seed encountered an error (non-fatal), continuing..."
+
 # Start FastAPI application
 exec uvicorn app.main:app --host 0.0.0.0 --port "$PORT"
