@@ -4,7 +4,7 @@
 **Dự án:** Hệ thống Phê duyệt Mua sắm & Đề xuất AI (AI Procurement & Purchase Approval System) — Nhóm 01  
 **Mã nguồn / Repository:** `thgnud1022/group-01-project`  
 **Nhánh Git:** `final-delivery`  
-**Phiên bản Phát hành:** `v1.0.0-final` (Commit `9de899d8d45c6f1c5dc42eb9b29abad23a5ebc29`)  
+**Phiên bản Phát hành Liên kết:** Tài liệu thuộc nhánh `final-delivery`, liên kết với bản phát hành cuối `v1.0.0-final` (Tag commit: `9de899d8d45c6f1c5dc42eb9b29abad23a5ebc29`)  
 **Ngày chốt hồ sơ:** 2026-10-08  
 **Chuẩn đầu ra môn học:** Deliverable 3.7 (Yêu cầu bắt buộc: Severity, Steps, Expected, Actual, Evidence, Owner, Status, Reproducible)  
 **Trạng thái Thẩm định:** **PASS (100% Bugs Resolved — 0 Open Blocker)**  
