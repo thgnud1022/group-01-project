@@ -49,15 +49,15 @@ Mọi vấn đề kỹ thuật phát hiện trong dự án được phân loại
 
 | ID | Type | Severity | Story | Task | Owner | Summary | Steps to Reproduce | Expected | Actual | Evidence | Status | Resolution |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| **BUG-001** *(QF-001 / CR-003)* | BUG | **BLOCKER** | US-09, GOV-02 | T-30..33, T-40 | Nguyễn Thị Thùy Dung | PO có thể được tạo từ PR chưa duyệt và chấp nhận ghi đè giá từ client | 1. Tạo PR status PENDING.<br>2. Gửi `POST /api/po` với prId đó. | Bị từ chối với HTTP 400 (PR phải APPROVED; giá lấy từ Quotation). | Tạo được PO dù PR chưa duyệt; cho phép client override đơn giá. | Kiro Verify V-03, Commit `5fe0ec0`, `test_po_prisma.py` | **RESOLVED** | Áp dụng khóa `SELECT ... FOR UPDATE`, kiểm tra `pr.status == 'APPROVED'`, khóa đơn giá từ bảng Quotation. |
-| **BUG-002** *(CR-001)* | BUG | **BLOCKER** | US-01, US-02 | T-01..06, T-37 | Nguyễn Thị Thùy Dung | Lỗ hổng tiêm vai trò phía client qua header/body dẫn đến leo thang đặc quyền | 1. Đăng nhập nhân viên.<br>2. Gửi request kèm header `Role: ADMIN` duyệt PR. | Bị từ chối với HTTP 403; vai trò phải lấy từ JWT và CSDL máy chủ. | Client tự nhận vai trò nào máy chủ chấp nhận vai trò đó. | Commit `19ce38b`, `6f47a4e`, `test_rbac.py` | **RESOLVED** | Xây dựng Supabase JWT ES256 JWKS verification, Server-Side `RoleChecker` bảo vệ 100% 19 endpoints. |
-| **BUG-003** *(CR-002)* | BUG | **BLOCKER** | GOV-01, US-02 | T-37..39 | Nguyễn Thị Thùy Dung | Bỏ sót quy tắc Không tự phê duyệt (No Self-Approval) cho phép người tạo tự duyệt PR của mình | 1. Đăng nhập Manager/Admin.<br>2. Tạo PR mới.<br>3. Bấm duyệt chính PR đó. | Bị chặn với HTTP 403 ("No Self-Approval — GOV-01"). | Quản lý/Admin tự duyệt thành công PR do chính mình tạo. | Commit `6f47a4e`, `5fe0ec0`, `test_rbac.py` | **RESOLVED** | Thêm kiểm tra `if approver_id == pr_creator_id: raise AuthorizationError(...)` trong toàn bộ luồng duyệt/từ chối/sửa PR. |
-| **BUG-004** *(CR-004)* | BUG | **BLOCKER** | US-10 | T-34..36 | Trần Thị Thu Hà | Cho phép Đóng PR khi hàng chưa nhận đủ 100% so với đơn hàng PO | 1. PO đặt 5 máy.<br>2. Nhận đợt 1 được 2 máy.<br>3. Gửi `POST /api/pr/{id}/close`. | Bị từ chối HTTP 400 ("Hàng chưa được nhận đủ"). | Cho phép đóng PR và quyết toán tiền dù còn thiếu 3 máy. | Commit `02a117d`, `test_close_prisma.py`, AI-089 failure smoke | **RESOLVED** | Kiểm tra `sum(receivedQty) >= po.quantity` trong transaction đóng PR trước khi chuyển trạng thái `CLOSED`. |
-| **BUG-005** *(CR-005)* | BUG | **MAJOR** | Platform / Deploy | T-41, T-42 | Trần Thị Kiều Giang | Mất ánh xạ `authUserId` khi Railway redeploy container dẫn đến lỗi 401 | 1. Railway build lại container.<br>2. Người dùng đăng nhập qua Supabase.<br>3. Gọi `/api/auth/me`. | Trả về HTTP 200 kèm thông tin người dùng từ PostgreSQL. | Trả về HTTP 401 do trường `User.authUserId` bị thiếu trong DB. | Commit `80afdd0`, script `seed_auth_users.py`, `start.sh` | **RESOLVED** | Nhúng kịch bản idempotent `seed_auth_users.py` trực tiếp vào `start.sh` trước khi Uvicorn khởi chạy. |
-| **BUG-006** *(CR-006)* | BUG | **MAJOR** | Platform / Security | T-41 | Trần Thị Kiều Giang | Xung đột cấu hình CORS wildcard `*` với `allow_credentials=True` khiến browser chặn request | 1. Mở web Vercel.<br>2. Gửi request có Authorization Bearer tới Railway backend. | Browser gửi request preflight thành công. | Browser chặn request vì W3C CORS cấm wildcard khi bật credentials. | Commit `b8404f4`, `backend/app/main.py` | **RESOLVED** | Liệt kê tường minh danh sách `ALLOWED_ORIGINS` (Vercel domain, localhost) thay thế wildcard `*`. |
-| **BUG-007** *(CR-007)* | BUG | **MAJOR** | Platform / Deploy | T-41 | Trần Thị Kiều Giang | Vercel rewrite proxy lỗi DNS resolution (`DNS_HOSTNAME_RESOLVE_FAILED` 502) khi Railway redeploy | 1. Gọi API qua proxy Vercel `/api/*`.<br>2. Railway restart container. | Request API chuyển tiếp thông suốt. | Vercel trả về 502 Bad Gateway do mất định tuyến DNS mạng biên. | Commit `b8404f4`, `d2cff2c`, `client.ts`, `.env` | **RESOLVED** | Đưa biến `VITE_API_URL` trỏ trực tiếp tới Railway backend vào bản build, bỏ qua proxy Vercel. |
+| **BUG-001** *(QF-001 / CR-003)* | BUG | **BLOCKER** | US-08 *(aff: GOV-02)* | T-26..29 *(aff: T-40)* | Nguyễn Thị Thùy Dung *(co-owner: Trần Thị Thu Hà)* | PO có thể được tạo từ PR chưa duyệt và chấp nhận ghi đè giá từ client | 1. Tạo PR status PENDING.<br>2. Gửi `POST /api/po` với prId đó. | Bị từ chối với HTTP 400 (PR phải APPROVED; giá lấy từ Quotation). | Tạo được PO dù PR chưa duyệt; cho phép client override đơn giá. | Kiro Verify V-03, Commit `5fe0ec0`, `test_po_prisma.py` | **RESOLVED** | Áp dụng khóa `SELECT ... FOR UPDATE`, kiểm tra `pr.status == 'APPROVED'`, khóa đơn giá từ bảng Quotation. |
+| **BUG-002** *(CR-001)* | BUG | **BLOCKER** | GOV-01, US-02 *(aff: US-01)* | T-37, T-04..06 *(aff: T-01..03)* | Nguyễn Thị Thùy Dung *(aff: Trần Thị Kiều Giang)* | Lỗ hổng tiêm vai trò phía client qua header/body dẫn đến leo thang đặc quyền | 1. Đăng nhập nhân viên.<br>2. Gửi request kèm header `Role: ADMIN` duyệt PR. | Bị từ chối với HTTP 403; vai trò phải lấy từ JWT và CSDL máy chủ. | Client tự nhận vai trò nào máy chủ chấp nhận vai trò đó. | Commit `19ce38b`, `6f47a4e`, `test_rbac.py` | **RESOLVED** | Xây dựng Supabase JWT ES256 JWKS verification, Server-Side `RoleChecker` bảo vệ 100% 19 endpoints. |
+| **BUG-003** *(CR-002)* | BUG | **BLOCKER** | GOV-01, US-02 *(aff: US-04)* | T-37..39 *(aff: T-10..13)* | Nguyễn Thị Thùy Dung *(aff: Nguyễn Trương Thùy Dương)* | Bỏ sót quy tắc Không tự phê duyệt (No Self-Approval) cho phép người tạo tự duyệt PR của mình | 1. Đăng nhập Manager/Admin.<br>2. Tạo PR mới.<br>3. Bấm duyệt chính PR đó. | Bị chặn với HTTP 403 ("No Self-Approval — GOV-01"). | Quản lý/Admin tự duyệt thành công PR do chính mình tạo. | Commit `6f47a4e`, `5fe0ec0`, `test_rbac.py` | **RESOLVED** | Thêm kiểm tra `if approver_id == pr_creator_id: raise AuthorizationError(...)` trong toàn bộ luồng duyệt/từ chối/sửa PR. |
+| **BUG-004** *(CR-004)* | BUG | **BLOCKER** | US-10 *(aff: US-09)* | T-34..36 *(aff: T-30..33)* | Trần Thị Thu Hà *(aff: Nguyễn Thị Thùy Dung)* | Cho phép Đóng PR khi hàng chưa nhận đủ 100% so với đơn hàng PO | 1. PO đặt 5 máy.<br>2. Nhận đợt 1 được 2 máy.<br>3. Gửi `POST /api/pr/{id}/close`. | Bị từ chối HTTP 400 ("Hàng chưa được nhận đủ"). | Cho phép đóng PR và quyết toán tiền dù còn thiếu 3 máy. | Commit `02a117d`, `test_close_prisma.py`, AI-089 failure smoke | **RESOLVED** | Kiểm tra `sum(receivedQty) >= po.quantity` trong transaction đóng PR trước khi chuyển trạng thái `CLOSED`. |
+| **BUG-005** *(CR-005)* | BUG | **MAJOR** | GOV-02 *(Platform Deploy)* | T-41, T-42 | Trần Thị Thu Hà *(Dev: Trần Thị Kiều Giang)* | Mất ánh xạ `authUserId` khi Railway redeploy container dẫn đến lỗi 401 | 1. Railway build lại container.<br>2. Người dùng đăng nhập qua Supabase.<br>3. Gọi `/api/auth/me`. | Trả về HTTP 200 kèm thông tin người dùng từ PostgreSQL. | Trả về HTTP 401 do trường `User.authUserId` bị thiếu trong DB. | Commit `80afdd0`, script `seed_auth_users.py`, `start.sh` | **RESOLVED** | Nhúng kịch bản idempotent `seed_auth_users.py` trực tiếp vào `start.sh` trước khi Uvicorn khởi chạy. |
+| **BUG-006** *(CR-006)* | BUG | **MAJOR** | GOV-02 *(Platform Security)* | T-41 | Trần Thị Thu Hà *(Dev: Trần Thị Kiều Giang)* | Xung đột cấu hình CORS wildcard `*` với `allow_credentials=True` khiến browser chặn request | 1. Mở web Vercel.<br>2. Gửi request có Authorization Bearer tới Railway backend. | Browser gửi request preflight thành công. | Browser chặn request vì W3C CORS cấm wildcard khi bật credentials. | Commit `b8404f4`, `backend/app/main.py` | **RESOLVED** | Liệt kê tường minh danh sách `ALLOWED_ORIGINS` (Vercel domain, localhost) thay thế wildcard `*`. |
+| **BUG-007** *(CR-007)* | BUG | **MAJOR** | GOV-02 *(Platform Deploy)* | T-41 | Trần Thị Thu Hà *(Dev: Trần Thị Kiều Giang)* | Vercel rewrite proxy lỗi DNS resolution (`DNS_HOSTNAME_RESOLVE_FAILED` 502) khi Railway redeploy | 1. Gọi API qua proxy Vercel `/api/*`.<br>2. Railway restart container. | Request API chuyển tiếp thông suốt. | Vercel trả về 502 Bad Gateway do mất định tuyến DNS mạng biên. | Commit `b8404f4`, `d2cff2c`, `client.ts`, `.env` | **RESOLVED** | Đưa biến `VITE_API_URL` trỏ trực tiếp tới Railway backend vào bản build, bỏ qua proxy Vercel. |
 | **BUG-008** *(CR-008)* | BUG | **MAJOR** | US-07 | T-21..25 | Nguyễn Trúc Lam | Màn hình so sánh báo giá chặn truy cập các vai trò ngoài PROCUREMENT và không cảnh báo quá hạn | 1. Đăng nhập Employee/Manager.<br>2. Mở màn hình so sánh báo giá. | Mọi vai trò đã đăng nhập đều xem được (HD-13); báo giá hết hạn có nhãn đỏ. | Bị chặn quyền 403; không có cảnh báo trực quan khi báo giá quá hạn. | Commit `20100e1`, `ComparisonView.tsx`, `test_quotation_comparison_prisma.py` | **RESOLVED** | Mở quyền đọc cho toàn bộ vai trò đã xác thực; bổ sung badge cảnh báo hết hạn màu đỏ khi `validUntil < now()`. |
-| **BUG-009** *(CR-009)* | BUG | **MAJOR** | US-01 | T-01..03 | Trần Thị Kiều Giang | Cảnh báo vượt ngân sách giả khi tạo PR và thiếu viền đỏ trên ô input bắt buộc | 1. Mở form tạo PR.<br>2. Nhập số tiền trong hạn mức.<br>3. Để trống trường lý do và bấm gửi. | Không báo vượt ngân sách; ô lý do viền đỏ cảnh báo. | Hiện cảnh báo vượt hạn mức; không có viền đỏ báo lỗi trực quan. | Commit `9af432c`, `0216a7c`, `frontend/src/App.tsx` | **RESOLVED** | Chuẩn hóa công thức tính ngân sách khả dụng; thêm class `border-red-500` và trạng thái `touched` khi validate form. |
+| **BUG-009** *(CR-009)* | BUG | **MAJOR** | US-01 *(aff: US-05)* | T-01..03 *(aff: T-14..16)* | Trần Thị Kiều Giang *(aff: Nguyễn Trương Thùy Dương)* | Cảnh báo vượt ngân sách giả khi tạo PR và thiếu viền đỏ trên ô input bắt buộc | 1. Mở form tạo PR.<br>2. Nhập số tiền trong hạn mức.<br>3. Để trống trường lý do và bấm gửi. | Không báo vượt ngân sách; ô lý do viền đỏ cảnh báo. | Hiện cảnh báo vượt hạn mức; không có viền đỏ báo lỗi trực quan. | Commit `9af432c`, `0216a7c`, `frontend/src/App.tsx` | **RESOLVED** | Chuẩn hóa công thức tính ngân sách khả dụng; thêm class `border-red-500` và trạng thái `touched` khi validate form. |
 | **BUG-010** *(CR-010)* | BUG | **MINOR** | US-06 | T-17..20 | Nguyễn Trương Thùy Dương | Ô nhập giá báo giá xuất hiện số 0 đứng đầu và thiếu vùng kéo thả tải lên tài liệu | 1. Mở form nhập báo giá.<br>2. Gõ đơn giá sản phẩm. | Giá trị hiển thị số tự nhiên; có vùng kéo thả chọn tệp đính kèm. | Xuất hiện tiền tố số '0' (vd: '01500000'); thiếu drag & drop file upload. | Commit `71b48e2`, `1775682`, `QuotationsView.tsx` | **RESOLVED** | Xử lý format chuỗi rỗng khi focus; bổ sung native file input picker và vùng kéo thả tệp đính kèm. |
 
 ---
@@ -67,8 +67,11 @@ Mọi vấn đề kỹ thuật phát hiện trong dự án được phân loại
 ### BUG-001: Khởi Tạo Purchase Order Từ PR Chưa Duyệt & Can Thiệp Giá Thương Mại
 - **Mã định danh cũ:** `QF-001` (Kiro Verify V-03), `CR-003` (Code Review)
 - **Mức độ nghiêm trọng:** **BLOCKER** (Vi phạm tính toàn vẹn thương mại REQ-BR-10 & REQ-BR-03)
-- **User Story:** **US-09**, **GOV-02** | **Task:** `T-30..T-33`, `T-40`
-- **Người chịu trách nhiệm (Owner):** **Nguyễn Thị Thùy Dung**
+- **Primary Story:** **US-08** (Tạo PO & Khóa giá/lượng) | **Primary Tasks:** `T-26..T-29`
+- **Affected Stories:** **GOV-02** (Audit Trail & Khóa Dữ liệu Thương mại PO) | **Affected Tasks:** `T-40`
+- **Chủ sở hữu chính (Primary Owner):** **Nguyễn Thị Thùy Dung** (Chủ sở hữu US-08 / T-26..T-29 theo Taiga Backlog & Core Viva Story)
+- **Chủ sở hữu liên đới (Affected Story Owner / Co-owner):** **Trần Thị Thu Hà** (Chủ sở hữu GOV-02 / T-40)
+- **Nhà phát triển mã nguồn (Historical Code Developer):** Nguyễn Thị Thùy Dung & Trần Thị Kiều Giang (Commit `5fe0ec0`)
 - **Mô-đun ảnh hưởng:** `backend/app/routers/po.py`, `backend/app/services/procurement_service.py`
 - **Các bước tái hiện (Steps to Reproduce):**
   1. Khởi tạo một Purchase Request mới có trạng thái `PENDING_MANAGER_APPROVAL`.
@@ -86,8 +89,11 @@ Mọi vấn đề kỹ thuật phát hiện trong dự án được phân loại
 ### BUG-002: Lỗ Hổng Tiêm Vai Trò Phía Khách (Client-Side Role Injection)
 - **Mã định danh cũ:** `CR-001` (Code Review)
 - **Mức độ nghiêm trọng:** **BLOCKER** (Vi phạm an ninh bảo mật, nguy cơ leo thang đặc quyền)
-- **User Story:** **US-01**, **US-02** | **Task:** `T-01..T-06`, `T-37`
-- **Người chịu trách nhiệm (Owner):** **Nguyễn Thị Thùy Dung** *(Đồng sở hữu: Trần Thị Kiều Giang)*
+- **Primary Story:** **GOV-01** (RBAC 5 vai trò), **US-02** (Theo dõi trạng thái PR) | **Primary Tasks:** `T-37`, `T-04..T-06`
+- **Affected Stories:** **US-01** (Context xác thực Form PR) | **Affected Tasks:** `T-01..T-03`
+- **Chủ sở hữu chính (Primary Owner):** **Nguyễn Thị Thùy Dung** (Chủ sở hữu GOV-01, US-02)
+- **Chủ sở hữu liên đới (Affected Story Owner):** **Trần Thị Kiều Giang** (Chủ sở hữu US-01)
+- **Nhà phát triển mã nguồn (Historical Code Developer):** Nguyễn Thị Thùy Dung & Trần Thị Kiều Giang (Commit `19ce38b`, `6f47a4e`)
 - **Mô-đun ảnh hưởng:** `backend/app/dependencies/auth.py`, `backend/app/dependencies/rbac.py`
 - **Các bước tái hiện (Steps to Reproduce):**
   1. Đăng nhập với tài khoản người dùng có vai trò `EMPLOYEE`.
@@ -105,8 +111,11 @@ Mọi vấn đề kỹ thuật phát hiện trong dự án được phân loại
 ### BUG-003: Bỏ Sót Ràng Buộc Không Tự Phê Duyệt (No Self-Approval Bypass)
 - **Mã định danh cũ:** `CR-002` (Code Review)
 - **Mức độ nghiêm trọng:** **BLOCKER** (Vi phạm nguyên tắc kiểm soát độc lập GOV-01 / Four-Eyes Principle)
-- **User Story:** **GOV-01**, **US-02** | **Task:** `T-37..T-39`
-- **Người chịu trách nhiệm (Owner):** **Nguyễn Thị Thùy Dung**
+- **Primary Story:** **GOV-01** (No Self-Approval Rule), **US-02** | **Primary Tasks:** `T-37..T-39`
+- **Affected Stories:** **US-04** (Thao tác phê duyệt của Manager) | **Affected Tasks:** `T-10..T-13`
+- **Chủ sở hữu chính (Primary Owner):** **Nguyễn Thị Thùy Dung** (Chủ sở hữu GOV-01 / T-37..T-39)
+- **Chủ sở hữu liên đới (Affected Story Owner):** **Nguyễn Trương Thùy Dương** (Chủ sở hữu US-04)
+- **Nhà phát triển mã nguồn (Historical Code Developer):** Nguyễn Thị Thùy Dung (Commit `6f47a4e`, `5fe0ec0`)
 - **Mô-đun ảnh hưởng:** `backend/app/routers/pr.py`, `backend/app/services/procurement_service.py`
 - **Các bước tái hiện (Steps to Reproduce):**
   1. Đăng nhập bằng tài khoản có vai trò `MANAGER` hoặc `ADMIN`.
@@ -125,8 +134,11 @@ Mọi vấn đề kỹ thuật phát hiện trong dự án được phân loại
 ### BUG-004: Cho Phép Đóng PR Khi Hàng Chưa Nhận Đủ 100% Số Lượng
 - **Mã định danh cũ:** `CR-004` (Code Review)
 - **Mức độ nghiêm trọng:** **BLOCKER** (Vi phạm ràng buộc REQ-BR-11 & HD-07, nguy cơ thất thoát tài chính)
-- **User Story:** **US-10** | **Task:** `T-34..T-36`
-- **Người chịu trách nhiệm (Owner):** **Trần Thị Thu Hà**
+- **Primary Story:** **US-10** (Đóng PR & Quyết toán Ngân sách) | **Primary Tasks:** `T-34..T-36`
+- **Affected Stories:** **US-09** (Thực hiện Nhận hàng) | **Affected Tasks:** `T-30..T-33`
+- **Chủ sở hữu chính (Primary Owner):** **Trần Thị Thu Hà** (Chủ sở hữu US-10 / Core Viva Story)
+- **Chủ sở hữu liên đới (Affected Story Owner):** **Nguyễn Thị Thùy Dung** (Chủ sở hữu US-09)
+- **Nhà phát triển mã nguồn (Historical Code Developer):** Trần Thị Thu Hà & Nguyễn Thị Thùy Dung (Commit `02a117d`)
 - **Mô-đun ảnh hưởng:** `backend/app/routers/receiving.py`, `backend/app/services/procurement_service.py`
 - **Các bước tái hiện (Steps to Reproduce):**
   1. Tạo PR và PO với số lượng 5 sản phẩm.
@@ -145,8 +157,10 @@ Mọi vấn đề kỹ thuật phát hiện trong dự án được phân loại
 ### BUG-005: Mất Ánh Xạ authUserId Khi Railway Container Khởi Động Lại
 - **Mã định danh cũ:** `CR-005` (Code Review)
 - **Mức độ nghiêm trọng:** **MAJOR** (Chặn đăng nhập sau mỗi lần deploy trên môi trường cloud)
-- **User Story:** Platform / Deployment | **Task:** `T-41`, `T-42`
-- **Người chịu trách nhiệm (Owner):** **Trần Thị Kiều Giang**
+- **Primary Story:** **GOV-02** (Bảo đảm Tính Bền Vững & Truy Vết Môi Trường Phát Hành) | **Primary Tasks:** `T-41`, `T-42`
+- **Affected Area:** Platform / Deployment
+- **Chủ sở hữu chính (Primary Owner):** **Trần Thị Thu Hà** (Chủ sở hữu GOV-02 / T-41..T-42 theo Taiga Backlog)
+- **Nhà phát triển mã nguồn (Historical Code Developer):** **Trần Thị Kiều Giang** (Commit `80afdd0`)
 - **Mô-đun ảnh hưởng:** `backend/start.sh`, `backend/scripts/seed_auth_users.py`
 - **Các bước tái hiện (Steps to Reproduce):**
   1. Push bản cập nhật mã nguồn mới kích hoạt Railway redeploy.
@@ -165,8 +179,10 @@ Mọi vấn đề kỹ thuật phát hiện trong dự án được phân loại
 ### BUG-006: Xung Đột Cấu Hình CORS Wildcard Với Cờ allow_credentials
 - **Mã định danh cũ:** `CR-006` (Code Review)
 - **Mức độ nghiêm trọng:** **MAJOR** (Trình duyệt chặn toàn bộ API call có Authorization header)
-- **User Story:** Platform / Security | **Task:** `T-41`
-- **Người chịu trách nhiệm (Owner):** **Trần Thị Kiều Giang**
+- **Primary Story:** **GOV-02** (Kiểm Soát An Ninh Môi Trường & Audit Mạng) | **Primary Tasks:** `T-41`
+- **Affected Area:** Platform / Security
+- **Chủ sở hữu chính (Primary Owner):** **Trần Thị Thu Hà** (Chủ sở hữu GOV-02 / T-41 theo Taiga Backlog)
+- **Nhà phát triển mã nguồn (Historical Code Developer):** **Trần Thị Kiều Giang** (Commit `b8404f4`)
 - **Mô-đun ảnh hưởng:** `backend/app/main.py`
 - **Các bước tái hiện (Steps to Reproduce):**
   1. Truy cập frontend từ domain Vercel `https://group-01-project.vercel.app`.
@@ -183,8 +199,10 @@ Mọi vấn đề kỹ thuật phát hiện trong dự án được phân loại
 ### BUG-007: Lỗi Phân Giải Tên Miền DNS Khi Gọi API Qua Vercel Proxy
 - **Mã định danh cũ:** `CR-007` (Code Review)
 - **Mức độ nghiêm trọng:** **MAJOR** (Gây lỗi 502 gián đoạn dịch vụ)
-- **User Story:** Platform / Networking | **Task:** `T-41`
-- **Người chịu trách nhiệm (Owner):** **Trần Thị Kiều Giang**
+- **Primary Story:** **GOV-02** (Bảo Đảm Hạ Tầng Vận Hành Phát Hành) | **Primary Tasks:** `T-41`
+- **Affected Area:** Platform / Networking
+- **Chủ sở hữu chính (Primary Owner):** **Trần Thị Thu Hà** (Chủ sở hữu GOV-02 / T-41 theo Taiga Backlog)
+- **Nhà phát triển mã nguồn (Historical Code Developer):** **Trần Thị Kiều Giang** (Commit `b8404f4`, `d2cff2c`)
 - **Mô-đun ảnh hưởng:** `frontend/.env`, `frontend/src/api/client.ts`
 - **Các bước tái hiện (Steps to Reproduce):**
   1. Frontend gọi API qua đường dẫn tương đối `/api/auth/me` đi qua Vercel proxy rewrite.
@@ -201,8 +219,9 @@ Mọi vấn đề kỹ thuật phát hiện trong dự án được phân loại
 ### BUG-008: Phân Quyền Hạn Chế & Thiếu Cảnh Báo Báo Giá Hết Hạn Trên Bảng So Sánh
 - **Mã định danh cũ:** `CR-008` (Code Review)
 - **Mức độ nghiêm trọng:** **MAJOR** (Vi phạm quyết định HD-13/K-2 và thiếu thông tin thời hạn)
-- **User Story:** **US-07** | **Task:** `T-21..T-25`
-- **Người chịu trách nhiệm (Owner):** **Nguyễn Trúc Lam**
+- **Primary Story:** **US-07** (Đối Sánh Báo Giá Đa Chiều) | **Primary Tasks:** `T-21..T-25`
+- **Chủ sở hữu chính (Primary Owner):** **Nguyễn Trúc Lam** (Chủ sở hữu US-07 / Core Viva Story)
+- **Nhà phát triển mã nguồn (Historical Code Developer):** Nguyễn Trúc Lam & Nguyễn Thị Thùy Dung (Commit `20100e1`)
 - **Mô-đun ảnh hưởng:** `backend/app/routers/quotations.py`, `frontend/src/components/ComparisonView.tsx`
 - **Các bước tái hiện (Steps to Reproduce):**
   1. Đăng nhập bằng tài khoản `EMPLOYEE` hoặc `MANAGER`.
@@ -220,8 +239,11 @@ Mọi vấn đề kỹ thuật phát hiện trong dự án được phân loại
 ### BUG-009: Cảnh Báo Vượt Ngân Sách Giả & Thiếu Viền Đỏ Xác Thực Biểu Mẫu PR
 - **Mã định danh cũ:** `CR-009` (Code Review)
 - **Mức độ nghiêm trọng:** **MAJOR** (Gây hiểu nhầm cho người dùng khi tạo yêu cầu mua sắm)
-- **User Story:** **US-01** | **Task:** `T-01..T-03`
-- **Người chịu trách nhiệm (Owner):** **Trần Thị Kiều Giang**
+- **Primary Story:** **US-01** (Tạo & Chuẩn Hóa Purchase Request) | **Primary Tasks:** `T-01..T-03`
+- **Affected Stories:** **US-05** (Kiểm Tra Hạn Mức Ngân Sách) | **Affected Tasks:** `T-14..T-16`
+- **Chủ sở hữu chính (Primary Owner):** **Trần Thị Kiều Giang** (Chủ sở hữu US-01 / Core Viva Story)
+- **Chủ sở hữu liên đới (Affected Story Owner):** **Nguyễn Trương Thùy Dương** (Chủ sở hữu US-05)
+- **Nhà phát triển mã nguồn (Historical Code Developer):** Trần Thị Kiều Giang (Commit `9af432c`, `0216a7c`)
 - **Mô-đun ảnh hưởng:** `frontend/src/App.tsx`
 - **Các bước tái hiện (Steps to Reproduce):**
   1. Mở màn hình tạo yêu cầu mua sắm mới.
@@ -239,8 +261,9 @@ Mọi vấn đề kỹ thuật phát hiện trong dự án được phân loại
 ### BUG-010: Số 0 Đứng Đầu Trên Ô Nhập Đơn Giá & Thiếu Vùng Kéo Thả Tệp Báo Giá
 - **Mã định danh cũ:** `CR-010` (Code Review)
 - **Mức độ nghiêm trọng:** **MINOR** (Khuyết tật trải nghiệm nhập liệu UI)
-- **User Story:** **US-06** | **Task:** `T-17..T-20`
-- **Người chịu trách nhiệm (Owner):** **Nguyễn Trương Thùy Dương**
+- **Primary Story:** **US-06** (Thu Thập & Nhập Báo Giá) | **Primary Tasks:** `T-17..T-20`
+- **Chủ sở hữu chính (Primary Owner):** **Nguyễn Trương Thùy Dương** (Chủ sở hữu US-06)
+- **Nhà phát triển mã nguồn (Historical Code Developer):** Nguyễn Trương Thùy Dương & Trần Thị Kiều Giang (Commit `71b48e2`, `1775682`)
 - **Mô-đun ảnh hưởng:** `frontend/src/components/QuotationsView.tsx`
 - **Các bước tái hiện (Steps to Reproduce):**
   1. Mở biểu mẫu nhập báo giá nhà cung cấp.
@@ -298,55 +321,73 @@ Bug ID ──► User Story ──► Tasks ──► Tệp Nguồn ──► Co
 
 | Bug ID | User Story | Mã Tasks | Tệp Nguồn Trọng Yếu | Commit Hash | Test Suite Hồi Quy | Kết Quả Thẩm Định |
 |---|---|---|---|---|---|---|
-| **BUG-001** | US-09, GOV-02 | T-30..33, T-40 | `po.py`, `procurement_service.py` | `5fe0ec0` | `test_po_prisma.py` (TC-PO-001..002) | **PASS (100%)** |
-| **BUG-002** | US-01, US-02 | T-01..06, T-37 | `auth.py`, `rbac.py` | `19ce38b`, `6f47a4e` | `test_jwt_auth.py`, `test_rbac.py` | **PASS (100%)** |
-| **BUG-003** | GOV-01, US-02 | T-37..39 | `pr.py`, `procurement_service.py` | `6f47a4e`, `5fe0ec0` | `test_rbac.py` (TC-RBAC-014..018) | **PASS (100%)** |
-| **BUG-004** | US-10 | T-34..36 | `receiving.py`, `procurement_service.py` | `02a117d` | `test_close_prisma.py` (TC-CLOSE-001..002) | **PASS (100%)** |
-| **BUG-005** | Platform | T-41, T-42 | `start.sh`, `seed_auth_users.py` | `80afdd0` | Khởi động lại container Railway, test login | **PASS (100%)** |
-| **BUG-006** | Platform | T-41 | `backend/app/main.py` | `b8404f4` | Browser API request với Bearer token | **PASS (100%)** |
-| **BUG-007** | Platform | T-41 | `frontend/.env`, `client.ts` | `b8404f4`, `d2cff2c` | AI-089 Public Smoke Test (9/9 checks) | **PASS (100%)** |
+| **BUG-001** | US-08 *(aff: GOV-02)* | T-26..29 *(aff: T-40)* | `po.py`, `procurement_service.py` | `5fe0ec0` | `test_po_prisma.py` (TC-PO-001..002) | **PASS (100%)** |
+| **BUG-002** | GOV-01, US-02 *(aff: US-01)* | T-37, T-04..06 *(aff: T-01..03)* | `auth.py`, `rbac.py` | `19ce38b`, `6f47a4e` | `test_jwt_auth.py`, `test_rbac.py` | **PASS (100%)** |
+| **BUG-003** | GOV-01, US-02 *(aff: US-04)* | T-37..39 *(aff: T-10..13)* | `pr.py`, `procurement_service.py` | `6f47a4e`, `5fe0ec0` | `test_rbac.py` (TC-RBAC-014..018) | **PASS (100%)** |
+| **BUG-004** | US-10 *(aff: US-09)* | T-34..36 *(aff: T-30..33)* | `receiving.py`, `procurement_service.py` | `02a117d` | `test_close_prisma.py` (TC-CLOSE-001..002) | **PASS (100%)** |
+| **BUG-005** | GOV-02 *(Platform Deploy)* | T-41, T-42 | `start.sh`, `seed_auth_users.py` | `80afdd0` | Khởi động lại container Railway, test login | **PASS (100%)** |
+| **BUG-006** | GOV-02 *(Platform Security)* | T-41 | `backend/app/main.py` | `b8404f4` | Browser API request với Bearer token | **PASS (100%)** |
+| **BUG-007** | GOV-02 *(Platform Deploy)* | T-41 | `frontend/.env`, `client.ts` | `b8404f4`, `d2cff2c` | AI-089 Public Smoke Test (9/9 checks) | **PASS (100%)** |
 | **BUG-008** | US-07 | T-21..25 | `quotations.py`, `ComparisonView.tsx` | `20100e1` | `test_quotation_comparison_prisma.py` (9/9) | **PASS (100%)** |
-| **BUG-009** | US-01 | T-01..03 | `frontend/src/App.tsx` | `9af432c`, `0216a7c` | Browser form validation E2E | **PASS (100%)** |
+| **BUG-009** | US-01 *(aff: US-05)* | T-01..03 *(aff: T-14..16)* | `frontend/src/App.tsx` | `9af432c`, `0216a7c` | Browser form validation E2E | **PASS (100%)** |
 | **BUG-010** | US-06 | T-17..20 | `frontend/src/components/QuotationsView.tsx` | `71b48e2`, `1775682` | Browser quotation input E2E | **PASS (100%)** |
 
 ---
 
 ## 9. Phân Bổ Trách Nhiệm Thành Viên (Story Ownership Alignment)
 
-Theo nguyên tắc mỗi thành viên chịu trách nhiệm trực tiếp cho User Story của mình:
+Theo nguyên tắc mỗi thành viên chịu trách nhiệm trực tiếp cho User Story và Task của mình theo Taiga Backlog chính thức:
 
-### 1. Trần Thị Kiều Giang (Owner: US-01 / Core Viva: US-01)
-- **Bugs phụ trách:**
+### 1. Trần Thị Kiều Giang (Chủ sở hữu: US-01 / Core Viva: US-01)
+- **Tác vụ Backlog:** `T-01..T-03`
+- **Lỗi sở hữu chính (Primary Bug):**
   - `BUG-009` (US-01: Cảnh báo vượt ngân sách giả & validation viền đỏ form tạo PR) $\rightarrow$ **RESOLVED**
-  - `BUG-005` (Platform: Mất ánh xạ UUID khi Railway container khởi động lại) $\rightarrow$ **RESOLVED**
-  - `BUG-006` (Platform: Xung đột cấu hình CORS credentials và wildcard) $\rightarrow$ **RESOLVED**
-  - `BUG-007` (Platform: Lỗi Vercel proxy DNS resolution gọi backend Railway) $\rightarrow$ **RESOLVED**
-- **Tổng số bugs:** 4 (1 Story bug, 3 Platform/Deployment bugs). **100% Resolved.**
+- **Lỗi liên đới (Affected Story Context):**
+  - `BUG-002` (US-01 Context xác thực Form PR) $\rightarrow$ **RESOLVED**
+- **Đóng góp phát triển hạ tầng (Historical Code Developer):**
+  - `BUG-005` (Kịch bản khởi động Railway `start.sh` & seed) $\rightarrow$ **RESOLVED**
+  - `BUG-006` (Cấu hình CORS máy chủ `main.py`) $\rightarrow$ **RESOLVED**
+  - `BUG-007` (Định tuyến API trực tiếp `client.ts`) $\rightarrow$ **RESOLVED**
+- **Tổng số lỗi sở hữu chính (Primary Bugs):** 1. **100% Resolved.**
 
-### 2. Nguyễn Trương Thùy Dương (Owner: US-04, US-05, US-06 / Core Viva: US-04)
-- **Bugs phụ trách:**
+### 2. Nguyễn Trương Thùy Dương (Chủ sở hữu: US-04, US-05, US-06 / Core Viva: US-04)
+- **Tác vụ Backlog:** `T-10..T-20`
+- **Lỗi sở hữu chính (Primary Bug):**
   - `BUG-010` (US-06: Ô nhập đơn giá báo giá số 0 đứng đầu & tải tệp đính kèm) $\rightarrow$ **RESOLVED**
-  - *Ghi chú:* US-04 (Yêu cầu sửa đổi PR) và US-05 (Sourcing nhà cung cấp) không phát sinh lỗi logic trong quá trình kiểm thử hồi quy.
-- **Tổng số bugs:** 1. **100% Resolved.**
+- **Lỗi liên đới (Affected Story Context):**
+  - `BUG-003` (US-04: Thao tác phê duyệt của Manager) $\rightarrow$ **RESOLVED**
+  - `BUG-009` (US-05: Kiểm tra hạn mức ngân sách) $\rightarrow$ **RESOLVED**
+- **Ghi chú nghiệp vụ:** US-04 (Yêu cầu sửa đổi PR) và US-05 (Sourcing nhà cung cấp) không phát sinh lỗi logic trong kiểm thử hồi quy.
+- **Tổng số lỗi sở hữu chính (Primary Bugs):** 1. **100% Resolved.**
 
-### 3. Nguyễn Trúc Lam (Owner: US-03, US-07 / Core Viva: US-07)
-- **Bugs phụ trách:**
+### 3. Nguyễn Trúc Lam (Chủ sở hữu: US-03, US-07 / Core Viva: US-07)
+- **Tác vụ Backlog:** `T-07..T-09`, `T-21..T-25`
+- **Lỗi sở hữu chính (Primary Bug):**
   - `BUG-008` (US-07: Phân quyền màn hình so sánh báo giá & nhãn cảnh báo quá hạn) $\rightarrow$ **RESOLVED**
-  - *Ghi chú:* US-03 (Từ chối PR có lý do & hoàn trả ngân sách) hoạt động đúng theo đặc tả.
-- **Tổng số bugs:** 1. **100% Resolved.**
+- **Ghi chú nghiệp vụ:** US-03 (Từ chối PR có lý do & hoàn trả ngân sách) hoạt động đúng theo đặc tả.
+- **Tổng số lỗi sở hữu chính (Primary Bugs):** 1. **100% Resolved.**
 
-### 4. Nguyễn Thị Thùy Dung (Owner: US-02, US-08, US-09, GOV-01 / Core Viva: US-08)
-- **Bugs phụ trách:**
-  - `BUG-001` (US-09, GOV-02: PO tạo từ PR chưa duyệt & can thiệp giá thương mại) $\rightarrow$ **RESOLVED**
-  - `BUG-002` (US-01, US-02: Lỗ hổng tiêm vai trò phía khách hàng) $\rightarrow$ **RESOLVED**
+### 4. Nguyễn Thị Thùy Dung (Chủ sở hữu: US-02, US-08, US-09, GOV-01 / Core Viva: US-08)
+- **Tác vụ Backlog:** `T-04..T-06`, `T-26..T-39`
+- **Lỗi sở hữu chính (Primary Bugs):**
+  - `BUG-001` (US-08: PO tạo từ PR chưa duyệt & can thiệp giá thương mại) $\rightarrow$ **RESOLVED**
+  - `BUG-002` (GOV-01, US-02: Lỗ hổng tiêm vai trò phía khách hàng) $\rightarrow$ **RESOLVED**
   - `BUG-003` (GOV-01, US-02: Bỏ sót quy tắc Không tự phê duyệt No Self-Approval) $\rightarrow$ **RESOLVED**
+- **Lỗi liên đới (Affected Story Context):**
+  - `BUG-004` (US-09: Thực hiện Nhận hàng) $\rightarrow$ **RESOLVED**
 - **Giới hạn kỹ thuật:** `LIM-001` (US-08: AI Advisory vận hành ở chế độ Fallback Heuristic 78%) $\rightarrow$ **ACCEPTED**
-- **Tổng số bugs:** 3. **100% Resolved.**
+- **Tổng số lỗi sở hữu chính (Primary Bugs):** 3. **100% Resolved.**
 
-### 5. Trần Thị Thu Hà (Owner: US-10, GOV-02 / Core Viva: US-10)
-- **Bugs phụ trách:**
+### 5. Trần Thị Thu Hà (Chủ sở hữu: US-10, GOV-02 / Core Viva: US-10)
+- **Tác vụ Backlog:** `T-34..T-36`, `T-40..T-42`
+- **Lỗi sở hữu chính (Primary Bugs):**
   - `BUG-004` (US-10: Cho phép đóng PR khi hàng chưa nhận đủ 100% đơn hàng PO) $\rightarrow$ **RESOLVED**
-- **Tổng số bugs:** 1. **100% Resolved.**
+  - `BUG-005` (GOV-02 / T-41..T-42: Mất ánh xạ UUID khi Railway container khởi động lại) $\rightarrow$ **RESOLVED**
+  - `BUG-006` (GOV-02 / T-41: Xung đột cấu hình CORS credentials và wildcard) $\rightarrow$ **RESOLVED**
+  - `BUG-007` (GOV-02 / T-41: Lỗi Vercel proxy DNS resolution gọi backend Railway) $\rightarrow$ **RESOLVED**
+- **Lỗi liên đới (Affected Story Context):**
+  - `BUG-001` (GOV-02 / T-40: Khóa dữ liệu thương mại PO & Audit Trail) $\rightarrow$ **RESOLVED**
+- **Tổng số lỗi sở hữu chính (Primary Bugs):** 4. **100% Resolved.**
 
 ---
 

@@ -592,6 +592,26 @@ rite); force push = NOT PERFORMED.
 - **Deployment Changes:** NONE.
 - **Git Tag Changes:** NO (Bảo toàn `v1.0.0-final` tại `9de899d8d45c6f1c5dc42eb9b29abad23a5ebc29`).
 
+### AI-098 — Bug Ownership & Repository Hygiene Correction
+- **AI Activity:** Bug Ownership & Repository Hygiene Correction (Deliverable 3.7 & Git Hygiene)
+- **Input / Context:** Yêu cầu chuẩn hóa phân định quyền sở hữu lỗi (Authoritative Story/Task Ownership theo Taiga Backlog) và kiểm toán vệ sinh repository (`scratch/ai089_public_smoke.py`).
+- **AI Action & Synthesis:**
+  1. Rà soát độc lập và chuẩn hóa 100% quyền sở hữu trong `docs/qa/bug-log.md` theo phân bổ chính thức: Giang (US-01 / T-01..T-03), Dương (US-04/05/06 / T-10..T-20), Lam (US-03/07 / T-07..T-09, T-21..T-25), Dung (US-02/08/09/GOV-01 / T-04..T-06, T-26..T-39), Hà (US-10/GOV-02 / T-34..T-36, T-40..T-42).
+  2. Tách bạch rõ ràng khái niệm Course Story Ownership (Chủ sở hữu Story/Task theo môn học) và Historical Git Commit Author (Người viết mã nguồn trong lịch sử Git); tuyệt đối không thay đổi lịch sử commit hay tên tác giả commit.
+  3. Xử lý triệt để các lỗi cross-story và lỗi hạ tầng:
+     - BUG-001: Xác định Primary Story là US-08 (T-26..T-29) thuộc Nguyễn Thị Thùy Dung (khớp với Core Viva Story US-08); Affected Story là GOV-02 (T-40) thuộc Trần Thị Thu Hà.
+     - BUG-005, BUG-006, BUG-007: Xác định Primary Story là GOV-02 (T-41, T-42) thuộc Trần Thị Thu Hà; ghi nhận Trần Thị Kiều Giang là Historical Code Developer.
+     - BUG-002, BUG-003, BUG-004, BUG-009: Ghi nhận rõ ràng Primary Owner và Affected Stories / Affected Tasks.
+  4. Xác lập tính toàn vẹn của chuỗi Viva cá nhân: 100% 5 thành viên đều có bug ánh xạ trực tiếp hoặc liên đới tới Core Viva Story của mình (Giang US-01, Dương US-04/06, Lam US-07, Dung US-08, Hà US-10).
+  5. Kiểm toán tệp scratch: Xác định `scratch/ai089_public_smoke.py` là Verification Evidence chính thức (được dẫn chiếu trong README.md, runbook.md, release-notes.md, code-review.md, FINAL_QA_GATE_REPORT.md để xác thực Deliverable 3.2 Public Cloud Release); đưa vào quản lý phiên bản minh bạch.
+- **Output:** Tài liệu `docs/qa/bug-log.md` được chuẩn hóa hoàn hảo về ownership; working tree được làm sạch vệ sinh repository.
+- **Verification:** Kiểm tra chéo với Taiga Backlog, Code Review Evidence và Git status porcelain.
+- **Trách nhiệm Con người (Human Responsibility):** Các thành viên con người đối soát lần cuối sự phân công quyền sở hữu Story/Task trước buổi vấn đáp bảo vệ đồ án (Viva defense).
+- **Production Code Changes:** NONE.
+- **Database/Schema Changes:** NONE.
+- **Deployment Changes:** NONE.
+- **Git Tag Changes:** NO (Bảo toàn `v1.0.0-final` tại `9de899d8d45c6f1c5dc42eb9b29abad23a5ebc29`).
+
 ---
 
 ## 4. Retrospective (Tổng kết Bài học Kinh nghiệm & Quản trị Rủi ro AI)
