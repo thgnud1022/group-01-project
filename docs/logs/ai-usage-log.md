@@ -472,6 +472,41 @@ rite); force push = NOT PERFORMED.
 - **Database/Schema Changes:** NONE.
 - **Git Tag:** UNCHANGED (Bảo toàn `v1.0.0-final` tại `9de899d8d45c6f1c5dc42eb9b29abad23a5ebc29`).
 
+### AI-091 — Fresh Final Course Compliance Gap Audit
+- **AI Activity:** Fresh Final Course Compliance Gap Audit
+- **Input / Context:** Current repository + course requirements (`Output_BaoCao.xlsx`, `docs/OUTPUT_BAOCAO.md`) + public release evidence (Vercel Frontend, Railway Backend, Supabase PostgreSQL, Git Tag `v1.0.0-final` $\rightarrow$ `9de899d8...`).
+- **AI Audit & Evidence Verification:**
+  1. Thực hiện rà soát độc lập và khách quan toàn bộ 32 Deliverables của môn học (Bài 1: 1.1..1.6; Bài 2: 2.1..2.11; Bài cuối: 3.1..3.15).
+  2. Phân loại chuẩn xác 5 trạng thái: **23 PASS (71.88%)**, **6 PARTIAL (18.75%)**, **2 MISSING EVIDENCE (6.25%)**, **1 INCONSISTENT (3.12%)**, **0 NOT STARTED (0.00%)**.
+  3. Duy trì nghiêm ngặt Deliverable **2.4 Usability Test** ở trạng thái `MISSING EVIDENCE / PENDING REAL USER TEST` (không tạo dữ liệu giả, bảo toàn tính liêm chính học thuật).
+  4. Xác định Deliverable **3.13 Release Notes** đang có mâu thuẫn (`INCONSISTENT`) do văn bản cũ ghi nhận "Chưa có Public Demo URL" trong khi thực tế đã phát hành công khai.
+  5. Thiết lập danh mục ưu tiên xử lý (P0, P1, P2) cho các công việc tài liệu tiếp theo.
+- **Output:** Ma trận đối soát 32 Deliverables chi tiết và danh mục khoảng trống cần hoàn thiện (Prioritized Gap List).
+- **Verification:** Kiểm tra trực tiếp các tệp tin trong repository, cấu hình hạ tầng đám mây và kết quả thực thi kiểm thử.
+- **Trách nhiệm Con người (Human Responsibility):** **Con người quyết định thứ tự xử lý các khoảng trống (gaps) và phê duyệt các hạng mục tạm hoãn (deferred items).**
+- **Production Code Changes:** NONE.
+- **Database/Schema Changes:** NONE.
+- **Deployment Changes:** NONE.
+- **Git Tag:** UNCHANGED (Bảo toàn `v1.0.0-final` tại `9de899d8d45c6f1c5dc42eb9b29abad23a5ebc29`).
+
+### AI-092 — Release Notes & Changelog Final Synchronization
+- **AI Activity:** Release Notes & Changelog Final Synchronization (Deliverable 3.13)
+- **Input / Context:** Phát hiện khoảng trống từ kiểm toán AI-091 (`Deliverable 3.13 = INCONSISTENT`), bằng chứng phát hành công khai thực tế từ AI-089 (Vercel Frontend, Railway Backend, Supabase PostgreSQL, Git Tag `v1.0.0-final` $\rightarrow$ `9de899d8...`).
+- **AI Action & Synchronization:**
+  1. Xóa bỏ toàn bộ các phát biểu lỗi thời, mâu thuẫn như "Chưa có Public Demo URL", "vận hành local stack" trong [docs/07-release/release-notes.md](file:///d:/LTUD/group-01-project-main/docs/07-release/release-notes.md).
+  2. Cập nhật đầy đủ siêu dữ liệu phát hành công khai: Frontend Vercel (`https://group-01-project.vercel.app`), Backend Railway (`https://group-01-project-production.up.railway.app`), CSDL Supabase PostgreSQL.
+  3. Bổ sung kết quả kiểm thử khói công khai 9/9 tiêu chí PASS từ `scratch/ai089_public_smoke.py`.
+  4. Chuẩn hóa cấu trúc **Mục 5: Nhật ký Thay đổi (Changelog — v1.0.0-final)** với 4 phân mục chuẩn: `Added`, `Verified`, `Fixed`, `Known Limitations`.
+  5. Bảo toàn tính trung thực học thuật: Ghi nhận chính xác Gemini Live là `UNVERIFIED`, Fallback Heuristic là `ACTIVE` (78%), công cụ E2E thực tế là Puppeteer, và Usability Test đang chờ kiểm thử trên người dùng thật.
+  6. Đưa trạng thái Deliverable 3.13 từ `INCONSISTENT` lên **PASS / ALIGNED**.
+- **Output:** Tài liệu Release Notes & Changelog v1.0.0-final được đồng bộ hoàn toàn với hiện trạng hệ thống công khai.
+- **Verification:** Đối chiếu chéo 1:1 giữa [release-notes.md](file:///d:/LTUD/group-01-project-main/docs/07-release/release-notes.md), [FINAL_QA_GATE_REPORT.md](file:///d:/LTUD/group-01-project-main/docs/evidence/FINAL_QA_GATE_REPORT.md), [OUTPUT_BAOCAO.md](file:///d:/LTUD/group-01-project-main/docs/OUTPUT_BAOCAO.md) và live deployments.
+- **Trách nhiệm Con người (Human Responsibility):** **Con người thẩm định và phê duyệt nội dung bản phát hành chính thức trước khi nộp đồ án.**
+- **Production Code Changes:** NONE.
+- **Database/Schema Changes:** NONE.
+- **Deployment Changes:** NONE.
+- **Git Tag Changes:** NO (Bảo toàn `v1.0.0-final` tại `9de899d8d45c6f1c5dc42eb9b29abad23a5ebc29`).
+
 ---
 
 ## 4. Retrospective (Tổng kết Bài học Kinh nghiệm & Quản trị Rủi ro AI)
