@@ -526,6 +526,24 @@ rite); force push = NOT PERFORMED.
 - **Deployment Changes:** NONE.
 - **Git Tag Changes:** NO (Bảo toàn `v1.0.0-final` tại `9de899d8d45c6f1c5dc42eb9b29abad23a5ebc29`).
 
+### AI-094 — Code Review Evidence Preparation & Retrospective Review
+- **AI Activity:** Code Review Evidence Preparation and Retrospective Review (Deliverable 3.6)
+- **Input / Context:** Yêu cầu môn học 3.6 (Deliverable 3.6 — Code Review Evidence), lịch sử Git commit (`git log`), mã nguồn thực tế các thành phần trọng yếu (`auth`, `rbac`, `pr`, `po`, `receiving`, `ai_service`), 9 bộ kiểm thử Pytest (133/133 PASS), kiểm thử Puppeteer E2E (14/14 PASS), và bằng chứng triển khai công khai.
+- **AI Action & Synthesis:**
+  1. Tiến hành hồi cứu trung thực lịch sử mã nguồn (Retrospective Review), không bịa đặt thảo luận GitHub PR, không ngụy tạo người duyệt hay mốc thời gian.
+  2. Xây dựng danh mục kiểm tra mã nguồn (Code Review Checklist) 6 lĩnh vực: An ninh/JWT/RBAC, Quy tắc nghiệp vụ, CSDL/Prisma, Trí tuệ nhân tạo, Kiểm thử tự động, Phát hành.
+  3. Lập Ma trận Truy xuất Nguồn gốc từ User Story (US-01..US-10, GOV-01, GOV-02) sang Task, Commit hash, Tệp nguồn và Test suite thực tế.
+  4. Lập sổ nhật ký phát hiện (Findings Log) chi tiết 14 mục (CR-001..CR-014) với đầy đủ thông tin: ID, Mức độ nghiêm trọng, Story, Task, File, Hiện trạng, Kỳ vọng, Bằng chứng, Trạng thái, Giải pháp và Test hồi quy.
+  5. Thống kê kết quả: 4 Blockers (100% Resolved), 8 Major (5 Resolved, 3 Accepted), 2 Minor (1 Resolved, 1 Accepted); 0 lỗi Open; Kết luận: PASS WITH ACCEPTED LIMITATIONS.
+  6. Thiết lập ranh giới rõ ràng: Trợ lý AI chỉ hỗ trợ thu thập bằng chứng và dự thảo báo cáo; trạng thái chính thức là `DRAFT — PENDING HUMAN SIGN-OFF` đang chờ con người thẩm định.
+- **Output:** Tệp tài liệu [docs/07-release/code-review.md](file:///d:/LTUD/group-01-project-main/docs/07-release/code-review.md) hoàn thiện Deliverable 3.6.
+- **Verification:** Đối chiếu chéo 1:1 với lịch sử Git commit (`git show`), các ca kiểm thử trong `backend/tests/` và báo cáo `FINAL_QA_GATE_REPORT.md`.
+- **Trách nhiệm Con người (Human Responsibility):** **Thành viên nhóm con người chịu trách nhiệm kiểm tra, xác nhận hoặc điều chỉnh các phát hiện hồi cứu trước khi ký duyệt nộp bài.**
+- **Production Code Changes:** NONE.
+- **Database/Schema Changes:** NONE.
+- **Deployment Changes:** NONE.
+- **Git Tag Changes:** NO (Bảo toàn `v1.0.0-final` tại `9de899d8d45c6f1c5dc42eb9b29abad23a5ebc29`).
+
 ---
 
 ## 4. Retrospective (Tổng kết Bài học Kinh nghiệm & Quản trị Rủi ro AI)
