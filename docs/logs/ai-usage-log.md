@@ -576,6 +576,22 @@ rite); force push = NOT PERFORMED.
 - **Deployment Changes:** NONE.
 - **Git Tag Changes:** NO (Bảo toàn `v1.0.0-final` tại `9de899d8d45c6f1c5dc42eb9b29abad23a5ebc29`).
 
+### AI-097 — Bug Log / Bug Tracking Finalization
+- **AI Activity:** Bug Log / Bug Tracking Finalization (Deliverable 3.7)
+- **Input / Context:** AI-091 compliance finding + QA findings (`docs/qa/QA_FINDINGS.md`) + code review findings (`docs/07-release/code-review.md`) + test evidence (`docs/evidence/FINAL_QA_GATE_REPORT.md`).
+- **AI Action & Synthesis:**
+  1. Xây dựng tài liệu theo dõi lỗi tập trung `docs/qa/bug-log.md` cho Deliverable 3.7 tuân thủ đầy đủ chuẩn đầu ra môn học (Severity, Steps, Expected, Actual, Evidence, Owner, Status, Reproducible).
+  2. Phân loại độc lập 19 vấn đề kỹ thuật thành 4 nhóm: 10 Lỗi phần mềm thực tế (Actual Bugs), 3 Sai lệch tài liệu (Documentation Issues), 4 Giới hạn kỹ thuật chấp nhận (Accepted Limitations), 2 Khoảng trống kiểm chứng (Verification Gaps).
+  3. Ánh xạ 10 lỗi phần mềm thực tế vào đúng User Story ownership của 5 thành viên (Giang 4 bugs gồm 1 US-01 + 3 Platform, Dương 1 bug US-06, Lam 1 bug US-07, Dung 3 bugs US-02/US-09/GOV-01, Hà 1 bug US-10) và truy xuất thông suốt tới Commits và Test suites hồi quy.
+  4. Xác nhận 100% (10/10) lỗi phần mềm thực tế đã được khắc phục hoàn toàn (RESOLVED), 0 Open Blocker, bảo toàn tính liêm chính học thuật không tạo lỗi giả.
+- **Output:** Hồ sơ theo dõi lỗi tập trung `docs/qa/bug-log.md`; đánh giá Deliverable 3.7: PASS.
+- **Verification:** Actual findings cross-checked against source code, commits, runtime PostgreSQL database and regression tests.
+- **Trách nhiệm Con người (Human Responsibility):** Các chủ sở hữu User Story và đại diện QA thẩm định tính chính xác của ma trận phân công lỗi, mức độ nghiêm trọng và trạng thái đóng lỗi.
+- **Production Code Changes:** NONE.
+- **Database/Schema Changes:** NONE.
+- **Deployment Changes:** NONE.
+- **Git Tag Changes:** NO (Bảo toàn `v1.0.0-final` tại `9de899d8d45c6f1c5dc42eb9b29abad23a5ebc29`).
+
 ---
 
 ## 4. Retrospective (Tổng kết Bài học Kinh nghiệm & Quản trị Rủi ro AI)
