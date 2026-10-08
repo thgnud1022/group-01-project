@@ -544,6 +544,22 @@ rite); force push = NOT PERFORMED.
 - **Deployment Changes:** NONE.
 - **Git Tag Changes:** NO (Bảo toàn `v1.0.0-final` tại `9de899d8d45c6f1c5dc42eb9b29abad23a5ebc29`).
 
+### AI-095 — Code Review Ownership Alignment & Human Sign-off Preparation
+- **AI Activity:** Code Review Ownership Alignment & Human Sign-off Preparation (Deliverable 3.6)
+- **Input / Context:** Báo cáo kiểm điểm mã nguồn hồi cứu AI-094 ([docs/07-release/code-review.md](file:///d:/LTUD/group-01-project-main/docs/07-release/code-review.md)), phân công trách nhiệm thành viên có thẩm quyền: Giang (US-01), Dương (US-04/05/06), Lam (US-03/07), Dung (US-02/08/09/GOV-01), Hà (US-10/GOV-02), và 5 Core Viva Stories tương ứng.
+- **AI Action & Synthesis:**
+  1. Bổ sung mục "5. Đánh Giá Trách Nhiệm Từng Thành Viên (Individual Ownership Review)" vào hồ sơ code-review.md.
+  2. Ánh xạ chuỗi giá trị toàn diện cho từng thành viên: Story → Requirement/AC → Task → Source files → Commits → Test suites → Findings → Resolution.
+  3. Kiểm chứng tính toàn vẹn của 5 Core Viva Stories (US-01, US-04, US-07, US-08, US-10) với 100% commits, tests và evidence thực tế.
+  4. Lập bảng mẫu "Human Sign-off Readiness" phân định ranh giới rõ ràng: Trợ lý AI chỉ chuẩn bị dữ liệu; trạng thái ghi nhận là `RETROSPECTIVE REVIEW + HUMAN SIGN-OFF PENDING`, giữ nguyên chữ ký ở trạng thái `PENDING (Chờ kiểm tra)`.
+- **Output:** Tệp [docs/07-release/code-review.md](file:///d:/LTUD/group-01-project-main/docs/07-release/code-review.md) được nâng cấp đồng bộ trách nhiệm thành viên và sẵn sàng thẩm định.
+- **Verification:** Kiểm tra liên kết 1:1 giữa các tệp nguồn, test cases và các commit của 5 thành viên.
+- **Trách nhiệm Con người (Human Responsibility):** **Từng thành viên sở hữu User Story (Giang, Dương, Lam, Dung, Hà) trực tiếp đọc, thẩm định và xác nhận phần việc của mình trước khi ký nộp bài.**
+- **Production Code Changes:** NONE.
+- **Database/Schema Changes:** NONE.
+- **Deployment Changes:** NONE.
+- **Git Tag Changes:** NO (Bảo toàn `v1.0.0-final` tại `9de899d8d45c6f1c5dc42eb9b29abad23a5ebc29`).
+
 ---
 
 ## 4. Retrospective (Tổng kết Bài học Kinh nghiệm & Quản trị Rủi ro AI)

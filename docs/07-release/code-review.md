@@ -291,7 +291,165 @@
 
 ---
 
-## 5. Tổng Hợp Kết Quả Đánh Giá Mã Nguồn (Release Review Summary)
+## 5. Đánh Giá Trách Nhiệm Từng Thành Viên (Individual Ownership Review)
+
+> **Nguyên tắc Quản trị Dự án:** Mỗi thành viên trong nhóm sở hữu và chịu trách nhiệm toàn diện cho User Story của mình xuyên suốt vòng đời phát triển (Story → Requirement/AC → Task → Source Code → Commit → Tests → Code Review Findings → Resolution).
+
+### 5.1. Trần Thị Kiều Giang
+* **User Story Phụ trách Chính:** **US-01** (Khởi tạo Yêu cầu Mua sắm & Tạm giữ Ngân sách khả dụng)
+* **Core Viva Story:** **US-01** (Đại diện bảo vệ chuyên sâu chức năng PR Creation & Budget Reservation)
+* **Các Tác vụ (Tasks):** `T-01`, `T-02`, `T-03`
+* **Yêu cầu Nghiệp vụ & Tiêu chí Chấp nhận (AC):** REQ-FR-01 (Tạo PR với danh mục mặt hàng), REQ-FR-02 (Tự động tính tổng giá trị), REQ-BR-01 (Kiểm tra ngân sách phòng ban), REQ-BR-02 (Tạm giữ `tempReservedAmount`).
+* **Mô-đun & Tệp Nguồn Trọng Yếu:**
+  - [`backend/app/routers/pr.py`](file:///d:/LTUD/group-01-project-main/backend/app/routers/pr.py) (Endpoint `POST /api/pr`, `GET /api/pr`)
+  - [`backend/app/services/procurement_service.py`](file:///d:/LTUD/group-01-project-main/backend/app/services/procurement_service.py) (`create_pr_prisma`, khóa dòng `SELECT ... FOR UPDATE` trên bảng `Budget`)
+  - [`frontend/src/App.tsx`](file:///d:/LTUD/group-01-project-main/frontend/src/App.tsx) (Giao diện tạo PR, tính toán ngân sách trực quan)
+* **Lịch sử Git Commits Thực tế:**
+  - `6117d39` — Khởi tạo schema `PurchaseRequest`, `PRItem` và ràng buộc `authUserId`.
+  - `19ce38b` — Kết nối xác thực JWT/JWKS bảo vệ endpoint tạo PR.
+  - `9af432c` — Sửa lỗi tính toán sai lệch cảnh báo vượt ngân sách giả.
+  - `0216a7c` — Bổ sung viền đỏ cảnh báo khi bỏ trống các trường bắt buộc trên biểu mẫu PR.
+* **Bộ Kiểm Thử Minh Chứng:**
+  - `backend/tests/test_pr_creation_prisma.py` (9/9 tests PASSED)
+  - `backend/tests/test_business_rules.py` (10/10 tests PASSED)
+* **Phát Hiện Kiểm Điểm Mã Nguồn (Findings):**
+  - **CR-009 (MAJOR):** Cảnh báo ngân sách sai lệch & thiếu viền đỏ biểu mẫu PR → **RESOLVED** (Commit `9af432c`, `0216a7c`).
+* **Trạng thái Thẩm định Kỹ thuật:** **PASS (100% Resolved & Verified)**
+
+---
+
+### 5.2. Nguyễn Trương Thùy Dương
+* **User Story Phụ trách Chính:** **US-04**, **US-05**, **US-06**
+* **Core Viva Story:** **US-04** (Yêu cầu Chỉnh sửa & Nộp lại PR — HD-16 / REQ-FR-06)
+* **Các Tác vụ (Tasks):** `T-10`, `T-11`, `T-12`, `T-13` (US-04); `T-14`, `T-15`, `T-16` (US-05); `T-17`, `T-18`, `T-19`, `T-20` (US-06)
+* **Yêu cầu Nghiệp vụ & Tiêu chí Chấp nhận (AC):**
+  - US-04: Cấp quản lý yêu cầu chỉnh sửa kèm lý do bắt buộc; người tạo PR chỉnh sửa và nộp lại (`REVISION_REQUESTED` → `PENDING_APPROVAL`).
+  - US-05: Quản lý nhà cung cấp Sourcing (Tạo mới, truy vấn, chuẩn hóa thông tin doanh nghiệp).
+  - US-06: Thu thập và nhập báo giá nhà cung cấp (Đơn giá, số lượng, ngày giao hàng, điều khoản bảo hành, tệp đính kèm).
+* **Mô-đun & Tệp Nguồn Trọng Yếu:**
+  - [`backend/app/routers/pr.py`](file:///d:/LTUD/group-01-project-main/backend/app/routers/pr.py) (`POST /api/pr/{id}/revision`, `POST /api/pr/{id}/resubmit`)
+  - [`backend/app/routers/suppliers.py`](file:///d:/LTUD/group-01-project-main/backend/app/routers/suppliers.py) (`GET /api/suppliers`, `POST /api/suppliers`)
+  - [`backend/app/routers/quotations.py`](file:///d:/LTUD/group-01-project-main/backend/app/routers/quotations.py) (`POST /api/quotations`, `GET /api/quotations`)
+  - [`frontend/src/components/SuppliersView.tsx`](file:///d:/LTUD/group-01-project-main/frontend/src/components/SuppliersView.tsx), [`frontend/src/components/QuotationsView.tsx`](file:///d:/LTUD/group-01-project-main/frontend/src/components/QuotationsView.tsx)
+* **Lịch sử Git Commits Thực tế:**
+  - `6f47a4e` — Triển khai logic HD-16 Revision Request & Resubmit có kiểm tra quyền hạn.
+  - `25041db` — Phase 4A Sourcing & Supplier management với PostgreSQL persistence.
+  - `70e382c` — Phase 4B Quotation collection flow với RBAC enforcement.
+  - `71b48e2` — Xử lý triệt để số 0 đứng đầu khi nhập đơn giá báo giá.
+  - `1775682` — Thêm trình chọn tệp thực tế và vùng kéo thả tệp đính kèm báo giá.
+* **Bộ Kiểm Thử Minh Chứng:**
+  - `backend/tests/test_pr_revision_prisma.py` (8/8 tests PASSED)
+  - `backend/tests/test_supplier_quotation_prisma.py` (14/14 tests PASSED)
+* **Phát Hiện Kiểm Điểm Mã Nguồn (Findings):**
+  - **CR-010 (MINOR):** Ô nhập đơn giá xuất hiện số 0 & thiếu vùng kéo thả tệp → **RESOLVED** (Commit `71b48e2`, `1775682`).
+* **Trạng thái Thẩm định Kỹ thuật:** **PASS (100% Resolved & Verified)**
+
+---
+
+### 5.3. Nguyễn Trúc Lam
+* **User Story Phụ trách Chính:** **US-03**, **US-07**
+* **Core Viva Story:** **US-07** (Đối sánh Báo giá Đa chiều & Ma trận So sánh — HD-13 / K-2)
+* **Các Tác vụ (Tasks):** `T-07`, `T-08`, `T-09` (US-03); `T-21`, `T-22`, `T-23`, `T-24`, `T-25` (US-07)
+* **Yêu cầu Nghiệp vụ & Tiêu chí Chấp nhận (AC):**
+  - US-03: Cấp quản lý từ chối PR kèm lý do bắt buộc; hệ thống tự động hoàn trả ngân sách tạm giữ (`tempReservedAmount`) về ngân sách khả dụng.
+  - US-07: Hiển thị bảng đối sánh đa chiều các báo giá của cùng một PR (Đơn giá, chênh lệch giá, thời hạn giao hàng, điều khoản bảo hành, cảnh báo hết hạn).
+* **Mô-đun & Tệp Nguồn Trọng Yếu:**
+  - [`backend/app/routers/pr.py`](file:///d:/LTUD/group-01-project-main/backend/app/routers/pr.py) (`POST /api/pr/{id}/reject`)
+  - [`backend/app/routers/quotations.py`](file:///d:/LTUD/group-01-project-main/backend/app/routers/quotations.py) (`GET /api/quotations/compare/{pr_id}`)
+  - [`backend/app/services/procurement_service.py`](file:///d:/LTUD/group-01-project-main/backend/app/services/procurement_service.py) (`reject_pr_prisma`, `compare_quotations_prisma`)
+  - [`frontend/src/components/ComparisonView.tsx`](file:///d:/LTUD/group-01-project-main/frontend/src/components/ComparisonView.tsx)
+* **Lịch sử Git Commits Thực tế:**
+  - `6f47a4e` — Triển khai từ chối PR có lý do bắt buộc và hoàn ngân sách an toàn.
+  - `ca92d15` — Phase 4C Xây dựng luồng so sánh báo giá với PostgreSQL persistence.
+  - `20100e1` — Thực thi quy tắc HD-13/K-2: Cho phép toàn bộ vai trò đã xác thực xem đối sánh và kích hoạt cảnh báo hết hạn `validUntil`.
+* **Bộ Kiểm Thử Minh Chứng:**
+  - `backend/tests/test_pr_reject_prisma.py` (7/7 tests PASSED)
+  - `backend/tests/test_quotation_comparison_prisma.py` (9/9 tests PASSED)
+* **Phát Hiện Kiểm Điểm Mã Nguồn (Findings):**
+  - **CR-008 (MAJOR):** Báo giá hết hạn & hạn chế quyền xem đối sánh → **RESOLVED** (Commit `20100e1`).
+* **Trạng thái Thẩm định Kỹ thuật:** **PASS (100% Resolved & Verified)**
+
+---
+
+### 5.4. Nguyễn Thị Thùy Dung
+* **User Story Phụ trách Chính:** **US-02**, **US-08**, **US-09**, **GOV-01**
+* **Core Viva Story:** **US-08** (AI Tư vấn Phân tích & Khuyến nghị Báo giá Đa tiêu chí)
+* **Các Tác vụ (Tasks):** `T-04..T-06` (US-02); `T-26..T-29` (US-08); `T-30..T-33` (US-09); `T-37..T-39` (GOV-01)
+* **Yêu cầu Nghiệp vụ & Tiêu chí Chấp nhận (AC):**
+  - US-02: Phê duyệt PR bởi cấp quản lý (MANAGER/FINANCE/ADMIN); ghi nhận nhật ký phê duyệt.
+  - US-08: AI phân tích ma trận báo giá, tính điểm đa tiêu chí (Giá 40%, Giao hàng 25%, Độ tin cậy 25%, Điều khoản 10%), xuất phát hiện bất thường và lý do khuyến nghị.
+  - US-09: Chuyên viên Mua sắm (PROCUREMENT) trao thầu và tạo Purchase Order từ PR đã duyệt.
+  - GOV-01: Quy tắc Không tự phê duyệt (No Self-Approval) — Ngăn người tạo PR tự duyệt/từ chối/yêu cầu sửa PR của chính mình.
+* **Mô-đun & Tệp Nguồn Trọng Yếu:**
+  - [`backend/app/routers/pr.py`](file:///d:/LTUD/group-01-project-main/backend/app/routers/pr.py) (`POST /api/pr/{id}/approve`)
+  - [`backend/app/routers/po.py`](file:///d:/LTUD/group-01-project-main/backend/app/routers/po.py) (`POST /api/po`, `GET /api/po`)
+  - [`backend/app/services/ai_service.py`](file:///d:/LTUD/group-01-project-main/backend/app/services/ai_service.py) (Gemini API + Fallback Heuristic 40/25/25/10)
+  - [`backend/app/services/procurement_service.py`](file:///d:/LTUD/group-01-project-main/backend/app/services/procurement_service.py) (`approve_pr_prisma`, `create_po_prisma`)
+  - [`frontend/src/components/ComparisonView.tsx`](file:///d:/LTUD/group-01-project-main/frontend/src/components/ComparisonView.tsx)
+* **Lịch sử Git Commits Thực tế:**
+  - `6f47a4e` — Triển khai RBAC máy chủ và quy tắc No Self-Approval (GOV-01).
+  - `5fe0ec0` — Khóa chặn tạo PO nếu PR chưa `APPROVED` (REQ-BR-10) và khóa đơn giá PO từ CSDL.
+  - `91996e7` — Tích hợp Google Gemini REST API và bộ phân tích Fallback Heuristic.
+  - `16294c6`, `18494d4` — Hoàn thiện UI khuyến nghị AI và chuẩn hóa ranh giới AI Advisory.
+  - `ad8f457` — Triển khai quy trình trao thầu con người tạo PO (Human Award to PO).
+* **Bộ Kiểm Thử Minh Chứng:**
+  - `backend/tests/test_pr_approval_prisma.py` (8/8 tests PASSED)
+  - `backend/tests/test_rbac.py` (28/28 tests PASSED)
+  - `backend/tests/test_ai_service.py` (5/5 tests PASSED)
+  - `backend/tests/test_po_prisma.py` (10/10 tests PASSED)
+  - `backend/tests/test_us09_po.py` (8/8 tests PASSED)
+* **Phát Hiện Kiểm Điểm Mã Nguồn (Findings):**
+  - **CR-001 (BLOCKER):** Lỗ hổng tiêm vai trò phía khách → **RESOLVED** (Commit `19ce38b`, `6f47a4e`).
+  - **CR-002 (BLOCKER):** Bỏ sót quy tắc không tự phê duyệt → **RESOLVED** (Commit `6f47a4e`, `5fe0ec0`).
+  - **CR-003 (BLOCKER):** Tạo PO từ PR chưa duyệt & sửa đổi dữ liệu thương mại → **RESOLVED** (Commit `5fe0ec0`).
+  - **CR-011 (MAJOR):** Gemini Live API chưa kiểm chứng tự động → **ACCEPTED (Fallback Heuristic Active)**.
+* **Trạng thái Thẩm định Kỹ thuật:** **PASS WITH ACCEPTED LIMITATIONS (Đã công bố giới hạn AI)**
+
+---
+
+### 5.5. Trần Thị Thu Hà
+* **User Story Phụ trách Chính:** **US-10**, **GOV-02**
+* **Core Viva Story:** **US-10** (Nhận Hàng, Kiểm Soát Số Lượng & Đóng PR Quyết Toán Ngân Sách)
+* **Các Tác vụ (Tasks):** `T-34`, `T-35`, `T-36` (US-10); `T-40`, `T-41`, `T-42` (GOV-02 & Release)
+* **Yêu cầu Nghiệp vụ & Tiêu chí Chấp nhận (AC):**
+  - US-10: Nhận hàng theo từng đợt có tệp biên bản đính kèm; kiểm tra `SUM(receivedQty) <= PO.quantity` (REQ-BR-04); chặn đóng PR nếu hàng chưa nhận đủ 100% (REQ-BR-11 / HD-07); quyết toán ngân sách (`tempReservedAmount` giảm, `spentAmount` tăng).
+  - GOV-02: Khóa dữ liệu thương mại trên PO; không cho phép client ghi đè đơn giá/số lượng.
+* **Mô-đun & Tệp Nguồn Trọng Yếu:**
+  - [`backend/app/routers/receiving.py`](file:///d:/LTUD/group-01-project-main/backend/app/routers/receiving.py) (`POST /api/receiving`, `GET /api/receiving/po/{po_id}`)
+  - [`backend/app/routers/pr.py`](file:///d:/LTUD/group-01-project-main/backend/app/routers/pr.py) (`POST /api/pr/{id}/close`)
+  - [`backend/app/services/procurement_service.py`](file:///d:/LTUD/group-01-project-main/backend/app/services/procurement_service.py) (`receive_goods_prisma`, `close_pr_prisma`, khóa dòng `SELECT ... FOR UPDATE`)
+  - [`frontend/src/components/ReceivingModal.tsx`](file:///d:/LTUD/group-01-project-main/frontend/src/components/ReceivingModal.tsx)
+* **Lịch sử Git Commits Thực tế:**
+  - `02a117d` — Triển khai quy tắc REQ-BR-11 / HD-07: Chặn đóng PR nếu hàng chưa nhận đủ.
+  - `b5d00a3` — Di chuyển toàn bộ dữ liệu nhận hàng sang PostgreSQL Supabase.
+  - `dfdd7e5` — Di chuyển logic đóng PR và quyết toán ngân sách sang Prisma Client.
+  - `a1bc041` — Hoàn thiện trọn vẹn chu trình nhận hàng và đóng PR trên giao diện người dùng.
+  - `cc84847` — Kiểm chứng toàn bộ chu trình nghiệp vụ E2E từ PR đến Close PR.
+* **Bộ Kiểm Thử Minh Chứng:**
+  - `backend/tests/test_receiving_prisma.py` (6/6 tests PASSED)
+  - `backend/tests/test_close_prisma.py` (8/8 tests PASSED)
+  - `backend/tests/test_phase4f_lifecycle.py` (5/5 tests PASSED)
+  - `frontend/scripts/test_final_full_lifecycle_e2e.js` (14/14 steps PASSED)
+  - `scratch/ai089_public_smoke.py` (Xác thực Public Cloud: Cả Happy Path và Failure Guard PASSED)
+* **Phát Hiện Kiểm Điểm Mã Nguồn (Findings):**
+  - **CR-004 (BLOCKER):** Đóng PR khi hàng chưa được nhận đủ 100% → **RESOLVED** (Commit `02a117d`).
+* **Trạng thái Thẩm định Kỹ thuật:** **PASS (100% Resolved & Verified)**
+
+---
+
+### 5.6. Bảng Kiểm Tra Core Viva Stories (Core Viva Stories Matrix)
+
+| Thành viên | Story Bảo Vệ (Core Viva) | Mô Tả Trọng Tâm Chuyên Sâu | Commit Trọng Yếu | Bộ Test Kiểm Chứng | Trạng Thái Thẩm Định |
+|---|---|---|---|---|---|
+| **Trần Thị Kiều Giang** | **US-01** | Tạo PR & Kiểm tra/Tạm giữ ngân sách (`SELECT ... FOR UPDATE`) | `6117d39`, `19ce38b`, `9af432c` | `test_pr_creation_prisma.py` | **PASS (100%)** |
+| **Nguyễn Trương Thùy Dương** | **US-04** | Luồng Quản lý yêu cầu sửa đổi & Nộp lại PR (HD-16) | `6f47a4e` | `test_pr_revision_prisma.py` | **PASS (100%)** |
+| **Nguyễn Trúc Lam** | **US-07** | Ma trận Đối sánh Báo giá Đa chiều & Cảnh báo Hết hạn (HD-13) | `ca92d15`, `20100e1` | `test_quotation_comparison_prisma.py` | **PASS (100%)** |
+| **Nguyễn Thị Thùy Dung** | **US-08** | AI Tư vấn Xếp hạng Báo giá Đa tiêu chí & Fallback Heuristic | `91996e7`, `16294c6`, `18494d4` | `test_ai_service.py` | **PASS WITH ACCEPTED LIMITATIONS** |
+| **Trần Thị Thu Hà** | **US-10** | Nhận hàng Đa đợt, Chặn đóng PR chưa nhận đủ & Quyết toán | `02a117d`, `dfdd7e5`, `a1bc041` | `test_close_prisma.py`, `test_receiving_prisma.py` | **PASS (100%)** |
+
+---
+
+## 6. Tổng Hợp Kết Quả Đánh Giá Mã Nguồn (Release Review Summary)
 
 ```
 ================================================================================
@@ -318,12 +476,18 @@
 
 ---
 
-## 6. Chữ Ký Xác Nhận & Phê Duyệt Của Nhóm Phát Triển (Sign-off)
+## 7. Bảng Sẵn Sàng Ký Duyệt Của Con Người (Human Sign-Off Readiness)
 
-*Hồ sơ này thể hiện sự đánh giá hồi cứu toàn diện, trung thực dựa trên bằng chứng vật lý của kho mã nguồn dự án Group 01.*
+> **Cảnh báo Ranh giới Thẩm định:** Trợ lý AI chỉ thực hiện việc chuẩn bị template, trích xuất dữ liệu thực tế từ Git và đối chiếu chéo các bộ kiểm thử. **Tuyệt đối KHÔNG tự ý ghi nhận "HUMAN REVIEW CONFIRMED" khi các thành viên nhóm chưa kiểm tra và ký xác nhận thực tế.**
 
-| Vai trò | Đại diện Thực hiện | Trạng thái Thẩm định | Ghi chú Phê duyệt |
+**Trạng thái Hiện tại của Hồ sơ:**  
+`RETROSPECTIVE REVIEW + HUMAN SIGN-OFF PENDING`
+
+| Thành Viên Sở Hữu (Story Owner) | User Story Phụ Trách | Trạng Thái Sẵn Sàng Thẩm Định (Review Status) | Chữ Ký Xác Nhận của Con Người (Human Sign-off) |
 |---|---|---|---|
-| **Soạn thảo Hồi cứu (Drafting)** | Trợ lý Antigravity AI | `COMPLETED` | Tái cấu trúc 100% từ Git log, test suites và live deployments |
-| **Thẩm định Kỹ thuật (Reviewer)** | Đại diện Nhóm Nhóm 01 | `DRAFT — PENDING HUMAN SIGN-OFF` | Đang chờ thành viên nhóm kiểm tra đối chiếu trước buổi bảo vệ |
-| **Đại diện Nhóm (Team Lead)** | Trưởng nhóm Group 01 | `DRAFT — PENDING HUMAN SIGN-OFF` | Chuẩn bị phê duyệt nộp Deliverable 3.6 |
+| **Trần Thị Kiều Giang** | **US-01** (T-01..T-03) | `READY FOR REVIEW` | `PENDING (Chờ kiểm tra)` |
+| **Nguyễn Trương Thùy Dương** | **US-04**, **US-05**, **US-06** (T-10..T-20) | `READY FOR REVIEW` | `PENDING (Chờ kiểm tra)` |
+| **Nguyễn Trúc Lam** | **US-03**, **US-07** (T-07..T-09, T-21..T-25) | `READY FOR REVIEW` | `PENDING (Chờ kiểm tra)` |
+| **Nguyễn Thị Thùy Dung** | **US-02**, **US-08**, **US-09**, **GOV-01** (T-04..T-06, T-26..T-39) | `READY FOR REVIEW` | `PENDING (Chờ kiểm tra)` |
+| **Trần Thị Thu Hà** | **US-10**, **GOV-02** (T-34..T-36, T-40..T-42) | `READY FOR REVIEW` | `PENDING (Chờ kiểm tra)` |
+
