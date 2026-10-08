@@ -507,6 +507,25 @@ rite); force push = NOT PERFORMED.
 - **Deployment Changes:** NONE.
 - **Git Tag Changes:** NO (Bảo toàn `v1.0.0-final` tại `9de899d8d45c6f1c5dc42eb9b29abad23a5ebc29`).
 
+### AI-093 — README + Runbook Finalization
+- **AI Activity:** README + Runbook Finalization (Deliverable 3.12)
+- **Input / Context:** Kết quả rà soát khoảng trống tuân thủ từ AI-091 (`Deliverable 3.12 = PARTIAL`), mã nguồn thực tế và bằng chứng triển khai công khai (Vercel Frontend, Railway Backend, Supabase PostgreSQL).
+- **AI Action & Finalization:**
+  1. Rà soát và loại bỏ toàn bộ đường dẫn tuyệt đối mang tính cá nhân/máy cục bộ (`d:\THUDDN\...`, `d:\LTUD\...`) trong cả [README.md](file:///d:/LTUD/group-01-project-main/README.md) và [docs/07-release/runbook.md](file:///d:/LTUD/group-01-project-main/docs/07-release/runbook.md), chuẩn hóa 100% sang đường dẫn tương đối (`backend/`, `frontend/`, `docs/`).
+  2. Loại bỏ các hướng dẫn/tuyên bố kiểm thử Playwright lỗi thời; ghi nhận chính xác trình điều khiển E2E thực tế được kiểm chứng là Puppeteer (`puppeteer-core`, 14/14 steps PASS), nêu rõ Playwright specifications tồn tại nhưng chưa được nghiệm thu độc lập.
+  3. Cập nhật đầy đủ hướng dẫn khởi chạy cục bộ theo đúng kiến trúc hiện tại: Python venv, FastAPI/Uvicorn port 8000, Vite port 5173, sinh Prisma client và chạy idempotent seed `seed_auth_users.py`.
+  4. Bổ sung bảng biến môi trường rõ ràng cho Backend và Frontend (chỉ nêu tên biến, mục đích, tính bắt buộc; không để lộ thông tin mật).
+  5. Tài liệu hóa đầy đủ liên kết Public Demo: Vercel Frontend, Railway Backend, Supabase PostgreSQL, Healthcheck, OpenAPI docs.
+  6. Bổ sung mục Xử lý Sự cố Thường gặp (Troubleshooting) dựa trên các sự cố thực tế đã xử lý (401 mapping, CORS wildcard credentials conflict, Vercel DNS resolve failed, connection pooler).
+  7. Bảo đảm tiêu chí "Một sinh viên khác có thể đọc và tự chạy dự án" (Another student can run).
+- **Output:** Tệp [README.md](file:///d:/LTUD/group-01-project-main/README.md) và [docs/07-release/runbook.md](file:///d:/LTUD/group-01-project-main/docs/07-release/runbook.md) được hoàn thiện toàn diện.
+- **Verification:** Đối chiếu chéo lệnh thực thi với `backend/pyproject.toml`, `backend/requirements.txt`, `backend/start.sh`, `frontend/package.json` và cấu hình triển khai thực tế.
+- **Trách nhiệm Con người (Human Responsibility):** **Con người thẩm định toàn bộ hướng dẫn vận hành và xác nhận sinh viên khác có thể thực hiện theo.**
+- **Production Code Changes:** NONE.
+- **Database/Schema Changes:** NONE.
+- **Deployment Changes:** NONE.
+- **Git Tag Changes:** NO (Bảo toàn `v1.0.0-final` tại `9de899d8d45c6f1c5dc42eb9b29abad23a5ebc29`).
+
 ---
 
 ## 4. Retrospective (Tổng kết Bài học Kinh nghiệm & Quản trị Rủi ro AI)
