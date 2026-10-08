@@ -578,4 +578,32 @@ Trong trường hợp thành viên rà soát phát hiện bất kỳ điểm nà
 3. Chỉ cập nhật tài liệu kỹ thuật khi có bằng chứng vật lý chứng minh sai lệch; tuyệt đối **KHÔNG** chỉnh sửa mã nguồn production trong pha chốt tài liệu này.
 4. Sau khi đối chiếu chính xác, thành viên mới tiến hành chuyển trạng thái sang `CONFIRMED`.
 
+---
+
+### 7.4. Mẫu Phiếu Ký Duyệt Chuẩn (Standard Sign-off Template)
+
+```text
+Owner: <Tên thành viên>
+Story: <Mã User Story>
+Review completed:
+[ ] YES   [ ] NO
+
+I confirm that:
+- Story mapping is correct.
+- Task mapping is correct.
+- Code evidence is correct.
+- Commit evidence is correct.
+- Test evidence is correct.
+- Findings/resolution are accurate.
+
+Human decision:
+[ ] CONFIRMED   [ ] CORRECTION REQUIRED
+
+Name:
+<filled by human>
+
+Date:
+<filled by human>
+```
+
 
