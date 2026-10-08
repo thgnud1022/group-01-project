@@ -12,4 +12,4 @@ cmds = [
 ]
 
 [start]
-cmd = "if [ -d backend ]; then cd backend; fi && python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+cmd = "if [ -d backend ]; then cd backend; fi && (sh start.sh || (python scripts/seed_auth_users.py ; python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT))"
