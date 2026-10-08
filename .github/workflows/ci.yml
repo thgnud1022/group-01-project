@@ -1,0 +1,107 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - final-delivery
+  pull_request:
+    branches:
+      - final-delivery
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend-test:
+    name: Backend Pytest Suite
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: app
+          POSTGRES_PASSWORD: app-local-password
+          POSTGRES_DB: procurement_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt pytest
+
+      - name: Generate Prisma client
+        working-directory: backend
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://app:app-local-password@localhost:5432/procurement_db' }}
+        run: |
+          prisma generate
+
+      - name: Initialize test database schema and seeds
+        working-directory: backend
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://app:app-local-password@localhost:5432/procurement_db' }}
+        run: |
+          if [ -z "${{ secrets.DATABASE_URL }}" ]; then
+            echo "DATABASE_URL secret is not set. Syncing schema to local PostgreSQL container..."
+            prisma db push --accept-data-loss
+            python prisma/seed.py
+            python scripts/seed_auth_users.py
+          else
+            echo "DATABASE_URL secret is configured. Using configured database."
+          fi
+
+      - name: Run backend pytest suite
+        working-directory: backend
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://app:app-local-password@localhost:5432/procurement_db' }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL || 'https://oogcmsouczrmbwughnfb.supabase.co' }}
+        run: |
+          pytest tests/test_phase4f_lifecycle.py \
+                 tests/test_po_prisma.py \
+                 tests/test_ai_service.py \
+                 tests/test_quotation_comparison_prisma.py \
+                 tests/test_supplier_quotation_prisma.py \
+                 tests/test_pr_approval_prisma.py \
+                 tests/test_pr_revision_prisma.py \
+                 tests/test_pr_reject_prisma.py \
+                 tests/test_rbac.py -v
+
+  frontend-build:
+    name: Frontend Build & Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build frontend application
+        working-directory: frontend
+        run: npm run build

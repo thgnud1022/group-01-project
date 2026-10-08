@@ -133,6 +133,7 @@ All 32 deliverables listed in Section 2 require actual evidence. "Slide mô tả
 ## 11. CI/CD / Docker / Deployment
 
 - **3.2 Release chạy được:** **COMPLETE** (Public URLs: Frontend `https://group-01-project.vercel.app`, Backend `https://group-01-project-production.up.railway.app` + Git Tag `v1.0.0-final` -> `9de899d8d45c6f1c5dc42eb9b29abad23a5ebc29`. Verified end-to-end via AI-089 Public Smoke Test).
+- **3.11 CI/CD + Docker/Deployment:** **COMPLETE** (GitHub Actions `.github/workflows/ci.yml` multi-job CI pipeline: `backend-test` with PostgreSQL 16 Service Container + `frontend-build`; Docker packaging in `backend/Dockerfile` & `compose.yaml`; Báo cáo kiểm chứng tại `docs/evidence/CI_CD_PIPELINE_REPORT.md`).
 - **3.13 Release Notes + Changelog:** Version, scope, features, fixes, known issues, upgrade notes. Matches v1.0.0-final.
 
 ## 12. Traceability
