@@ -127,8 +127,8 @@ All 32 deliverables listed in Section 2 require actual evidence. "Slide mô tả
 
 ## 10. Security / NFR
 
-- **3.3 Authentication + Authorization:** Login/session/token; role/permission; protected actions. Backend must enforce permission, not just hide UI buttons.
-- **3.10 Security + NFR Evidence:** RBAC, validation, secrets, dependency check, basic performance/a11y/logging. No leaked secrets/stack traces.
+- **3.3 Authentication + Authorization:** **COMPLETE** (Supabase Auth JWT ES256 JWKS verification via `jwt_service.py` with 5s timeout & fail-closed HTTP 401; Server-Side RBAC via `RoleChecker` covering 100% 19 endpoints; No Self-Approval GOV-01 guard; 100% verified via `test_jwt_auth.py` (10/10 PASS) & `test_rbac.py` (28/28 PASS); Chi tiết tại `docs/07-release/security-nfr.md`).
+- **3.10 Security + NFR Evidence:** **COMPLETE** (Hồ sơ an ninh và kiểm thử phi chức năng hoàn chỉnh tại `docs/07-release/security-nfr.md`: Server-side RBAC 19 endpoints, No Self-Approval GOV-01, PO creation guard REQ-BR-10 với khóa cứng giá/lượng, Receiving completion guard REQ-BR-11, Budget reservation/settlement guard; Pydantic V2 input validation fail-fast 422; Quét Git 0 secret leaks, `.gitignore` & `.env.example` sanitization; Frontend `npm audit` 0 vulnerabilities trên 74 packages, Backend `pip check` 0 broken requirements; Đo lường hiệu năng: Vite build 12.43s, bundle gzip 181.79 kB, Railway `/api/health` 1.08s, Vercel frontend 0.78s; Logging tập trung 0 stack trace/secret leak; Docker `python:3.11-slim` tối giản; AI Advisory-only boundary với deterministic heuristic fallback 78% confidence và 0 autonomous PO creation; Sổ bộ khuyết tật SEC-001..SEC-007; Bộ kiểm thử an ninh tự động Pytest 85/85 PASS trong 253.15s; Đồng ký duyệt: Nguyễn Thị Thùy Dung - GOV-01 & Trần Thị Thu Hà - GOV-02).
 
 ## 11. CI/CD / Docker / Deployment
 
