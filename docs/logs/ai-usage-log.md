@@ -560,6 +560,22 @@ rite); force push = NOT PERFORMED.
 - **Deployment Changes:** NONE.
 - **Git Tag Changes:** NO (Bảo toàn `v1.0.0-final` tại `9de899d8d45c6f1c5dc42eb9b29abad23a5ebc29`).
 
+### AI-096 — Human Code Review Sign-off Preparation and Ownership Confirmation
+- **AI Activity:** Human Code Review Sign-off Preparation and Ownership Confirmation (Deliverable 3.6)
+- **Input / Context:** Báo cáo kiểm điểm mã nguồn hồi cứu đồng bộ trách nhiệm thành viên AI-095 ([docs/07-release/code-review.md](file:///d:/LTUD/group-01-project-main/docs/07-release/code-review.md)), nguyên tắc liêm chính học thuật và phòng chống ngụy tạo bằng chứng con người.
+- **AI Action & Synthesis:**
+  1. Giữ nguyên 100% hồ sơ Code Review đã lập: danh mục kiểm tra 6 phần, ma trận truy xuất Story → Task → Commit → Test, 14 phát hiện trung thực (10 Resolved, 4 Accepted, 0 Open).
+  2. Xây dựng Bảng Tổng hợp Ký duyệt (Human Sign-off Matrix) 5 thành viên (Giang US-01, Dương US-04/05/06, Lam US-03/07, Dung US-02/08/09/GOV-01, Hà US-10/GOV-02) với trạng thái chuẩn: Review Status `READY`, Human Sign-off `PENDING`, Date `—`.
+  3. Soạn thảo 5 Phiếu Xác nhận Thẩm định Độc lập (Individual Sign-Off Slips) với checklist 5 điểm cho từng thành viên, để trống hoàn toàn các trường chữ ký và ngày ký để thành viên con người tự điền.
+  4. Thiết lập Quy trình Xử lý Sai lệch (Correction Workflow) nghiêm ngặt; tuyệt đối không tự ý đánh dấu "CONFIRMED" khi chưa có xác nhận thực tế từ các thành viên.
+- **Output:** Hồ sơ Code Review [docs/07-release/code-review.md](file:///d:/LTUD/group-01-project-main/docs/07-release/code-review.md) hoàn thiện khung thẩm định con người, trạng thái `RETROSPECTIVE REVIEW + HUMAN SIGN-OFF PENDING (0/5 CONFIRMED)`.
+- **Verification:** Kiểm tra ma trận phân quyền sở hữu User Story, đối chiếu 5 Core Viva Stories và đảm bảo không có bất kỳ dòng chữ ký giả nào.
+- **Trách nhiệm Con người (Human Responsibility):** **Từng thành viên sở hữu User Story trực tiếp đọc, thẩm định và xác nhận hoặc yêu cầu chỉnh sửa phần việc của mình trước khi ký nộp bài.**
+- **Production Code Changes:** NONE.
+- **Database/Schema Changes:** NONE.
+- **Deployment Changes:** NONE.
+- **Git Tag Changes:** NO (Bảo toàn `v1.0.0-final` tại `9de899d8d45c6f1c5dc42eb9b29abad23a5ebc29`).
+
 ---
 
 ## 4. Retrospective (Tổng kết Bài học Kinh nghiệm & Quản trị Rủi ro AI)

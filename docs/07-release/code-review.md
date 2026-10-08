@@ -478,16 +478,104 @@
 
 ## 7. Bảng Sẵn Sàng Ký Duyệt Của Con Người (Human Sign-Off Readiness)
 
-> **Cảnh báo Ranh giới Thẩm định:** Trợ lý AI chỉ thực hiện việc chuẩn bị template, trích xuất dữ liệu thực tế từ Git và đối chiếu chéo các bộ kiểm thử. **Tuyệt đối KHÔNG tự ý ghi nhận "HUMAN REVIEW CONFIRMED" khi các thành viên nhóm chưa kiểm tra và ký xác nhận thực tế.**
+> **Cảnh báo Ranh giới Thẩm định & Phòng chống Ngụy tạo (Academic Integrity & Anti-Fabrication):**  
+> Trợ lý AI chỉ thực hiện việc chuẩn bị template, trích xuất dữ liệu thực tế từ Git và đối chiếu chéo các bộ kiểm thử. **Tuyệt đối KHÔNG tự ý ghi nhận "HUMAN REVIEW CONFIRMED", không tự ký thay, không tạo chữ ký giả, không bịa đặt người review hay ngày duyệt khi các thành viên nhóm chưa kiểm tra và ký xác nhận thực tế.**
 
 **Trạng thái Hiện tại của Hồ sơ:**  
-`RETROSPECTIVE REVIEW + HUMAN SIGN-OFF PENDING`
+`RETROSPECTIVE REVIEW + HUMAN SIGN-OFF PENDING (0/5 CONFIRMED)`
 
-| Thành Viên Sở Hữu (Story Owner) | User Story Phụ Trách | Trạng Thái Sẵn Sàng Thẩm Định (Review Status) | Chữ Ký Xác Nhận của Con Người (Human Sign-off) |
-|---|---|---|---|
-| **Trần Thị Kiều Giang** | **US-01** (T-01..T-03) | `READY FOR REVIEW` | `PENDING (Chờ kiểm tra)` |
-| **Nguyễn Trương Thùy Dương** | **US-04**, **US-05**, **US-06** (T-10..T-20) | `READY FOR REVIEW` | `PENDING (Chờ kiểm tra)` |
-| **Nguyễn Trúc Lam** | **US-03**, **US-07** (T-07..T-09, T-21..T-25) | `READY FOR REVIEW` | `PENDING (Chờ kiểm tra)` |
-| **Nguyễn Thị Thùy Dung** | **US-02**, **US-08**, **US-09**, **GOV-01** (T-04..T-06, T-26..T-39) | `READY FOR REVIEW` | `PENDING (Chờ kiểm tra)` |
-| **Trần Thị Thu Hà** | **US-10**, **GOV-02** (T-34..T-36, T-40..T-42) | `READY FOR REVIEW` | `PENDING (Chờ kiểm tra)` |
+### 7.1. Bảng Tổng Hợp Ký Duyệt Thẩm Định (Human Sign-off Matrix)
+
+| Owner (Thành Viên Phụ Trách) | Story Phụ Trách | Review Status (Trạng Thái Rà Soát) | Human Sign-off (Chữ Ký Xác Nhận) | Date (Ngày Ký) |
+|---|---|---|---|---|
+| **Trần Thị Kiều Giang** | US-01 | `READY` | `PENDING` | — |
+| **Nguyễn Trương Thùy Dương** | US-04, US-05, US-06 | `READY` | `PENDING` | — |
+| **Nguyễn Trúc Lam** | US-03, US-07 | `READY` | `PENDING` | — |
+| **Nguyễn Thị Thùy Dung** | US-02, US-08, US-09, GOV-01 | `READY` | `PENDING` | — |
+| **Trần Thị Thu Hà** | US-10, GOV-02 | `READY` | `PENDING` | — |
+
+---
+
+### 7.2. Phiếu Xác Nhận Thẩm Định Từng Thành Viên (Individual Sign-Off Slips)
+
+#### Phiếu 1: Trần Thị Kiều Giang
+* **User Story Sở hữu:** **US-01** (Khởi tạo Yêu cầu Mua sắm & Tạm giữ Ngân sách khả dụng)
+* **Các Tác vụ (Tasks):** `T-01..T-03`
+* **Trạng thái Chuẩn bị:** `READY FOR REVIEW`
+* **Nội dung Kiểm tra & Cam kết của Thành viên:**
+  - [ ] Xác nhận ánh xạ User Story & Tasks (`T-01..T-03`) là chính xác.
+  - [ ] Xác nhận mô-đun tệp nguồn (`backend/app/routers/pr.py`, `backend/app/services/procurement_service.py`, `frontend/src/App.tsx`) là chính xác.
+  - [ ] Xác nhận bằng chứng Commit (`6117d39`, `19ce38b`, `9af432c`, `0216a7c`) thực tế trong Git log.
+  - [ ] Xác nhận bằng chứng Kiểm thử (`test_pr_creation_prisma.py`, `test_business_rules.py`) đã chạy đạt 100%.
+  - [ ] Xác nhận phát hiện kiểm điểm mã nguồn (CR-009: Resolved) trung thực với quá trình thực hiện.
+* **Quyết định Thẩm định (Human Decision):** `PENDING` *(Chờ thành viên con người xác nhận: CONFIRMED hoặc CORRECTION REQUIRED)*
+* **Họ và tên Người Ký (Signer Name):** *(Chờ thành viên điền)*
+* **Ngày Ký Xác Nhận (Date):** *—*
+
+#### Phiếu 2: Nguyễn Trương Thùy Dương
+* **User Story Sở hữu:** **US-04**, **US-05**, **US-06** (Yêu cầu Sửa/Nộp lại PR; Quản lý Nhà cung cấp; Thu thập Báo giá)
+* **Các Tác vụ (Tasks):** `T-10..T-20`
+* **Trạng thái Chuẩn bị:** `READY FOR REVIEW`
+* **Nội dung Kiểm tra & Cam kết của Thành viên:**
+  - [ ] Xác nhận ánh xạ User Story & Tasks (`T-10..T-20`) là chính xác.
+  - [ ] Xác nhận mô-đun tệp nguồn (`pr.py`, `suppliers.py`, `quotations.py`, `SuppliersView.tsx`, `QuotationsView.tsx`) là chính xác.
+  - [ ] Xác nhận bằng chứng Commit (`6f47a4e`, `25041db`, `70e382c`, `71b48e2`, `1775682`) thực tế trong Git log.
+  - [ ] Xác nhận bằng chứng Kiểm thử (`test_pr_revision_prisma.py`, `test_supplier_quotation_prisma.py`) đã chạy đạt 100%.
+  - [ ] Xác nhận phát hiện kiểm điểm mã nguồn (CR-010: Resolved) trung thực với quá trình thực hiện.
+* **Quyết định Thẩm định (Human Decision):** `PENDING` *(Chờ thành viên con người xác nhận: CONFIRMED hoặc CORRECTION REQUIRED)*
+* **Họ và tên Người Ký (Signer Name):** *(Chờ thành viên điền)*
+* **Ngày Ký Xác Nhận (Date):** *—*
+
+#### Phiếu 3: Nguyễn Trúc Lam
+* **User Story Sở hữu:** **US-03**, **US-07** (Từ chối PR & Giải phóng Ngân sách; Ma trận Đối sánh Báo giá)
+* **Các Tác vụ (Tasks):** `T-07..T-09`, `T-21..T-25`
+* **Trạng thái Chuẩn bị:** `READY FOR REVIEW`
+* **Nội dung Kiểm tra & Cam kết của Thành viên:**
+  - [ ] Xác nhận ánh xạ User Story & Tasks (`T-07..T-09`, `T-21..T-25`) là chính xác.
+  - [ ] Xác nhận mô-đun tệp nguồn (`pr.py`, `quotations.py`, `procurement_service.py`, `ComparisonView.tsx`) là chính xác.
+  - [ ] Xác nhận bằng chứng Commit (`6f47a4e`, `ca92d15`, `20100e1`) thực tế trong Git log.
+  - [ ] Xác nhận bằng chứng Kiểm thử (`test_pr_reject_prisma.py`, `test_quotation_comparison_prisma.py`) đã chạy đạt 100%.
+  - [ ] Xác nhận phát hiện kiểm điểm mã nguồn (CR-008: Resolved) trung thực với quá trình thực hiện.
+* **Quyết định Thẩm định (Human Decision):** `PENDING` *(Chờ thành viên con người xác nhận: CONFIRMED hoặc CORRECTION REQUIRED)*
+* **Họ và tên Người Ký (Signer Name):** *(Chờ thành viên điền)*
+* **Ngày Ký Xác Nhận (Date):** *—*
+
+#### Phiếu 4: Nguyễn Thị Thùy Dung
+* **User Story Sở hữu:** **US-02**, **US-08**, **US-09**, **GOV-01** (Phê duyệt PR; AI Tư vấn Báo giá; Trao thầu PO; Quy tắc No Self-Approval)
+* **Các Tác vụ (Tasks):** `T-04..T-06`, `T-26..T-39`
+* **Trạng thái Chuẩn bị:** `READY FOR REVIEW`
+* **Nội dung Kiểm tra & Cam kết của Thành viên:**
+  - [ ] Xác nhận ánh xạ User Story & Tasks (`T-04..T-06`, `T-26..T-39`) là chính xác.
+  - [ ] Xác nhận mô-đun tệp nguồn (`pr.py`, `po.py`, `ai_service.py`, `procurement_service.py`, `ComparisonView.tsx`) là chính xác.
+  - [ ] Xác nhận bằng chứng Commit (`6f47a4e`, `5fe0ec0`, `91996e7`, `16294c6`, `18494d4`, `ad8f457`) thực tế trong Git log.
+  - [ ] Xác nhận bằng chứng Kiểm thử (`test_pr_approval_prisma.py`, `test_rbac.py`, `test_ai_service.py`, `test_po_prisma.py`, `test_us09_po.py`) đã chạy đạt 100%.
+  - [ ] Xác nhận phát hiện kiểm điểm mã nguồn (CR-001, CR-002, CR-003: Resolved; CR-011: Accepted Fallback) trung thực với hệ thống.
+* **Quyết định Thẩm định (Human Decision):** `PENDING` *(Chờ thành viên con người xác nhận: CONFIRMED hoặc CORRECTION REQUIRED)*
+* **Họ và tên Người Ký (Signer Name):** *(Chờ thành viên điền)*
+* **Ngày Ký Xác Nhận (Date):** *—*
+
+#### Phiếu 5: Trần Thị Thu Hà
+* **User Story Sở hữu:** **US-10**, **GOV-02** (Nhận hàng Đa đợt & Đóng PR Quyết toán Ngân sách; Khóa Dữ liệu Thương mại PO)
+* **Các Tác vụ (Tasks):** `T-34..T-36`, `T-40..T-42`
+* **Trạng thái Chuẩn bị:** `READY FOR REVIEW`
+* **Nội dung Kiểm tra & Cam kết của Thành viên:**
+  - [ ] Xác nhận ánh xạ User Story & Tasks (`T-34..T-36`, `T-40..T-42`) là chính xác.
+  - [ ] Xác nhận mô-đun tệp nguồn (`receiving.py`, `pr.py`, `procurement_service.py`, `ReceivingModal.tsx`) là chính xác.
+  - [ ] Xác nhận bằng chứng Commit (`02a117d`, `b5d00a3`, `dfdd7e5`, `a1bc041`, `cc84847`) thực tế trong Git log.
+  - [ ] Xác nhận bằng chứng Kiểm thử (`test_receiving_prisma.py`, `test_close_prisma.py`, `test_phase4f_lifecycle.py`, E2E, cloud smoke) đã chạy đạt 100%.
+  - [ ] Xác nhận phát hiện kiểm điểm mã nguồn (CR-004: Resolved) trung thực với quá trình thực hiện.
+* **Quyết định Thẩm định (Human Decision):** `PENDING` *(Chờ thành viên con người xác nhận: CONFIRMED hoặc CORRECTION REQUIRED)*
+* **Họ và tên Người Ký (Signer Name):** *(Chờ thành viên điền)*
+* **Ngày Ký Xác Nhận (Date):** *—*
+
+---
+
+### 7.3. Quy Trình Xử Lý Sai Lệch (Correction Workflow)
+
+Trong trường hợp thành viên rà soát phát hiện bất kỳ điểm nào chưa khớp giữa hồ sơ và hiện trạng mã nguồn thực tế:
+1. Ghi nhận trạng thái là `CORRECTION REQUIRED` kèm mô tả chi tiết điểm chưa chính xác.
+2. Trợ lý AI và nhóm tiến hành đối chiếu lại với lịch sử Git (`git log`, `git show`) và tệp kiểm thử tương ứng.
+3. Chỉ cập nhật tài liệu kỹ thuật khi có bằng chứng vật lý chứng minh sai lệch; tuyệt đối **KHÔNG** chỉnh sửa mã nguồn production trong pha chốt tài liệu này.
+4. Sau khi đối chiếu chính xác, thành viên mới tiến hành chuyển trạng thái sang `CONFIRMED`.
+
 
