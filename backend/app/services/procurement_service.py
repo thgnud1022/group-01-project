@@ -221,19 +221,18 @@ class ProcurementService:
                     current_reserved = Decimal(str(budget_row["tempReservedAmount"]))
                     available = allocated - spent - current_reserved
 
-                    # 7. Check REQ-BR-01
-                    if total_estimated > available:
-                        raise ValueError(
-                            f"Tạo PR thất bại: Giá trị ước tính ({total_estimated:,.0f}đ) vượt quá "
-                            f"Ngân sách khả dụng còn lại của {dept.name} ({available:,.0f}đ)."
-                        )
+                    # 7. REQ-BR-01 (soft warning): PRs exceeding budget are ALLOWED but flagged.
+                    # Finance will review over-budget PRs in their Budget Review queue.
+                    is_budget_exceeded = total_estimated > available
+                    over_amount = float(total_estimated - available) if is_budget_exceeded else 0.0
 
-                    # 8. Reserve budget in transaction
-                    new_reserved = current_reserved + total_estimated
-                    await tx.budget.update(
-                        where={"id": budget_id},
-                        data={"tempReservedAmount": new_reserved},
-                    )
+                    # 8. Reserve budget only when funds are available (skip reservation for over-budget PRs)
+                    if not is_budget_exceeded:
+                        new_reserved = current_reserved + total_estimated
+                        await tx.budget.update(
+                            where={"id": budget_id},
+                            data={"tempReservedAmount": new_reserved},
+                        )
 
                     # 9. Create PurchaseRequest + PRItems
                     created_pr = await tx.purchaserequest.create(
@@ -268,6 +267,8 @@ class ProcurementService:
                         ],
                         "status": created_pr.status,
                         "approvals": [],
+                        "isBudgetExceeded": is_budget_exceeded,
+                        "overAmount": over_amount,
                     }
 
             except errors.UniqueViolationError as e:
