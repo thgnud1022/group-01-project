@@ -1,8 +1,8 @@
 import pytest
 from app.services.procurement_service import ProcurementService, db
 
-def test_req_br_01_budget_check_rejection():
-    """REQ-BR-01: System must block PR creation if estimated value exceeds available budget"""
+def test_req_br_01_budget_check_soft_warning():
+    """REQ-BR-01: System allows PR creation exceeding budget but flags it with isBudgetExceeded=True"""
     dept_id = "DEPT-IT"
     budget = ProcurementService.get_budget(dept_id)
     available = budget["availableAmount"]
@@ -10,15 +10,16 @@ def test_req_br_01_budget_check_rejection():
     # Attempt to create PR exceeding available budget by 10,000,000 VND
     excessive_price = available + 10_000_000
     
-    with pytest.raises(ValueError) as excinfo:
-        ProcurementService.create_pr(
-            dept_id=dept_id,
-            creator_id="employee@company.com",
-            title="Thử nghiệm PR vượt ngân sách",
-            items=[{"itemName": "Siêu máy tính Server", "quantity": 1, "estimatedUnitPrice": excessive_price}]
-        )
+    pr = ProcurementService.create_pr(
+        dept_id=dept_id,
+        creator_id="employee@company.com",
+        title="Thử nghiệm PR vượt ngân sách",
+        items=[{"itemName": "Siêu máy tính Server", "quantity": 1, "estimatedUnitPrice": excessive_price}]
+    )
         
-    assert "vượt quá Ngân sách khả dụng" in str(excinfo.value)
+    assert pr["status"] == "PENDING_MANAGER_APPROVAL"
+    assert pr["isBudgetExceeded"] is True
+    assert pr["overAmount"] == 10_000_000
 
 def test_req_br_02_multilevel_approval_threshold():
     """REQ-BR-02: PR > 50m VND requires 2-level approval (Manager then Finance)"""

@@ -64,13 +64,10 @@ class ProcurementService:
     def create_pr(dept_id: str, creator_id: str, title: str, items: List[Dict[str, Any]]) -> Dict[str, Any]:
         total_estimated = sum(item["quantity"] * item["estimatedUnitPrice"] for item in items)
         
-        # REQ-BR-01: Check Budget
+        # REQ-BR-01 (soft warning): PRs exceeding budget are ALLOWED but flagged
         budget = ProcurementService.get_budget(dept_id)
-        if total_estimated > budget["availableAmount"]:
-            raise ValueError(
-                f"Tạo PR thất bại: Giá trị ước tính ({total_estimated:,.0f}đ) vượt quá "
-                f"Ngân sách khả dụng còn lại của {budget['departmentName']} ({budget['availableAmount']:,.0f}đ)."
-            )
+        is_budget_exceeded = total_estimated > budget["availableAmount"]
+        over_amount = float(total_estimated - budget["availableAmount"]) if is_budget_exceeded else 0.0
             
         pr_id = f"PR-2026-00{len(db.prs) + 1}"
         pr_record = {
@@ -81,11 +78,14 @@ class ProcurementService:
             "estimatedValue": total_estimated,
             "items": items,
             "status": "PENDING_MANAGER_APPROVAL",
-            "approvals": []
+            "approvals": [],
+            "isBudgetExceeded": is_budget_exceeded,
+            "overAmount": over_amount,
         }
         
-        # Lock reserved budget
-        db.budgets[dept_id]["tempReservedAmount"] += total_estimated
+        # Lock reserved budget only if within budget
+        if not is_budget_exceeded:
+            db.budgets[dept_id]["tempReservedAmount"] += total_estimated
         db.prs[pr_id] = pr_record
         return pr_record
 

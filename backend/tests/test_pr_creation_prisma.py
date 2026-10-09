@@ -241,7 +241,7 @@ def test_tc_pr_004_budget_period_not_found():
 
 
 def test_tc_pr_005_insufficient_budget():
-    """TC-PR-005: REQ-BR-01 Budget check fails, rejects request, creates no PR or items, leaves budget intact."""
+    """TC-PR-005: REQ-BR-01 Soft warning: PR exceeding budget is created with isBudgetExceeded=True without reserving budget."""
     async def run_test():
         prisma = get_prisma()
         b_before = await prisma.budget.find_first(where={"departmentId": "DEPT-HR"})
@@ -254,15 +254,16 @@ def test_tc_pr_005_insufficient_budget():
 
         excessive_price = float(available) + 50_000_000.0
 
-        with pytest.raises(ValueError) as excinfo:
-            await ProcurementService.create_pr_prisma(
-                dept_id="DEPT-HR",
-                creator_id="employee@company.com",
-                title="[TEST] PR exceeding HR budget",
-                items=[{"itemName": "Dự án đào tạo xa xỉ", "quantity": 1, "estimatedUnitPrice": excessive_price}],
-            )
+        result = await ProcurementService.create_pr_prisma(
+            dept_id="DEPT-HR",
+            creator_id="employee@company.com",
+            title="[TEST] PR exceeding HR budget",
+            items=[{"itemName": "Dự án đào tạo xa xỉ", "quantity": 1, "estimatedUnitPrice": excessive_price}],
+        )
 
-        assert "vượt quá Ngân sách khả dụng" in str(excinfo.value)
+        assert result["status"] == "PENDING_MANAGER_APPROVAL"
+        assert result["isBudgetExceeded"] is True
+        assert result["overAmount"] > 0
 
         # Verify no budget was reserved
         b_after = await prisma.budget.find_first(where={"departmentId": "DEPT-HR"})
@@ -367,15 +368,15 @@ def test_tc_pr_008_concurrency_overspending_protection():
         )
         assert res1["status"] == "PENDING_MANAGER_APPROVAL"
 
-        # Second request must be rejected because available amount is now only 40%
-        with pytest.raises(ValueError) as excinfo:
-            await ProcurementService.create_pr_prisma(
-                dept_id="DEPT-HR",
-                creator_id="employee@company.com",
-                title="[TEST] Concurrency PR 2",
-                items=[{"itemName": "Course B", "quantity": 1, "estimatedUnitPrice": single_amount}],
-            )
-        assert "vượt quá Ngân sách khả dụng" in str(excinfo.value)
+        # Second request succeeds but is flagged as over-budget (soft warning)
+        res2 = await ProcurementService.create_pr_prisma(
+            dept_id="DEPT-HR",
+            creator_id="employee@company.com",
+            title="[TEST] Concurrency PR 2",
+            items=[{"itemName": "Course B", "quantity": 1, "estimatedUnitPrice": single_amount}],
+        )
+        assert res2["status"] == "PENDING_MANAGER_APPROVAL"
+        assert res2["isBudgetExceeded"] is True
 
     run_async(run_test())
 
