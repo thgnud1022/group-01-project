@@ -1,0 +1,9 @@
+Found 2 known vulnerabilities in 1 package
+Name  Version ID              Fix Versions
+----- ------- --------------- ------------
+pyjwt 2.14.0  PYSEC-2026-4141 2.15.0
+pyjwt 2.14.0  PYSEC-2026-4183 2.15.0
+
+Name                Skip Reason
+------------------- ----------------------------------------------------------------------------------
+procurement-backend Dependency not found on PyPI and could not be audited: procurement-backend (1.0.0)

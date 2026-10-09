@@ -10,7 +10,7 @@
 > - **Nguyễn Thị Thùy Dung** — Kỹ sư Giao diện & An ninh Hệ thống (`GOV-01` / Tasks `T-37..T-39` / Story `US-08`)  
 > - **Trần Thị Thu Hà** — Kỹ sư Đảm bảo Chất lượng & Trưởng ban Kiểm định (`GOV-02` / Tasks `T-40..T-42` / Story `US-10`)  
 > **Ngày Chốt Hồ sơ:** 2026-10-08  
-> **Trạng thái Thẩm định:** **PASS (100% Core Security Guards & NFR Baselines Verified — 0 Open Blocker)**  
+> **Trạng thái Thẩm định:** **PASS (100% Core Security Guards & NFR Baselines Verified — PyJWT Remediated, Documented Limitations Retained)**
 
 ---
 
@@ -27,17 +27,17 @@ Tài liệu này là hồ sơ bằng chứng an ninh kỹ thuật và kiểm th�
 
 | Chỉ số Đo lường | Giá trị Thực chứng | Trạng thái Thẩm định | Căn cứ Bằng chứng |
 |---|:---:|:---:|---|
-| **Xác thực JWT (JWKS ES256)** | 100% Server-side via Supabase | **PASS** | [`jwt_service.py`](file:///d:/LTUD/group-01-project-main/backend/app/services/jwt_service.py), `test_jwt_auth.py` (10/10 PASS) |
-| **Bảo vệ Phân quyền (Server-Side RBAC)** | 19 / 19 Endpoints (100%) | **PASS** | [`rbac.py`](file:///d:/LTUD/group-01-project-main/backend/app/dependencies/rbac.py), `test_rbac.py` (28/28 PASS) |
+| **Xác thực JWT (JWKS ES256)** | 100% Server-side via Supabase | **PASS** | [`jwt_service.py`](file:///d:/LTUD/group-01-project-main/backend/app/services/jwt_service.py), `test_jwt_auth.py` (12/12 PASS), [`security-jwt-rbac-execution.txt`](file:///d:/LTUD/group-01-project-main/docs/evidence/security-jwt-rbac-execution.txt) |
+| **Bảo vệ Phân quyền (Server-Side RBAC)** | 19 / 19 Endpoints (100%) | **PASS** | [`rbac.py`](file:///d:/LTUD/group-01-project-main/backend/app/dependencies/rbac.py), `test_rbac.py` (28/28 PASS), [`security-jwt-rbac-execution.txt`](file:///d:/LTUD/group-01-project-main/docs/evidence/security-jwt-rbac-execution.txt) |
 | **Quy tắc Không Tự Phê duyệt (GOV-01)** | Chặn 100% các vai trò (kể cả ADMIN) | **PASS** | [`procurement_service.py`](file:///d:/LTUD/group-01-project-main/backend/app/services/procurement_service.py#L383-L388), `test_rbac.py` |
-| **Bảo vệ Tạo Đơn PO (REQ-BR-10)** | PR bắt buộc `APPROVED` + Khóa giá | **PASS** | [`procurement_service.py`](file:///d:/LTUD/group-01-project-main/backend/app/services/procurement_service.py#L1553-L1605), `test_po_prisma.py` (15/15 PASS) |
-| **Bảo vệ Đóng PR khi Nhận hàng (REQ-BR-11)** | Chặn nếu `SUM(receivedQty) < PO.qty` | **PASS** | [`procurement_service.py`](file:///d:/LTUD/group-01-project-main/backend/app/services/procurement_service.py#L1820-L1865), `test_close_prisma.py` (8/8 PASS) |
-| **Rò rỉ Bí mật (Secret Leaks in Git)** | 0 mật khẩu, 0 token, 0 private key | **PASS** | Quét lịch sử Git, tệp `.gitignore`, tệp `.env.example` |
-| **Lỗ hổng Phụ thuộc Frontend** | 0 lỗ hổng (74 packages) | **PASS** | `npm audit --omit=dev` (0 vulnerabilities) |
-| **Xung đột Gói Backend** | 0 xung đột phụ thuộc | **PASS** | `pip check` (No broken requirements found) |
+| **Bảo vệ Tạo Đơn PO (REQ-BR-10)** | PR bắt buộc `APPROVED` + Khóa giá | **PASS** | [`procurement_service.py`](file:///d:/LTUD/group-01-project-main/backend/app/services/procurement_service.py#L1553-L1605), `test_po_prisma.py` (12/12 PASS) |
+| **Bảo vệ Đóng PR khi Nhận hàng (REQ-BR-11)** | Chặn nếu `SUM(receivedQty) < PO.qty` | **PASS** | [`procurement_service.py`](file:///d:/LTUD/group-01-project-main/backend/app/services/procurement_service.py#L1820-L1865), `test_close_prisma.py` (14/14 PASS) |
+| **Rò rỉ Bí mật (Secret Leaks in Git)** | 0 mật khẩu, 0 token, 0 private key | **PASS** | Đã quét các file hiện tại bằng `git grep`, không phát hiện secret thật trong các kết quả đã kiểm tra (101 matches an toàn), tệp `.gitignore`, tệp `.env.example` |
+| **Lỗ hổng Phụ thuộc Frontend** | 0 lỗ hổng (74 packages) | **PASS** | `npm.cmd audit --omit=dev` (0 vulnerabilities) |
+| **Lỗ hổng Phụ thuộc Backend** | 0 lỗ hổng (PyJWT 2.15.1 remediated) | **PASS** | `pip-audit` exit code 0 ([`python-pip-audit-remediation.txt`](file:///d:/LTUD/group-01-project-main/docs/evidence/python-pip-audit-remediation.txt)) |
 | **Hiệu năng Build Frontend (Vite)** | 12.43s (Bundle 649.36 kB / gzip 181.79 kB) | **PASS** | `npm run build` benchmark thực tế |
 | **Độ trễ API Backend Công khai** | 1.08s (Endpoint `/api/health` trên Railway) | **PASS** | Đo lường HTTP curl trực tiếp |
-| **Bộ Kiểm thử An ninh Tự động** | 85 / 85 Tests PASSED (0 fail, 0 error) | **PASS** | Pytest runtime 253.15s trên Supabase PostgreSQL |
+| **Kiểm Thử An Ninh & Nghiệp Vụ Cốt Lõi** | 85 / 85 Tests PASSED (0 fail, 0 error) | **PASS** | Pytest runtime 252.75s trên Supabase PostgreSQL (AI-104) |
 
 ---
 
@@ -173,6 +173,7 @@ FastAPI Router Entry -> Pydantic Schema Validation -> Business Service Logic -> 
   - [`CreatePOSchema`](file:///d:/LTUD/group-01-project-main/backend/app/routers/po.py#L10): Chỉ tiếp nhận `purchaseRequestId` và `quotationId`; không có trường giá/lượng từ client.
   - [`ReceivingSchema`](file:///d:/LTUD/group-01-project-main/backend/app/routers/receiving.py#L10): Xác thực `purchaseOrderId`, `receivedQuantity` $> 0$, `conditionStatus`.
   - [`SupplierCreateSchema`](file:///d:/LTUD/group-01-project-main/backend/app/routers/suppliers.py#L10): Xác thực tên NCC, mã số thuế, email liên hệ, số điện thoại.
+- **Phòng Chống Tấn Công Tiêm Mã SQL (SQL Injection Protection):** Hệ thống không sử dụng câu lệnh SQL nối chuỗi trực tiếp (raw concatenated SQL queries). Toàn bộ thao tác truy vấn và biến đổi dữ liệu đều thông qua cơ chế Parameterized Queries của **Prisma ORM** kết hợp kiểm thực dữ liệu đầu vào của **Pydantic V2**, cung cấp cơ chế bảo vệ ở tầng ứng dụng (application-layer protection). Bài kiểm thử xâm nhập / fuzz testing chuyên dụng (penetration testing) không nằm trong phạm vi thực thi.
 
 ---
 
@@ -196,9 +197,9 @@ SUPABASE_URL="https://[PROJECT-REF].supabase.co"
 LLM_API_KEY="AIzaSy..."
 ```
 
-### 6.3. Quét Lịch Sử Commit (Git History Audit):
-- Không có bất kỳ Private Key, Supabase Service Role Key hay mật khẩu quản trị CSDL nào bị commit vào nhánh `final-delivery`.
-- Supabase Anon Key có trong `frontend/.env` là khóa công khai định danh theo thiết kế của Supabase (chỉ có quyền truy cập qua chính sách RLS/JWT), không phải khóa bí mật đặc quyền.
+### 6.3. Rà Soát Khóa Bí Mật Trên Tệp Hiện Tại (Git Secret Audit):
+- Đã quét các file hiện tại bằng `git grep`, không phát hiện secret thật trong các kết quả đã kiểm tra (0 Private Key, 0 Supabase Service Role Key, 0 mật khẩu quản trị CSDL).
+- Supabase Anon Key có trong tệp mẫu/cấu hình frontend là khóa công khai định danh theo thiết kế của Supabase (chỉ có quyền truy cập qua chính sách RLS/JWT), không phải khóa bí mật đặc quyền.
 
 ### 6.4. Bảo Mật Trên Nền Tảng Đám Mây:
 - **Railway:** Các biến nhạy cảm (`DATABASE_URL`, `SUPABASE_JWT_SECRET`, `LLM_API_KEY`) được nạp trực tiếp qua bảng điều khiển Railway Environment Variables dưới dạng biến môi trường runtime.
@@ -221,15 +222,36 @@ npm audit --omit=dev
 - **Kết luận:** Đạt chuẩn an toàn tuyệt đối (**0 CVE Vulnerabilities** trên toàn bộ 74 gói production runtime).
 
 ### 7.2. Phụ Thuộc Phía Máy Chủ (Backend Dependencies):
-Lệnh kiểm tra tương thích và tính toàn vẹn gói Python:
-```bash
-pip check
-```
-- **Kết quả thực tế:**
-  ```
-  No broken requirements found.
-  ```
-- **Ghi chú về Công cụ Quét Chuyên dụng (`pip-audit`):** Môi trường máy trạm local không cài đặt sẵn công cụ `pip-audit`. Tình trạng này được ghi nhận minh bạch là **NOT VERIFIED LOCALLY** (không khẳng định sai sự thật rằng đã chạy `pip-audit`), tuy nhiên toàn bộ các gói sử dụng (`fastapi==0.110.0`, `pyjwt==2.8.0`, `cryptography==42.0.5`, `prisma==0.13.1`, `httpx==0.27.0`) đều là các bản phát hành ổn định chính thức.
+Kiểm toán an ninh phụ thuộc Python được thực hiện qua công cụ chuẩn `pip-audit` và `pip check` trên môi trường ảo `backend/.venv`:
+
+1. **Kiểm tra Tương thích Gói (`pip check`):**
+   ```bash
+   pip check
+   ```
+   - **Kết quả thực tế:** `No broken requirements found` (0 xung đột phụ thuộc giữa các package).
+
+2. **Quét Lỗ Hổng Cơ Sở (Baseline `pip-audit` — AI-103):**
+   ```bash
+   backend\.venv\Scripts\python.exe -m pip_audit
+   ```
+   - **Kết quả thực tế:** Phát hiện 2 lỗ hổng bảo mật mức Medium trong gói `pyjwt==2.14.0`:
+     - `PYSEC-2026-4141` (`GHSA-42vr-xj54-vc7v`): Xử lý token lồng nhau gây `RecursionError` chưa bắt.
+     - `PYSEC-2026-4183` (`GHSA-x33g-cr3x-6449` / `CVE-2026-102275`): `OKPAlgorithm.from_jwk` không kiểm tra đối chiếu public key d và x.
+   - **Minh chứng Baseline:** [`docs/evidence/python-pip-audit.txt`](file:///d:/LTUD/group-01-project-main/docs/evidence/python-pip-audit.txt).
+
+3. **Khắc Phục & Tái Kiểm Toán (Remediation & Re-audit — AI-104):**
+   - Nâng cấp gói `pyjwt` từ `2.14.0` lên phiên bản vá an toàn **`2.15.1`** trong [`backend/pyproject.toml`](file:///d:/LTUD/group-01-project-main/backend/pyproject.toml) (`"pyjwt>=2.15.1"`), [`backend/requirements.txt`](file:///d:/LTUD/group-01-project-main/backend/requirements.txt), [`requirements.txt`](file:///d:/LTUD/group-01-project-main/requirements.txt) và môi trường `backend\.venv`. Không thay đổi bất kỳ phụ thuộc nào khác.
+   - Thực thi lại lệnh `pip-audit`:
+     ```text
+     No known vulnerabilities found
+     Name                Skip Reason
+     ------------------- ----------------------------------------------------------------------------------
+     procurement-backend Dependency not found on PyPI and could not be audited: procurement-backend (1.0.0)
+     ```
+   - **Mã thoát (Exit code):** `0`.
+   - **Minh chứng Tái Kiểm Toán:** [`docs/evidence/python-pip-audit-remediation.txt`](file:///d:/LTUD/group-01-project-main/docs/evidence/python-pip-audit-remediation.txt).
+   - **Kiểm thử hồi quy sau vá:** Toàn bộ 85/85 tests an ninh và nghiệp vụ cốt lõi đạt 100% PASS (252.75s).
+   - **Kết luận:** Lỗ hổng phụ thuộc PyJWT đã được khắc phục hoàn toàn (**0 Known Vulnerabilities**). Gói `procurement-backend` là gói cài đặt cục bộ của dự án (local package), không nằm trên PyPI, đây là hành vi bỏ qua thông thường, không phải lỗ hổng.
 
 ---
 
@@ -338,38 +360,44 @@ Toàn bộ các vấn đề an ninh và phi chức năng được phát hiện v
 |---|:---:|:---:|---|:---:|---|
 | **SEC-001** *(BUG-002)* | **BLOCKER** | Audit Vòng 1 | Tiêm vai trò từ phía client qua HTTP header/body cho phép nhân viên tự nhận quyền ADMIN để duyệt PR | **RESOLVED** | Xây dựng Supabase Auth JWT ES256 JWKS verification, Server-Side `RoleChecker` bảo vệ 100% 19 endpoints (`test_rbac.py` 28/28 PASS). |
 | **SEC-002** *(BUG-003)* | **BLOCKER** | Audit Vòng 1 | Bỏ sót quy tắc Không Tự Phê Duyệt (No Self-Approval) cho phép Quản lý/Admin tự phê duyệt PR do chính mình tạo | **RESOLVED** | Bổ sung chốt chặn `current_user.id != PR.creatorId` trong toàn bộ luồng approve, reject, request-revision (`test_rbac.py`, `test_pr_approval_prisma.py`). |
-| **SEC-003** *(BUG-001)* | **BLOCKER** | Kiro Audit V-03 | Cho phép tạo PO từ PR chưa duyệt và cho phép client gửi đè giá/số lượng tùy ý lên máy chủ | **RESOLVED** | Áp dụng khóa dòng `SELECT ... FOR UPDATE`, kiểm tra `PR.status == 'APPROVED'`, khóa cứng 100% đơn giá và số lượng từ bảng `Quotation` (`test_po_prisma.py` 15/15 PASS). |
+| **SEC-003** *(BUG-001)* | **BLOCKER** | Kiro Audit V-03 | Cho phép tạo PO từ PR chưa duyệt và cho phép client gửi đè giá/số lượng tùy ý lên máy chủ | **RESOLVED** | Áp dụng khóa dòng `SELECT ... FOR UPDATE`, kiểm tra `PR.status == 'APPROVED'`, khóa cứng 100% đơn giá và số lượng từ bảng `Quotation` (`test_po_prisma.py` 12/12 PASS). |
 | **SEC-004** | **LOW** | Docker Review | Container Docker chạy dưới quyền người dùng mặc định (`root`) thay vì tài khoản không đặc quyền | **ACCEPTED LIMITATION** | Image xây dựng trên nền tảng PaaS Railway có tường lửa cô lập mạng; ghi nhận kế hoạch bổ sung `USER appuser` trong chu kỳ bảo trì tiếp theo. |
 | **SEC-005** | **LOW** | A11y Review | Chưa tiến hành kiểm thử tự động toàn diện theo chuẩn WCAG 2.1 AA bằng công cụ axe-core hoặc trình đọc màn hình chuyên nghiệp | **ACCEPTED LIMITATION** | Biểu mẫu và nút bấm đáp ứng chuẩn tiếp cận cơ bản (nhãn thẻ, ngữ nghĩa HTML, điều hướng bàn phím); ghi nhận giới hạn kỹ thuật công khai. |
-| **SEC-006** | **INFO** | Dependency Review | Công cụ quét tự động `pip-audit` chưa được cài đặt sẵn trong môi trường Python ảo local | **NOT VERIFIED LOCALLY** | Đã thực hiện `pip check` (0 lỗi xung đột) và `npm audit --omit=dev` (0 lỗ hổng bảo mật); ghi nhận tình trạng công cụ minh bạch. |
+| **SEC-006** | **INFO** | Dependency Review | Lỗ hổng phụ thuộc PyJWT (PYSEC-2026-4141, PYSEC-2026-4183 trong bản 2.14.0) | **RESOLVED / PASS** | Thực thi `pip-audit` (AI-103), phát hiện 2 CVEs trong `pyjwt==2.14.0` ([`python-pip-audit.txt`](file:///d:/LTUD/group-01-project-main/docs/evidence/python-pip-audit.txt)). Nâng cấp lên `pyjwt==2.15.1` (AI-104), quét lại đạt 0 lỗ hổng ([`python-pip-audit-remediation.txt`](file:///d:/LTUD/group-01-project-main/docs/evidence/python-pip-audit-remediation.txt)) và kiểm thử hồi quy 85/85 tests PASS. |
 | **SEC-007** | **INFO** | AI Governance Review | Nguy cơ AI tự động hóa vượt quyền thực hiện các giao dịch thương mại hoặc phê duyệt ngân sách | **CONTROLLED / PASS** | Khóa cứng quyền của AI ở mức Advisory Only; 100% giao dịch tài chính đòi hỏi chữ ký điện tử của con người (Human-in-the-Loop). |
 
 ---
 
-## 14. Bảng Minh Chứng Thực Thi Bộ Kiểm Thử An Ninh Tự Động (Automated Security Test Evidence)
+## 14. Bảng Minh Chứng Thực Thi Bộ Kiểm Thử An Ninh & Nghiệp Vụ Cốt Lõi (Security-Relevant & Core Business Regression Test Evidence)
 
 Kết quả thực thi tự động trực tiếp trên môi trường CSDL Supabase PostgreSQL qua bộ kiểm thử Pytest:
 
 ```bash
-python -m pytest tests/test_jwt_auth.py tests/test_rbac.py tests/test_business_rules.py tests/test_po_prisma.py tests/test_pr_approval_prisma.py tests/test_close_prisma.py -q
+python -m pytest tests/test_jwt_auth.py tests/test_rbac.py tests/test_business_rules.py tests/test_po_prisma.py tests/test_pr_approval_prisma.py tests/test_close_prisma.py -v
 ```
 
 ### Kết Quả Thực Thi Thực Tế:
 - **Tổng số test cases:** **85 / 85 PASSED (100% PASS)**
 - **Số lỗi (Failures / Errors):** **0 Failed, 0 Error**
-- **Thời gian thực thi:** **253.15 giây (~4 phút 13 giây)** trên CSDL Supabase PostgreSQL thực tế.
+- **Cảnh báo (Warnings):** **3 Deprecation Warnings** (Starlette TestClient, AnyIO BlockingPortal, Pydantic Config; không ảnh hưởng kết quả kiểm thử).
+- **Thời gian thực thi:** **252.75 giây (~4 phút 12 giây)** trên CSDL Supabase PostgreSQL thực tế (phiên xác nhận AI-104 sau vá PyJWT 2.15.1).
 
 ### Bảng Phân Bổ Chi Tiết Từng Bộ Kiểm Thử:
 
 | Tệp Kiểm Thử (Test Suite) | Số Lượng Tests | Kết Quả | Trọng Tâm Bảo Vệ An Ninh & Ràng Buộc |
 |---|:---:|:---:|---|
-| [`test_jwt_auth.py`](file:///d:/LTUD/group-01-project-main/backend/tests/test_jwt_auth.py) | **10** | **10 / 10 PASS** | Xác thực JWT ES256, kiểm tra chữ ký JWKS, từ chối token hết hạn, từ chối issuer/audience sai, fail-closed 401 khi thiếu header. |
+| [`test_jwt_auth.py`](file:///d:/LTUD/group-01-project-main/backend/tests/test_jwt_auth.py) | **12** | **12 / 12 PASS** | Xác thực JWT ES256, kiểm tra chữ ký JWKS, từ chối token hết hạn, từ chối issuer/audience sai, fail-closed 401 khi thiếu header. |
 | [`test_rbac.py`](file:///d:/LTUD/group-01-project-main/backend/tests/test_rbac.py) | **28** | **28 / 28 PASS** | Server-Side RBAC cho 5 vai trò, chặn truy cập trái phép 403, kiểm tra quy tắc No Self-Approval (GOV-01) trên mọi kịch bản. |
-| [`test_business_rules.py`](file:///d:/LTUD/group-01-project-main/backend/tests/test_business_rules.py) | **9** | **9 / 9 PASS** | Kiểm tra logic nghiệp vụ ngân sách, tính hợp lệ của PR, tính toán số tiền và phân cấp phê duyệt. |
-| [`test_po_prisma.py`](file:///d:/LTUD/group-01-project-main/backend/tests/test_po_prisma.py) | **15** | **15 / 15 PASS** | Chốt chặn REQ-BR-10 (PR phải APPROVED mới được tạo PO), tính duy nhất 1 PR - 1 PO, khóa đơn giá và số lượng từ Quotation trong PostgreSQL. |
+| [`test_business_rules.py`](file:///d:/LTUD/group-01-project-main/backend/tests/test_business_rules.py) | **4** | **4 / 4 PASS** | Kiểm tra logic nghiệp vụ ngân sách (REQ-BR-01, 02), khóa đơn giá PO (REQ-BR-03), giới hạn nhận hàng (REQ-BR-04). |
+| [`test_po_prisma.py`](file:///d:/LTUD/group-01-project-main/backend/tests/test_po_prisma.py) | **12** | **12 / 12 PASS** | Chốt chặn REQ-BR-10 (PR phải APPROVED mới được tạo PO), tính duy nhất 1 PR - 1 PO, khóa đơn giá và số lượng từ Quotation trong PostgreSQL. |
 | [`test_pr_approval_prisma.py`](file:///d:/LTUD/group-01-project-main/backend/tests/test_pr_approval_prisma.py) | **15** | **15 / 15 PASS** | Quy trình phê duyệt PR trên Prisma Client, kiểm tra quyền Manager/Admin, chặn No Self-Approval trong môi trường CSDL thực tế. |
-| [`test_close_prisma.py`](file:///d:/LTUD/group-01-project-main/backend/tests/test_close_prisma.py) | **8** | **8 / 8 PASS** | Chốt chặn HD-07 / REQ-BR-11: chặn đóng PR khi `receivedQty < PO.qty`, quyết toán ngân sách chính xác khi nhận đủ hàng 100%. |
-| **TỔNG CỘNG** | **85** | **85 / 85 PASS** | **100% Tiêu chí An ninh & Chốt chặn Nghiệp vụ được Xác nhận** |
+| [`test_close_prisma.py`](file:///d:/LTUD/group-01-project-main/backend/tests/test_close_prisma.py) | **14** | **14 / 14 PASS** | Chốt chặn HD-07 / REQ-BR-11: chặn đóng PR khi `receivedQty < PO.qty`, quyết toán ngân sách chính xác khi nhận đủ hàng 100%. |
+| **TỔNG CỘNG** | **85** | **85 / 85 PASS** | **100% Tiêu chí An ninh & Chốt chặn Nghiệp vụ Cốt lõi được Xác nhận** |
+
+### Hồ Sơ Bằng Chứng Thực Thi Đính Kèm:
+1. [`docs/evidence/security-jwt-rbac-execution.txt`](file:///d:/LTUD/group-01-project-main/docs/evidence/security-jwt-rbac-execution.txt): Nhật ký thực thi 40/40 JWT + RBAC tests PASS.
+2. [`docs/evidence/python-pip-audit.txt`](file:///d:/LTUD/group-01-project-main/docs/evidence/python-pip-audit.txt): Nhật ký quét baseline `pip-audit` phát hiện 2 CVEs trong PyJWT 2.14.0.
+3. [`docs/evidence/python-pip-audit-remediation.txt`](file:///d:/LTUD/group-01-project-main/docs/evidence/python-pip-audit-remediation.txt): Nhật ký tái kiểm toán `pip-audit` đạt 0 lỗi sau khi nâng cấp PyJWT 2.15.1.
 
 ---
 
@@ -377,7 +405,7 @@ python -m pytest tests/test_jwt_auth.py tests/test_rbac.py tests/test_business_r
 
 $$\Large\textbf{SECURITY \& NFR COMPLIANCE = VERIFIED PASS}$$
 
-- **Kết luận:** Hệ thống **AI Procurement & Purchase Approval System (Group 01)** đáp ứng đầy đủ và vượt mức các yêu cầu an ninh và phi chức năng theo đặc tả Deliverable 3.10 của môn học.
+- **Kết luận:** Hệ thống **AI Procurement & Purchase Approval System (Group 01)** đáp ứng các yêu cầu an ninh và phi chức năng theo đặc tả Deliverable 3.10 của môn học: 100% chốt chặn an ninh nghiệp vụ được chứng minh thực tế, lỗ hổng phụ thuộc PyJWT đã được khắc phục hoàn toàn (2.15.1), đi kèm các giới hạn kỹ thuật được công bố minh bạch (kiểm thử A11y tự động WCAG 2.1 AA chưa chạy, chỉ số Core Web Vitals chưa đo lường, Gemini Live duy trì chế độ Fallback).
 - **Tính Liêm chính:** Toàn bộ bằng chứng trong tài liệu này phản ánh trung thực hiện trạng mã nguồn trên nhánh `final-delivery`, không ngụy tạo kết quả kiểm thử, công bố đầy đủ và minh bạch các giới hạn kỹ thuật được chấp nhận.
 
 ### Chữ Ký Xác Nhận của Người Phụ Trách:

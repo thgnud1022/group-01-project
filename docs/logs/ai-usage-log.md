@@ -108,6 +108,10 @@ Tài liệu này ghi nhận nhật ký sử dụng AI (Gemini / Antigravity) tro
 | **AI-084** | Trần Thị Kiều Giang (Engineering) & Toàn đội Group-01 | Deliverable 3.2: Finalize AI-083 Trace + Create Vercel Deployment Configuration | Đóng gói commit lưu vết AI-083 vào Git history, tạo file cấu hình triển khai frontend/vercel.json với reverse proxy rewrites tới Railway backend và SPA fallback, cập nhật trace AI-084 | Báo cáo kiểm định AI-083, release tag `v1.0.0-final`, commit `08fcdfd`, cấu hình Vercel routing | Tạo file `frontend/vercel.json` (rewrites `/api/:path*` -> `<RAILWAY_BACKEND_URL>`, `/(.*)` -> `/index.html`), xác thực JSON hợp lệ; commit sạch lưu vết AI-083 (`08fcdfd`); Application Code = NONE, Deployment Config = YES, Release Tag = IMMUTABLE | `git status`, `git diff --stat`, `git commit`, `node JSON.parse`, `git log -4 --oneline`, `git rev-parse HEAD`, `git rev-parse v1.0.0-final == 9de899d` | **Trách nhiệm Con người:** Con người cung cấp URL triển khai backend Railway thực tế (thay thế placeholder `<RAILWAY_BACKEND_URL>`), duyệt cấu hình và phát lệnh deploy production. 0 mã nguồn production bị thay đổi; 0 schema database thay đổi; git push: NOT PERFORMED. |
 | **AI-085** | Trần Thị Kiều Giang (Engineering) & Toàn đội Group-01 | Deliverable 3.2: Railway Backend Public Deployment Execution | Thẩm định tính toàn vẹn mã nguồn trước deploy, kiểm tra Railway CLI (NOT INSTALLED), phát hiện blocker công cụ triển khai cục bộ, bảo toàn 100% mã nguồn production và tag v1.0.0-final | Release candidate `v1.0.0-final`, commit `93b2f9c`, Railway CLI environment | Kiểm tra `git diff v1.0.0-final..HEAD` (0 production diff), kiểm tra `railway --version` (CommandNotFoundException -> NOT INSTALLED); xác định deployment bị chặn ở tầng CLI; không tự ý cài đặt package toàn cục; Application Code = NONE, Release Tag = IMMUTABLE | `git status`, `git diff v1.0.0-final..HEAD`, `railway --version`, `git rev-parse HEAD`, `git rev-parse v1.0.0-final == 9de899d` | **Trách nhiệm Con người:** Con người lựa chọn phương án: cài Railway CLI (`npm i -g @railway/cli`) và login, HOẶC kết nối GitHub repo trực tiếp trên Railway Dashboard để deploy Web Service; cấu hình biến môi trường (`DATABASE_URL`, `SUPABASE_URL`) và kích hoạt deployment. 0 mã nguồn production bị thay đổi; 0 schema database thay đổi; git push: NOT PERFORMED. |
 | **AI-100** | Trần Thị Thu Hà (Primary GOV-02) & Trần Thị Kiều Giang (DevOps) | Deliverable 3.11: CI/CD Pipeline Implementation & Verification | Xây dựng và kiểm chứng workflow GitHub Actions tự động kiểm thử backend (Pytest + PostgreSQL) và build frontend (Vite/TypeScript) | Chuẩn đầu ra môn học (`Output_BaoCao.xlsx` / Deliverable 3.11), `backend/requirements.txt`, `backend/Dockerfile`, `compose.yaml`, `frontend/package.json` | File workflow `.github/workflows/ci.yml` (jobs: `backend-test`, `frontend-build`); kiểm toán tính an toàn Dockerfile và compose.yaml | Cú pháp YAML hợp lệ 100%; frontend `npm run build` PASS (12.42s); test suite và seed scripts sẵn sàng | **Trách nhiệm Con người:** Con người rà soát cấu hình workflow, quản lý GitHub Secrets và phê duyệt CI policy. 0 code production bị thay đổi; 0 schema CSDL thay đổi; 0 thay đổi deployment; tag `v1.0.0-final` bất biến. |
+| **AI-102** | Nguyễn Thị Thùy Dung (`GOV-01`) & Trần Thị Thu Hà (`GOV-02`) | Deliverable 3.10: Security / NFR Evidence Reconciliation | Đối soát chứng cứ an ninh thực tế với tài liệu, thực thi kiểm thử JWT/RBAC, quét bí mật Git, kiểm tra công cụ quét lỗ hổng backend/frontend | Chuẩn đầu ra môn học (`Output_BaoCao.xlsx` / Deliverable 3.10), `test_jwt_auth.py`, `test_rbac.py`, `security-nfr.md` | Hồ sơ bằng chứng `security-jwt-rbac-execution.txt` (40/40 PASS); Git secret scan 101 matches an toàn; npm audit 0 lỗ hổng; phát hiện pip-audit thiếu | `backend\.venv\Scripts\python.exe -m pytest ... 40/40 PASS`; `git grep` 0 real secrets/keys; `npm.cmd audit --omit=dev` 0 vulnerabilities | **Trách nhiệm Con người:** Con người phê chuẩn báo cáo kiểm định AI-102, xác nhận các giới hạn kỹ thuật được ghi nhận minh bạch và quyết định bước tiếp theo cho pip-audit. 0 mã nguồn production bị thay đổi. |
+| **AI-103** | Trần Thị Thu Hà (`GOV-02`) & Nguyễn Thị Thùy Dung (`GOV-01`) | Deliverable 3.10: Complete Remaining Security / NFR Evidence | Thu thập bằng chứng còn lại cho Deliverable 3.10: cài đặt pip-audit v2.10.1, rà soát Accessibility và Lighthouse Core Web Vitals | Chuẩn đầu ra môn học (`Output_BaoCao.xlsx` / Deliverable 3.10), môi trường ảo `backend/.venv`, `frontend/package.json` | Hồ sơ bằng chứng baseline `python-pip-audit.txt` phát hiện 2 Medium CVEs trong PyJWT 2.14.0 (PYSEC-2026-4141, PYSEC-2026-4183); xác nhận A11y & Lighthouse tools not present | `backend\.venv\Scripts\python.exe -m pip_audit` (Exit code 1); curl kiểm tra production frontend 200 OK | **Trách nhiệm Con người:** Con người quyết định phương án xử lý lỗ hổng PyJWT (giữ nguyên accepted limitation hay nâng cấp vá an toàn 2.15.1). Không tự ý sửa code hay update package. |
+| **AI-104** | Nguyễn Thị Thùy Dung (`GOV-01`) & Trần Thị Thu Hà (`GOV-02`) | Deliverable 3.10: PyJWT Security Remediation & Regression | Thực hiện nâng cấp tối thiểu PyJWT 2.14.0 lên 2.15.1, kiểm thử hồi quy bảo vệ an ninh và nghiệp vụ cốt lõi, tái kiểm toán pip-audit | Quyết định con người chấp thuận nâng cấp, `pyproject.toml`, `requirements.txt`, 6 test suites an ninh & nghiệp vụ | Khắc phục hoàn toàn 2 CVEs trong PyJWT; hồ sơ `python-pip-audit-remediation.txt` (0 vulnerabilities, exit code 0); cập nhật `backend/pyproject.toml` và `requirements.txt` | Targeted regression (40/40 PASS in 69.96s); Full regression 6 test suites (85/85 PASS in 252.75s trên Supabase); pip-audit re-run exit code 0 | **Trách nhiệm Con người:** Con người phê chuẩn nâng cấp PyJWT 2.15.1, kiểm tra diff tối thiểu (3 dòng thay đổi), xác nhận không có bất kỳ phụ thuộc nào khác bị ảnh hưởng. |
+| **AI-105** | Toàn đội Group-01 (`GOV-01` & `GOV-02`) | Deliverable 3.10: Final Security / NFR Documentation Reconciliation | Đồng bộ hóa toàn diện tài liệu nghiệm thu Deliverable 3.10 trong security-nfr.md, OUTPUT_BAOCAO.md, AI_USAGE_TRACEABILITY.md và ai-usage-log.md | Bằng chứng thực nghiệm từ AI-102, AI-103, AI-104 (`security-jwt-rbac-execution.txt`, `python-pip-audit.txt`, `python-pip-audit-remediation.txt`) | Cập nhật hồ sơ Deliverable 3.10: sửa 10/10 thành 12/12 JWT, phân bổ đúng 85 tests, cập nhật SEC-006 thành RESOLVED, bảo lưu trung thực các giới hạn kỹ thuật A11y/Lighthouse/SQL/LLM | Đối soát tính nhất quán 100% giữa code, test evidence và văn bản báo cáo; 0 thay đổi mã nguồn sản phẩm | **Trách nhiệm Con người:** Con người kiểm tra diff tài liệu, ký duyệt hồ sơ Deliverable 3.10 và chuẩn bị cho buổi báo cáo Viva đồ án môn học. |
 
 ---
 
@@ -648,6 +652,81 @@ rite); force push = NOT PERFORMED.
 - **Database/Schema Changes:** NONE.
 - **Deployment Changes:** NONE (Bảo toàn Vercel và Railway đang vận hành).
 - **Git Tag Changes:** UNCHANGED (Bảo toàn `v1.0.0-final` tại `9de899d8d45c6f1c5dc42eb9b29abad23a5ebc29`).
+
+### AI-102 — Security / NFR Evidence Reconciliation
+- **AI Activity:** Security & Non-Functional Requirements Evidence Reconciliation (Deliverable 3.10)
+- **Input / Context:** Yêu cầu nghiệm thu Deliverable 3.10 theo `Output_BaoCao.xlsx`, bộ kiểm thử an ninh `test_jwt_auth.py`, `test_rbac.py`, tài liệu `docs/07-release/security-nfr.md` và mã nguồn production.
+- **AI Action & Synthesis:**
+  1. Thực thi kiểm thử an ninh trực tiếp: Chạy `pytest backend/tests/test_jwt_auth.py backend/tests/test_rbac.py -v` lưu kết quả vào `docs/evidence/security-jwt-rbac-execution.txt`. Kết quả: 40/40 tests PASS (12/12 JWT + 28/28 RBAC, 3 deprecation warnings, 0 failed, 0 error).
+  2. Quét bí mật Git (Secret Scan): Sử dụng `git grep` tìm kiếm các khóa bí mật (`GEMINI_API_KEY`, `LLM_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, private keys). Xác định 101 matches an toàn: 0 real secrets, 0 private keys (toàn bộ là tên biến config, mock trong unit test, hoặc string reason `"LLM_API_KEY_NOT_CONFIGURED"`).
+  3. Kiểm tra quét an ninh phụ thuộc Python: Khảo sát lệnh `pip-audit --version` -> công cụ chưa được cài đặt trong môi trường ảo backend. Ghi nhận tình trạng `NOT EXECUTED / TOOL MISSING` (không đánh đồng `pip check` với vulnerability scan).
+  4. Kiểm tra quét an ninh phụ thuộc Frontend: Thực thi `npm.cmd audit --omit=dev` -> `found 0 vulnerabilities` trên 74 gói production.
+  5. Đối soát tài liệu: Phát hiện tài liệu `security-nfr.md` và `OUTPUT_BAOCAO.md` ghi thiếu 2 test JWT (ghi 10 thay vì 12) và sai lệch phân bổ số lượng test giữa các file trong bảng 85 tests.
+- **Output:** Báo cáo kiểm định AI-102 + file bằng chứng thực thi `docs/evidence/security-jwt-rbac-execution.txt`.
+- **Verification:** Thực thi Pytest thực tế 40/40 PASS; Git grep; npm audit.
+- **Trách nhiệm Con người (Human Responsibility):** Con người tiếp nhận báo cáo kiểm định, phê chuẩn việc ghi nhận minh bạch các giới hạn kỹ thuật và chỉ đạo hướng xử lý cho công cụ `pip-audit`.
+- **Production Code Changes:** NONE.
+- **Database/Schema Changes:** NONE.
+- **Deployment Changes:** NONE.
+- **Git Tag Changes:** UNCHANGED (`v1.0.0-final`).
+
+### AI-103 — Complete Remaining Security / NFR Evidence
+- **AI Activity:** Complete Remaining Security/NFR Evidence (Deliverable 3.10)
+- **Input / Context:** Báo cáo AI-102, môi trường ảo `backend/.venv`, mã nguồn `frontend/`, production frontend URL trên Vercel.
+- **AI Action & Synthesis:**
+  1. Cài đặt công cụ quét an ninh Python: Thực thi `pip install pip-audit` cài đặt bản 2.10.1 vào `backend\.venv`.
+  2. Thực thi quét an ninh baseline: Chạy `backend\.venv\Scripts\python.exe -m pip_audit`. Kết quả phát hiện 2 lỗ hổng bảo mật mức Medium (`PYSEC-2026-4141`, `PYSEC-2026-4183`) trong gói `pyjwt==2.14.0`. Lưu bằng chứng baseline tại `docs/evidence/python-pip-audit.txt`.
+  3. Tuân thủ Hard Stop an toàn: Không tự ý sửa `pyproject.toml`, không tự ý nâng cấp package khi chưa có quyết định của con người. Ghi nhận trạng thái: `NEEDS HUMAN DECISION`.
+  4. Rà soát công cụ Accessibility (A11y): Kiểm tra `package.json`, `node_modules` và PATH hệ thống. Xác nhận `axe`, `axe-core`, `lighthouse` chưa được cài đặt. Ghi nhận minh bạch: `ACCESSIBILITY AUTOMATED AUDIT = NOT EXECUTED / TOOL NOT PRESENT` (duy trì Accepted Limitation SEC-005).
+  5. Rà soát công cụ Lighthouse / Core Web Vitals: Xác nhận Lighthouse CLI chưa có sẵn. Ghi nhận: `LIGHTHOUSE = NOT EXECUTED / TOOL NOT PRESENT`.
+- **Output:** File bằng chứng `docs/evidence/python-pip-audit.txt` + Báo cáo kiểm chứng khoảng trống chứng cứ.
+- **Verification:** `pip-audit` baseline output (Exit code 1, 2 CVEs trong PyJWT 2.14.0); curl production frontend (HTTP 200 OK).
+- **Trách nhiệm Con người (Human Responsibility):** Con người đưa ra quyết định kỹ thuật: phê chuẩn nâng cấp PyJWT lên 2.15.1 để vá lỗi bảo mật, bảo đảm an toàn trước thềm nghiệm thu đồ án.
+- **Production Code Changes:** NONE.
+- **Database/Schema Changes:** NONE.
+- **Deployment Changes:** NONE.
+- **Git Tag Changes:** UNCHANGED (`v1.0.0-final`).
+
+### AI-104 — PyJWT Security Remediation & Regression
+- **AI Activity:** Controlled PyJWT Security Remediation & Full Security/Business Regression (Deliverable 3.10)
+- **Input / Context:** Quyết định con người phê duyệt phương án nâng cấp PyJWT lên 2.15.1; các tệp cấu hình phụ thuộc `backend/pyproject.toml`, `backend/requirements.txt`, `requirements.txt`; 6 test suites an ninh & nghiệp vụ cốt lõi.
+- **AI Action & Synthesis:**
+  1. Cập nhật phụ thuộc tối thiểu: Sửa version constraint từ `"pyjwt>=2.9.0"` thành `"pyjwt>=2.15.1"` trong `backend/pyproject.toml`, `backend/requirements.txt` và `requirements.txt`.
+  2. Cài đặt vào môi trường thực thi: Thực thi `pip install pyjwt==2.15.1` trong `backend\.venv`. Xác thực runtime: `python -c "import jwt; print(jwt.__version__)"` -> `2.15.1`. 0 phụ thuộc nào khác bị thay đổi.
+  3. Kiểm thử hồi quy khoanh vùng (Targeted Regression): Chạy `pytest backend/tests/test_jwt_auth.py backend/tests/test_rbac.py -v`. Kết quả: 40/40 PASS (12/12 JWT + 28/28 RBAC) trong 69.96s.
+  4. Kiểm thử hồi quy toàn diện an ninh & nghiệp vụ cốt lõi: Chạy toàn bộ 6 test suites (`test_jwt_auth.py`, `test_rbac.py`, `test_pr_approval_prisma.py`, `test_po_prisma.py`, `test_close_prisma.py`, `test_business_rules.py`). Kết quả: **85 / 85 Tests PASSED (100% PASS)** trong 252.75s trên CSDL Supabase PostgreSQL thực tế.
+  5. Tái kiểm toán an ninh với pip-audit: Chạy `backend\.venv\Scripts\python.exe -m pip_audit`. Kết quả: Mã thoát 0, **"No known vulnerabilities found"**. Toàn bộ 2 CVEs biến mất. Lưu bằng chứng tại `docs/evidence/python-pip-audit-remediation.txt`.
+  6. Kiểm tra git diff: Xác nhận diff chỉ gồm 3 file dependency declarations (mỗi file 1 dòng thay đổi cho `pyjwt`).
+- **Output:** File bằng chứng tái kiểm toán `docs/evidence/python-pip-audit-remediation.txt` + cập nhật phụ thuộc PyJWT 2.15.1.
+- **Verification:** `pip-audit` re-run (Exit code 0, 0 CVEs); Pytest regression 85/85 PASS trên PostgreSQL; `git diff --stat`.
+- **Trách nhiệm Con người (Human Responsibility):** Con người nghiệm thu kết quả vá lỗi, xác nhận không có xung đột tương thích và cho phép đồng bộ hóa tài liệu.
+- **Production Code Changes:** NONE (Chỉ cập nhật 3 file khai báo phụ thuộc).
+- **Database/Schema Changes:** NONE.
+- **Deployment Changes:** NONE.
+- **Git Tag Changes:** UNCHANGED (`v1.0.0-final`).
+
+### AI-105 — Final Security / NFR Documentation Reconciliation
+- **AI Activity:** Final Security and Non-Functional Requirements Documentation Reconciliation (Deliverable 3.10)
+- **Input / Context:** Bằng chứng thực tế xác thực từ AI-102, AI-103, AI-104; 3 file bằng chứng (`security-jwt-rbac-execution.txt`, `python-pip-audit.txt`, `python-pip-audit-remediation.txt`); các tài liệu `docs/07-release/security-nfr.md`, `docs/OUTPUT_BAOCAO.md`, `docs/AI_USAGE_TRACEABILITY.md`, `docs/logs/ai-usage-log.md`.
+- **AI Action & Synthesis:**
+  1. Đồng bộ `docs/07-release/security-nfr.md`:
+     - Sửa số lượng test JWT từ 10/10 thành 12/12 PASS.
+     - Cập nhật số liệu PO Prisma từ 15 thành 12, Close PR Prisma từ 8 thành 14.
+     - Cập nhật Mục 7.2 tài liệu hóa quy trình quét baseline, vá PyJWT 2.15.1 và tái kiểm toán pip-audit 0 vulnerabilities.
+     - Chuyển trạng thái SEC-006 từ `NOT VERIFIED LOCALLY` thành `RESOLVED / PASS`.
+     - Chuẩn hóa bảng phân bổ Mục 14 đúng 85 tests qua 6 test suites và liên kết đầy đủ 3 file bằng chứng.
+     - Bổ sung khẳng định phòng chống SQL injection ở tầng ứng dụng ORM/Pydantic, không claim tuyệt đối hóa.
+     - Bảo lưu toàn vẹn các giới hạn kỹ thuật được chấp nhận: SEC-004 (Docker root), SEC-005 (WCAG 2.1 AA automated audit pending), Core Web Vitals pending, Gemini Live fallback.
+  2. Đồng bộ `docs/OUTPUT_BAOCAO.md`: Cập nhật Deliverable 3.3 (12/12 JWT + 28/28 RBAC = 40/40 PASS) và Deliverable 3.10 với đầy đủ chứng cứ thực nghiệm sau vá PyJWT 2.15.1, giữ nguyên trạng thái các giới hạn phi chức năng.
+  3. Cập nhật Ma trận truy vết `docs/AI_USAGE_TRACEABILITY.md`: Bổ sung hàng AI-102..AI-105 vào Bảng Phần B và bổ sung Mục 24 chi tiết trong Phần 3.
+  4. Cập nhật Nhật ký sử dụng AI `docs/logs/ai-usage-log.md`: Thêm các phiên AI-102..AI-105 vào Bảng tổng hợp Mục 2 và biên bản chi tiết Mục 3.
+- **Output:** Toàn bộ 4 tài liệu kiểm định chất lượng được đồng bộ hóa 100% với hiện trạng mã nguồn và chứng cứ thực nghiệm.
+- **Verification:** `git diff --stat` xác nhận chỉ có 4 file tài liệu và 3 file dependency/evidence được sửa/tạo; 0 thay đổi mã nguồn logic; 0 thay đổi deployment.
+- **Trách nhiệm Con người (Human Responsibility):** Con người độc lập rà soát báo cáo AI-105, ký duyệt Deliverable 3.10 và chuẩn bị trình bày bảo vệ đồ án Viva.
+- **Production Code Changes:** NONE.
+- **Database/Schema Changes:** NONE.
+- **Deployment Changes:** NONE.
+- **Git Tag Changes:** UNCHANGED (`v1.0.0-final`).
 
 ---
 
