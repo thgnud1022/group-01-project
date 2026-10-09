@@ -24,6 +24,26 @@ export type NavItemKey =
   | 'purchase-orders' 
   | 'audit-trail';
 
+/** Roles that are permitted to see/use a given nav item */
+export type UserRole = 'EMPLOYEE' | 'MANAGER' | 'PROCUREMENT' | 'FINANCE' | 'ADMIN';
+
+/** Returns true when the current user role is allowed to access the given nav key */
+export function canAccessTab(role: UserRole | undefined, tab: NavItemKey): boolean {
+  if (!role) return false;
+  if (role === 'ADMIN') return true;
+  const matrix: Record<NavItemKey, UserRole[]> = {
+    'purchase-requests': ['EMPLOYEE', 'MANAGER', 'PROCUREMENT', 'FINANCE'],
+    'new-request':       ['EMPLOYEE', 'MANAGER', 'PROCUREMENT', 'FINANCE'],
+    'approvals':         ['MANAGER'],
+    'budget-review':     ['FINANCE'],
+    'sourcing':          ['PROCUREMENT'],
+    'suppliers':         ['PROCUREMENT'],
+    'purchase-orders':   ['PROCUREMENT'],
+    'audit-trail':       ['EMPLOYEE', 'MANAGER', 'PROCUREMENT', 'FINANCE'],
+  };
+  return matrix[tab]?.includes(role) ?? false;
+}
+
 interface AppShellProps {
   currentTab: NavItemKey;
   onNavigate: (tab: NavItemKey) => void;
@@ -47,61 +67,58 @@ export const AppShell: React.FC<AppShellProps> = ({
   children,
   counts = { prs: 3, approvals: 1, budget: 1, sourcing: 3, pos: 1 }
 }) => {
-  const navItems = [
+  const allNavItems = [
     {
       key: 'purchase-requests' as NavItemKey,
       label: 'Purchase requests',
-      roleHint: 'Employee',
       icon: FileText,
       count: counts.prs,
     },
     {
       key: 'new-request' as NavItemKey,
       label: 'New request',
-      roleHint: 'Employee',
       icon: PlusCircle,
     },
     {
       key: 'approvals' as NavItemKey,
       label: 'Approvals',
-      roleHint: 'Manager',
       icon: CheckSquare,
       count: counts.approvals,
     },
     {
       key: 'budget-review' as NavItemKey,
       label: 'Budget review',
-      roleHint: 'Finance',
       icon: BarChart3,
       count: counts.budget,
     },
     {
       key: 'sourcing' as NavItemKey,
       label: 'Sourcing',
-      roleHint: 'Procurement',
       icon: Search,
       count: counts.sourcing,
     },
     {
       key: 'suppliers' as NavItemKey,
       label: 'Suppliers',
-      roleHint: 'Procurement',
       icon: Building2,
     },
     {
       key: 'purchase-orders' as NavItemKey,
       label: 'Purchase orders',
-      roleHint: 'Procurement',
       icon: Package,
       count: counts.pos,
     },
     {
       key: 'audit-trail' as NavItemKey,
       label: 'Audit Trail',
-      roleHint: 'All',
       icon: ShieldCheck,
     },
   ];
+
+  // Filter nav items to only show tabs the current user's role can access
+  const navItems = allNavItems.filter((item) =>
+    canAccessTab(user?.role as UserRole | undefined, item.key)
+  );
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f5f6f8' }} data-testid="app-shell">
@@ -179,9 +196,6 @@ export const AppShell: React.FC<AppShellProps> = ({
                   </div>
                   
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
-                    <span style={{ fontSize: '11px', color: '#8a929e', letterSpacing: '0.275px' }}>
-                      {item.roleHint}
-                    </span>
                     {item.count !== undefined && item.count > 0 && (
                       <span
                         style={{

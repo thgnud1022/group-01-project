@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api, AuthenticatedUser } from './api/client';
-import { AppShell, NavItemKey } from './components/AppShell';
+import { AppShell, NavItemKey, canAccessTab, UserRole } from './components/AppShell';
 import { Login } from './components/Login';
 import { PurchaseRequestsView } from './components/PurchaseRequestsView';
 import { NewRequestView } from './components/NewRequestView';
@@ -90,6 +90,14 @@ export default function App() {
       setMessage({ type: 'error', text: 'Phiên làm việc đã hết hạn hoặc chưa được xác thực (401).' });
     });
   }, []);
+
+  // RBAC guard: redirect to default tab if current tab is not accessible for user's role
+  useEffect(() => {
+    if (!user) return;
+    if (!canAccessTab(user.role as UserRole, currentTab)) {
+      setCurrentTab('purchase-requests');
+    }
+  }, [user, currentTab]);
 
   // Load supporting domain data when tab changes
   useEffect(() => {
