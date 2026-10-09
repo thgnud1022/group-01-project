@@ -383,6 +383,12 @@ export default function App() {
                 setSelectedPR(updated);
               }}
               onNavigateTab={(tab) => setCurrentTab(tab as NavItemKey)}
+              onCollectQuotations={(prToCollect) => {
+                const targetPR = prToCollect || selectedPR;
+                setComparingPR(null);
+                setCollectingQuotationsPR(targetPR);
+                setCurrentTab('sourcing');
+              }}
               onRetrySubmit={async (retryPr) => {
                 try {
                   const res = await api.createPR({

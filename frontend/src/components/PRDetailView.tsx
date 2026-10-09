@@ -25,6 +25,7 @@ interface PRDetailViewProps {
   onRetrySubmit?: (pr: any) => void;
   onApproveSuccess?: (updatedPr: any) => void;
   onNavigateTab?: (tab: string) => void;
+  onCollectQuotations?: (pr: any) => void;
 }
 
 export const PRDetailView: React.FC<PRDetailViewProps> = ({
@@ -36,6 +37,7 @@ export const PRDetailView: React.FC<PRDetailViewProps> = ({
   onRetrySubmit,
   onApproveSuccess,
   onNavigateTab,
+  onCollectQuotations,
 }) => {
   const [pr, setPr] = useState<any>(initialPr);
 
@@ -1039,7 +1041,13 @@ export const PRDetailView: React.FC<PRDetailViewProps> = ({
                 Approved — covered by the safety remediation plan. Next, Procurement collects quotations against this request by uploading each supplier's quotation file.
               </p>
               <button
-                onClick={() => onNavigateTab && onNavigateTab('sourcing')}
+                onClick={() => {
+                  if (onCollectQuotations) {
+                    onCollectQuotations(pr);
+                  } else if (onNavigateTab) {
+                    onNavigateTab('sourcing');
+                  }
+                }}
                 style={{
                   backgroundColor: '#4a56d2',
                   color: '#ffffff',
@@ -1531,7 +1539,13 @@ export const PRDetailView: React.FC<PRDetailViewProps> = ({
                 None collected yet. 3 more quotations on file to collect.
               </p>
               <button
-                onClick={() => onNavigateTab && onNavigateTab('sourcing')}
+                onClick={() => {
+                  if (onCollectQuotations) {
+                    onCollectQuotations(pr);
+                  } else if (onNavigateTab) {
+                    onNavigateTab('sourcing');
+                  }
+                }}
                 style={{
                   backgroundColor: '#4a56d2',
                   color: '#ffffff',

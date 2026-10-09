@@ -36,13 +36,25 @@ export function canAccessTab(role: UserRole | undefined, tab: NavItemKey): boole
     'new-request':       ['EMPLOYEE', 'MANAGER', 'PROCUREMENT', 'FINANCE'],
     'approvals':         ['MANAGER'],
     'budget-review':     ['FINANCE'],
-    'sourcing':          ['PROCUREMENT'],
+    'sourcing':          ['PROCUREMENT', 'FINANCE', 'MANAGER', 'EMPLOYEE'],
     'suppliers':         ['PROCUREMENT'],
-    'purchase-orders':   ['PROCUREMENT'],
+    'purchase-orders':   ['PROCUREMENT', 'FINANCE', 'MANAGER', 'EMPLOYEE'],
     'audit-trail':       ['EMPLOYEE', 'MANAGER', 'PROCUREMENT', 'FINANCE'],
   };
   return matrix[tab]?.includes(role) ?? false;
 }
+
+/** Sidebar menu items visible per role (maintains clean, role-tailored sidebar menu) */
+const sidebarVisibilityMatrix: Record<NavItemKey, UserRole[]> = {
+  'purchase-requests': ['EMPLOYEE', 'MANAGER', 'PROCUREMENT', 'FINANCE'],
+  'new-request':       ['EMPLOYEE', 'MANAGER', 'PROCUREMENT', 'FINANCE'],
+  'approvals':         ['MANAGER'],
+  'budget-review':     ['FINANCE'],
+  'sourcing':          ['PROCUREMENT'],
+  'suppliers':         ['PROCUREMENT'],
+  'purchase-orders':   ['PROCUREMENT'],
+  'audit-trail':       ['EMPLOYEE', 'MANAGER', 'PROCUREMENT', 'FINANCE'],
+};
 
 interface AppShellProps {
   currentTab: NavItemKey;
@@ -115,10 +127,11 @@ export const AppShell: React.FC<AppShellProps> = ({
     },
   ];
 
-  // Filter nav items to only show tabs the current user's role can access
-  const navItems = allNavItems.filter((item) =>
-    canAccessTab(user?.role as UserRole | undefined, item.key)
-  );
+  // Filter nav items to only show menu items intended for current role in the sidebar
+  const navItems = allNavItems.filter((item) => {
+    if (!user?.role || user.role === 'ADMIN') return true;
+    return sidebarVisibilityMatrix[item.key]?.includes(user.role as UserRole) ?? false;
+  });
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f5f6f8' }} data-testid="app-shell">
