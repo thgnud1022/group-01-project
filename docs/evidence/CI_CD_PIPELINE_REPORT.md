@@ -95,4 +95,38 @@ Căn cứ phân công vai trò trong đồ án Group 01:
 ## 5. Kết luận & Khuyến nghị
 
 - **Deliverable 3.11 (CI/CD + Docker/Deployment):** Đạt trạng thái **PASS (VERIFIED)**.
-- **Hành động tiếp theo của sinh viên:** Khi repository được đồng bộ lên GitHub remote, đội ngũ sinh viên sẽ cấu hình thêm các Repository Secrets tùy chọn (`DATABASE_URL`, `SUPABASE_URL`) trên giao diện GitHub Settings nếu cần kết nối trực tiếp CSDL cloud trong CI, hoặc để pipeline sử dụng tự động PostgreSQL service container mặc định.
+- **Hành động tiếp theo của sinh viên:** Khi repository được đồng bộ lên GitHub remote, đội ngũ sinh viên có thể cấu hình thêm các Repository Secrets tùy chọn (`DATABASE_URL`, `SUPABASE_URL`) trên giao diện GitHub Settings nếu cần kết nối trực tiếp CSDL cloud trong CI, hoặc để pipeline sử dụng tự động PostgreSQL service container mặc định.
+
+---
+
+## 6. Nhật ký Khắc phục PYTHONPATH & Kiểm chứng GitHub Actions Remote Thực tế (AI-107)
+
+### 6.1. Sự cố Ban đầu (Initial Failure Analysis):
+Sau khi đẩy commit `243a908`, GitHub Actions runner trên môi trường `ubuntu-latest` thất bại tại step `Run backend pytest suite`:
+```text
+collected 0 items / 9 errors
+ModuleNotFoundError: No module named 'app'
+Error: Process completed with exit code 2.
+```
+- **Nguyên nhân cốt lõi:** Lệnh `pytest` gọi nhị phân độc lập không tự động thêm thư mục làm việc hiện tại (`backend`) vào `sys.path`, và step chưa có biến môi trường `PYTHONPATH`.
+
+### 6.2. Bản vá Kỹ thuật AI-107:
+Cập nhật file workflow [`.github/workflows/ci.yml`](file:///d:/LTUD/group-01-project-main/.github/workflows/ci.yml):
+1. Khai báo biến môi trường tường minh: `PYTHONPATH: ${{ github.workspace }}/backend`.
+2. Chuyển đổi lệnh thực thi sang dạng module: `python -m pytest tests/... -v`.
+3. Kiểm chứng cục bộ trước khi push: `python -m pytest ... --collect-only` thu thập thành công 133 tests (0 import error).
+4. Đóng gói commit: `dce7b94` (`ci: fix backend pytest import path`) và push lên nhánh `final-delivery`.
+
+### 6.3. Bằng chứng Thực thi Thực tế Trên GitHub Actions Remote (Verified Run Evidence):
+Kết quả kiểm tra trực tiếp qua GitHub REST API cho phiên chạy của commit `dce7b94`:
+- **Workflow Run ID:** `37878925224`
+- **URL Xác minh Trực tiếp:** [`https://github.com/thgnud1022/group-01-project/actions/runs/37878925224`](https://github.com/thgnud1022/group-01-project/actions/runs/37878925224)
+- **Commit SHA:** `dce7b94d23b3af356821c9eeb12e8600353ce2e2`
+- **Trạng thái Tổng thể:** `status: completed` | `conclusion: success` (**GREEN CHECKMARK 100% PASS**).
+- **Chi tiết Từng Job:**
+  1. `Frontend Build & Type Check`: **success** (thời lượng: 20 giây) — TypeScript biên dịch sạch, Vite đóng gói bundle production không lỗi.
+  2. `Backend Pytest Suite`: **success** (thời lượng: 61 giây) — Khởi tạo PostgreSQL 16 container, `prisma db push`, nạp dữ liệu mẫu và chạy thành công 9 suites kiểm thử backend (`test_phase4f_lifecycle.py`, `test_po_prisma.py`, `test_ai_service.py`, `test_quotation_comparison_prisma.py`, `test_supplier_quotation_prisma.py`, `test_pr_approval_prisma.py`, `test_pr_revision_prisma.py`, `test_pr_reject_prisma.py`, `test_rbac.py`).
+
+### 6.4. Phân Định Phạm Vi Kiểm Thử (Disambiguation of Test Scopes):
+- **Kiểm thử CI/CD (GitHub Actions Runner):** Thực thi 9 backend suites trên PostgreSQL 16 Service Container cô lập trong máy ảo Ubuntu của GitHub (đạt 100% Green).
+- **Kiểm thử An ninh & Nghiệp vụ Cốt lõi (Deliverable 3.10):** Bộ kiểm thử an ninh chuyên sâu 40/40 JWT/RBAC và 85/85 tests hồi quy cốt lõi được thực thi trực tiếp trên CSDL Supabase PostgreSQL Production thực tế (minh chứng độc lập tại [`docs/evidence/security-jwt-rbac-execution.txt`](file:///d:/LTUD/group-01-project-main/docs/evidence/security-jwt-rbac-execution.txt) và [`docs/07-release/security-nfr.md`](file:///d:/LTUD/group-01-project-main/docs/07-release/security-nfr.md)). Không đánh đồng hai phạm vi kiểm thử này.

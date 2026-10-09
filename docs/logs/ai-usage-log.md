@@ -112,6 +112,8 @@ Tài liệu này ghi nhận nhật ký sử dụng AI (Gemini / Antigravity) tro
 | **AI-103** | Trần Thị Thu Hà (`GOV-02`) & Nguyễn Thị Thùy Dung (`GOV-01`) | Deliverable 3.10: Complete Remaining Security / NFR Evidence | Thu thập bằng chứng còn lại cho Deliverable 3.10: cài đặt pip-audit v2.10.1, rà soát Accessibility và Lighthouse Core Web Vitals | Chuẩn đầu ra môn học (`Output_BaoCao.xlsx` / Deliverable 3.10), môi trường ảo `backend/.venv`, `frontend/package.json` | Hồ sơ bằng chứng baseline `python-pip-audit.txt` phát hiện 2 Medium CVEs trong PyJWT 2.14.0 (PYSEC-2026-4141, PYSEC-2026-4183); xác nhận A11y & Lighthouse tools not present | `backend\.venv\Scripts\python.exe -m pip_audit` (Exit code 1); curl kiểm tra production frontend 200 OK | **Trách nhiệm Con người:** Con người quyết định phương án xử lý lỗ hổng PyJWT (giữ nguyên accepted limitation hay nâng cấp vá an toàn 2.15.1). Không tự ý sửa code hay update package. |
 | **AI-104** | Nguyễn Thị Thùy Dung (`GOV-01`) & Trần Thị Thu Hà (`GOV-02`) | Deliverable 3.10: PyJWT Security Remediation & Regression | Thực hiện nâng cấp tối thiểu PyJWT 2.14.0 lên 2.15.1, kiểm thử hồi quy bảo vệ an ninh và nghiệp vụ cốt lõi, tái kiểm toán pip-audit | Quyết định con người chấp thuận nâng cấp, `pyproject.toml`, `requirements.txt`, 6 test suites an ninh & nghiệp vụ | Khắc phục hoàn toàn 2 CVEs trong PyJWT; hồ sơ `python-pip-audit-remediation.txt` (0 vulnerabilities, exit code 0); cập nhật `backend/pyproject.toml` và `requirements.txt` | Targeted regression (40/40 PASS in 69.96s); Full regression 6 test suites (85/85 PASS in 252.75s trên Supabase); pip-audit re-run exit code 0 | **Trách nhiệm Con người:** Con người phê chuẩn nâng cấp PyJWT 2.15.1, kiểm tra diff tối thiểu (3 dòng thay đổi), xác nhận không có bất kỳ phụ thuộc nào khác bị ảnh hưởng. |
 | **AI-105** | Toàn đội Group-01 (`GOV-01` & `GOV-02`) | Deliverable 3.10: Final Security / NFR Documentation Reconciliation | Đồng bộ hóa toàn diện tài liệu nghiệm thu Deliverable 3.10 trong security-nfr.md, OUTPUT_BAOCAO.md, AI_USAGE_TRACEABILITY.md và ai-usage-log.md | Bằng chứng thực nghiệm từ AI-102, AI-103, AI-104 (`security-jwt-rbac-execution.txt`, `python-pip-audit.txt`, `python-pip-audit-remediation.txt`) | Cập nhật hồ sơ Deliverable 3.10: sửa 10/10 thành 12/12 JWT, phân bổ đúng 85 tests, cập nhật SEC-006 thành RESOLVED, bảo lưu trung thực các giới hạn kỹ thuật A11y/Lighthouse/SQL/LLM | Đối soát tính nhất quán 100% giữa code, test evidence và văn bản báo cáo; 0 thay đổi mã nguồn sản phẩm | **Trách nhiệm Con người:** Con người kiểm tra diff tài liệu, ký duyệt hồ sơ Deliverable 3.10 và chuẩn bị cho buổi báo cáo Viva đồ án môn học. |
+| **AI-107** | Trần Thị Thu Hà (`GOV-02`) & Trần Thị Kiều Giang (DevOps) | Deliverable 3.11: Fix GitHub Actions Python Import Path & CI Remote Run Verification | Khắc phục lỗi `ModuleNotFoundError: No module named 'app'` (exit code 2) trên GitHub Actions runner và xác minh kết quả chạy thành công | Lỗi runner GitHub Actions sau commit `243a908`, `.github/workflows/ci.yml`, `backend/pyproject.toml` | Bổ sung `PYTHONPATH: ${{ github.workspace }}/backend` và chuyển sang `python -m pytest`; kiểm tra cú pháp YAML và collection 133 tests; đóng gói commit `dce7b94` | GitHub Actions Run ID `37878925224` hoàn thành 100% SUCCESS (`Frontend Build`: 20s, `Backend Pytest Suite`: 61s); 0 mã nguồn sản phẩm bị sửa | **Trách nhiệm Con người:** Con người phê duyệt thay đổi cấu hình CI, thực thi `git push` và xác nhận kết quả tích xanh trên giao diện GitHub. |
+| **AI-108** | Toàn đội Group-01 (`GOV-01` & `GOV-02`) | Deliverable 3.11: Final Delivery Evidence Sync | Đồng bộ hóa bằng chứng thực thi thực tế của AI-107 vào hồ sơ nghiệm thu cuối kỳ trong 5 tài liệu hiện có | Bằng chứng thực tế GitHub Actions Run #37878925224, `CI_CD_PIPELINE_REPORT.md`, `FINAL_QA_GATE_REPORT.md`, `OUTPUT_BAOCAO.md` | Cập nhật hồ sơ CI/CD với Run ID, thời lượng, phân định phạm vi test CI vs Supabase; bảo lưu trung thực các giới hạn kỹ thuật | Đối soát tính nhất quán giữa remote execution và tài liệu; 0 thay đổi mã nguồn logic hay deployment | **Trách nhiệm Con người:** Con người kiểm tra toàn bộ diff tài liệu, ký duyệt hồ sơ hoàn tất đồ án và chuẩn bị bảo vệ Viva. |
 
 ---
 
@@ -723,6 +725,41 @@ rite); force push = NOT PERFORMED.
 - **Output:** Toàn bộ 4 tài liệu kiểm định chất lượng được đồng bộ hóa 100% với hiện trạng mã nguồn và chứng cứ thực nghiệm.
 - **Verification:** `git diff --stat` xác nhận chỉ có 4 file tài liệu và 3 file dependency/evidence được sửa/tạo; 0 thay đổi mã nguồn logic; 0 thay đổi deployment.
 - **Trách nhiệm Con người (Human Responsibility):** Con người độc lập rà soát báo cáo AI-105, ký duyệt Deliverable 3.10 và chuẩn bị trình bày bảo vệ đồ án Viva.
+- **Production Code Changes:** NONE.
+- **Database/Schema Changes:** NONE.
+- **Deployment Changes:** NONE.
+- **Git Tag Changes:** UNCHANGED (`v1.0.0-final`).
+
+### AI-107 — Fix GitHub Actions Python Import Path & CI Remote Run Verification
+- **User / Assignee:** Trần Thị Thu Hà (`GOV-02` - Primary Governance) & Trần Thị Kiều Giang (DevOps / Engineering).
+- **Deliverable:** Deliverable 3.11: CI/CD Pipeline Implementation & Verification.
+- **Input / Context:** Runner GitHub Actions thất bại sau commit `243a908` với lỗi `ModuleNotFoundError: No module named 'app'` (exit code 2) trong step `Run backend pytest suite`; các tài liệu `.github/workflows/ci.yml`, `backend/pyproject.toml`.
+- **Thực hiện (AI Implementation):**
+  1. Phân tích nguyên nhân gốc: Lệnh `pytest` gọi nhị phân trên Linux runner không tự nạp thư mục `backend` vào `sys.path`, và step chưa có `PYTHONPATH`.
+  2. Hiệu chỉnh workflow `.github/workflows/ci.yml`: Bổ sung biến môi trường `PYTHONPATH: ${{ github.workspace }}/backend` và chuyển đổi lệnh sang `python -m pytest tests/... -v`.
+  3. Xác thực cú pháp và cục bộ: Kiểm tra YAML hợp lệ (`YAML valid: True`); chạy `python -m pytest ... --collect-only` thu thập 133 tests thành công (0 import errors).
+  4. Đóng gói & Xác minh: Tạo commit `dce7b94` (`ci: fix backend pytest import path`), push lên `final-delivery`. GitHub Actions kích hoạt Run ID `37878925224` và hoàn thành 100% SUCCESS (`Frontend Build`: 20s, `Backend Pytest Suite`: 61s).
+- **Output:** File `.github/workflows/ci.yml` được cập nhật, workflow GitHub Actions đạt tích xanh toàn diện (`status: completed`, `conclusion: success`).
+- **Verification:** GitHub REST API xác nhận Run ID `37878925224` thành công (URL: [`https://github.com/thgnud1022/group-01-project/actions/runs/37878925224`](https://github.com/thgnud1022/group-01-project/actions/runs/37878925224)).
+- **Trách nhiệm Con người (Human Responsibility):** Con người độc lập phê duyệt thay đổi cấu hình CI, thực thi `git push` và xác nhận kết quả tích xanh trên giao diện GitHub.
+- **Production Code Changes:** NONE.
+- **Database/Schema Changes:** NONE.
+- **Deployment Changes:** NONE.
+- **Git Tag Changes:** UNCHANGED (`v1.0.0-final`).
+
+### AI-108 — Final Delivery Evidence Sync
+- **User / Assignee:** Toàn đội Group-01 (`GOV-01` & `GOV-02` - Primary Governance).
+- **Deliverable:** Deliverable 3.11: CI/CD Pipeline Implementation & Verification, Deliverable 3.10: Security & NFR.
+- **Input / Context:** Bằng chứng thực thi thành công từ GitHub Actions Run ID `37878925224` (commit `dce7b94`), các tài liệu `CI_CD_PIPELINE_REPORT.md`, `FINAL_QA_GATE_REPORT.md`, `OUTPUT_BAOCAO.md`, `AI_USAGE_TRACEABILITY.md`, `ai-usage-log.md`.
+- **Thực hiện (AI Implementation):**
+  1. Đồng bộ `docs/evidence/CI_CD_PIPELINE_REPORT.md`: Bổ sung Mục 6 ghi nhận lỗi import ban đầu, bản vá kỹ thuật AI-107, URL xác minh và kết quả chạy remote thực tế 100% Green (Frontend: 20s, Backend: 61s); phân định rõ phạm vi kiểm thử CI container vs CSDL Supabase thật.
+  2. Đồng bộ `docs/evidence/FINAL_QA_GATE_REPORT.md`: Cập nhật trạng thái Deliverable 3.11 với bằng chứng remote execution thành công.
+  3. Đồng bộ `docs/OUTPUT_BAOCAO.md`: Cập nhật Deliverable 3.11 phản ánh đầy đủ thông số thực thi thực tế.
+  4. Cập nhật `docs/AI_USAGE_TRACEABILITY.md` và `docs/logs/ai-usage-log.md`: Bổ sung phiên làm việc AI-107 và AI-108.
+  5. Bảo lưu toàn vẹn các giới hạn kỹ thuật được chấp nhận (A11y automated audit pending, Core Web Vitals pending, dedicated penetration testing pending, Gemini Live fallback active).
+- **Output:** Toàn bộ 5 tài liệu kiểm định chất lượng được đồng bộ hóa hoàn chỉnh với kết quả thực tế trên GitHub Actions remote.
+- **Verification:** `git diff --check` sạch lỗi; `git diff --stat` xác nhận chỉ có đúng 5 file tài liệu được chỉnh sửa; 0 mã nguồn production bị thay đổi.
+- **Trách nhiệm Con người (Human Responsibility):** Con người độc lập kiểm tra diff tài liệu, phê duyệt đóng gói hồ sơ nghiệm thu cuối kỳ và chốt bản phát hành phục vụ buổi báo cáo Viva đồ án môn học.
 - **Production Code Changes:** NONE.
 - **Database/Schema Changes:** NONE.
 - **Deployment Changes:** NONE.
