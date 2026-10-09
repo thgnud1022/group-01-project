@@ -73,8 +73,9 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://app:app-local-password@localhost:5432/procurement_db' }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL || 'https://oogcmsouczrmbwughnfb.supabase.co' }}
+          PYTHONPATH: ${{ github.workspace }}/backend
         run: |
-          pytest tests/test_phase4f_lifecycle.py \
+          python -m pytest tests/test_phase4f_lifecycle.py \
                  tests/test_po_prisma.py \
                  tests/test_ai_service.py \
                  tests/test_quotation_comparison_prisma.py \
