@@ -11,6 +11,7 @@ COPY prisma prisma/
 RUN prisma generate
 
 COPY app app/
+COPY scripts scripts/
 COPY start.sh .
 RUN chmod +x start.sh
 
