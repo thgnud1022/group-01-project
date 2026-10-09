@@ -26,7 +26,7 @@ class ApprovePRSchema(BaseModel):
 async def create_pr(
     payload: CreatePRSchema,
     current_user: AuthenticatedUser = Depends(
-        RoleChecker(["EMPLOYEE", "MANAGER", "PROCUREMENT", "FINANCE", "ADMIN"])
+        RoleChecker(["EMPLOYEE", "ADMIN"])
     ),
 ):
     try:

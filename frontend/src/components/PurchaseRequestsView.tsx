@@ -238,15 +238,17 @@ export const PurchaseRequestsView: React.FC<PurchaseRequestsViewProps> = ({
           </p>
         </div>
 
-        <button
-          onClick={onNewRequest}
-          className="btn btn-primary"
-          style={{ height: '36px', padding: '0 16px', borderRadius: '4px' }}
-          data-testid="new-request-btn"
-        >
-          <Plus size={16} />
-          <span>New request</span>
-        </button>
+        {(!user?.role || user.role === 'EMPLOYEE' || user.role === 'ADMIN') && (
+          <button
+            onClick={onNewRequest}
+            className="btn btn-primary"
+            style={{ height: '36px', padding: '0 16px', borderRadius: '4px' }}
+            data-testid="new-request-btn"
+          >
+            <Plus size={16} />
+            <span>New request</span>
+          </button>
+        )}
       </div>
 
       {/* Action Alert Cards (Figma 9:333) */}

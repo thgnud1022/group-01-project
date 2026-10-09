@@ -33,12 +33,12 @@ export function canAccessTab(role: UserRole | undefined, tab: NavItemKey): boole
   if (role === 'ADMIN') return true;
   const matrix: Record<NavItemKey, UserRole[]> = {
     'purchase-requests': ['EMPLOYEE', 'MANAGER', 'PROCUREMENT', 'FINANCE'],
-    'new-request':       ['EMPLOYEE', 'MANAGER', 'PROCUREMENT', 'FINANCE'],
+    'new-request':       ['EMPLOYEE'],
     'approvals':         ['MANAGER'],
     'budget-review':     ['FINANCE'],
     'sourcing':          ['PROCUREMENT', 'FINANCE', 'MANAGER', 'EMPLOYEE'],
     'suppliers':         ['PROCUREMENT'],
-    'purchase-orders':   ['PROCUREMENT', 'FINANCE', 'MANAGER', 'EMPLOYEE'],
+    'purchase-orders':   ['EMPLOYEE', 'MANAGER', 'PROCUREMENT', 'FINANCE'],
     'audit-trail':       ['EMPLOYEE', 'MANAGER', 'PROCUREMENT', 'FINANCE'],
   };
   return matrix[tab]?.includes(role) ?? false;
@@ -47,12 +47,12 @@ export function canAccessTab(role: UserRole | undefined, tab: NavItemKey): boole
 /** Sidebar menu items visible per role (maintains clean, role-tailored sidebar menu) */
 const sidebarVisibilityMatrix: Record<NavItemKey, UserRole[]> = {
   'purchase-requests': ['EMPLOYEE', 'MANAGER', 'PROCUREMENT', 'FINANCE'],
-  'new-request':       ['EMPLOYEE', 'MANAGER', 'PROCUREMENT', 'FINANCE'],
+  'new-request':       ['EMPLOYEE'],
   'approvals':         ['MANAGER'],
   'budget-review':     ['FINANCE'],
   'sourcing':          ['PROCUREMENT'],
   'suppliers':         ['PROCUREMENT'],
-  'purchase-orders':   ['PROCUREMENT'],
+  'purchase-orders':   ['EMPLOYEE', 'MANAGER', 'PROCUREMENT', 'FINANCE'],
   'audit-trail':       ['EMPLOYEE', 'MANAGER', 'PROCUREMENT', 'FINANCE'],
 };
 
